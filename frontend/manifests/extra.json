@@ -1,0 +1,37 @@
+{
+  "name": "extra",
+  "version": "1.0.0",
+  "description": "Módulo de plantões extras",
+  "type": "feature",
+  "golden_module": false,
+  "routes": {
+    "list": {
+      "path": "/app/extras",
+      "component": "ExtraListScreen",
+      "personas": ["coordenador", "administrador"],
+      "endpoints": ["GET /api/v1/extras"],
+      "query_objects": ["ExtraQuery"],
+      "read_models": ["ExtraSummary"]
+    },
+    "detail": {
+      "path": "/app/extras/:id",
+      "component": "ExtraDetailScreen",
+      "personas": ["coordenador", "administrador"],
+      "endpoints": ["GET /api/v1/extras/{id}"],
+      "query_objects": ["ExtraQuery"],
+      "read_models": ["ExtraSummary"]
+    },
+    "form": {
+      "path": ["/app/extras/new", "/app/extras/:id/edit"],
+      "component": "ExtraFormScreen",
+      "personas": ["coordenador"],
+      "endpoints": ["POST /api/v1/extras", "PUT /api/v1/extras/{id}"],
+      "mutations": ["CreateExtra", "UpdateExtra"]
+    }
+  },
+  "components": ["ExtraListScreen", "ExtraDetailScreen", "ExtraFormScreen"],
+  "hooks": ["useExtraList", "useExtraDetail", "useCreateExtra", "useUpdateExtra", "useDeleteExtra"],
+  "services": ["extraQueries", "extraMutations"],
+  "types": ["Extra", "ExtraSummary", "ExtraFilters"],
+  "tests": {}
+}

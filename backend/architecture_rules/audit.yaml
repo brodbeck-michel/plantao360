@@ -1,0 +1,29 @@
+# Architecture Rules: Audit Layer
+# Audit context tracks changes
+
+forbidden_imports:
+  - fastapi
+  - sqlalchemy
+
+allowed_imports:
+  - app.audit.context
+
+required_patterns:
+  - "AuditContext"
+
+audit_context:
+  required_fields:
+    - "user"
+    - "request_id"
+    - "correlation_id"
+    - "timestamp"
+    - "ip"
+    - "user_agent"
+
+integration:
+  service:
+    required: true
+    description: "Service should accept AuditContext parameter"
+  router:
+    required: true
+    description: "Router should create AuditContext from request"

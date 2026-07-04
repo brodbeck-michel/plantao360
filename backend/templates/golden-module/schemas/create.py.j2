@@ -1,0 +1,7 @@
+from pydantic import BaseModel, Field
+
+from app.schemas.base.base_dto import BaseCreateDTO
+
+
+class {{module_name}}CreateDTO(BaseCreateDTO):
+    {{create_dto_fields}}

@@ -1,0 +1,17 @@
+from app.validators.{{module_name_snake}}_validator import {{module_name}}Validator
+from app.schemas.{{module_name_snake}}.{{module_name_snake}}_create import {{module_name}}CreateDTO
+from app.schemas.{{module_name_snake}}.{{module_name_snake}}_update import {{module_name}}UpdateDTO
+
+
+def test_validator_valid_create():
+    validator = {{module_name}}Validator()
+    dto = {{module_name}}CreateDTO({{validator_create_fields}})
+    result = validator.validate(dto)
+    assert result.is_valid
+
+
+def test_validator_valid_update():
+    validator = {{module_name}}Validator()
+    dto = {{module_name}}UpdateDTO({{validator_update_fields}})
+    result = validator.validate(dto)
+    assert result.is_valid

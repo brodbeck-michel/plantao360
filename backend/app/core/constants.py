@@ -1,0 +1,8 @@
+APP_NAME = "Plantão 360"
+APP_VERSION = "1.0.0"
+
+MAX_PAGE_SIZE = 100
+DEFAULT_PAGE_SIZE = 20
+
+DATE_FORMAT = "%Y-%m-%d"
+DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%S"

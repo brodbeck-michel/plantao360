@@ -1,0 +1,37 @@
+{
+  "name": "period",
+  "version": "1.0.0",
+  "description": "Módulo de gestão de períodos",
+  "type": "feature",
+  "golden_module": false,
+  "routes": {
+    "list": {
+      "path": "/app/periods",
+      "component": "PeriodListScreen",
+      "personas": ["coordenador", "financeiro", "administrador"],
+      "endpoints": ["GET /api/v1/periods"],
+      "query_objects": ["PeriodQuery"],
+      "read_models": ["PeriodSummary"]
+    },
+    "detail": {
+      "path": "/app/periods/:id",
+      "component": "PeriodDetailScreen",
+      "personas": ["coordenador", "financeiro", "administrador"],
+      "endpoints": ["GET /api/v1/periods/{id}", "GET /api/v1/query/periods"],
+      "query_objects": ["PeriodQuery"],
+      "read_models": ["PeriodSummary"]
+    },
+    "form": {
+      "path": ["/app/periods/new", "/app/periods/:id/edit"],
+      "component": "PeriodFormScreen",
+      "personas": ["coordenador", "administrador"],
+      "endpoints": ["POST /api/v1/periods", "PUT /api/v1/periods/{id}"],
+      "mutations": ["CreatePeriod", "UpdatePeriod"]
+    }
+  },
+  "components": ["PeriodListScreen", "PeriodDetailScreen", "PeriodFormScreen"],
+  "hooks": ["usePeriodList", "usePeriodDetail", "useCreatePeriod", "useUpdatePeriod", "useDeletePeriod"],
+  "services": ["periodQueries", "periodMutations"],
+  "types": ["Period", "PeriodSummary", "PeriodFilters"],
+  "tests": {}
+}

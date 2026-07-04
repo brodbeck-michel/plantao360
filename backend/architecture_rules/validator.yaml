@@ -1,0 +1,25 @@
+# Architecture Rules: Validator Layer
+# Validator orchestrates validation rules
+
+forbidden_imports:
+  - fastapi
+  - sqlalchemy
+  - app.services
+
+allowed_imports:
+  - app.validators.base_validator
+  - app.validators.rules
+  - app.schemas
+
+required_patterns:
+  - "BaseValidator"
+  - "ValidationResult"
+
+forbidden_patterns:
+  - "session."
+  - "Response("
+
+rules:
+  required: true
+  location: "validators/rules/"
+  naming: "validate_*"

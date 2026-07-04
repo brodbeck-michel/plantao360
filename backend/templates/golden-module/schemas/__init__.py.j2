@@ -1,0 +1,17 @@
+from pydantic import BaseModel, Field
+
+from app.schemas.{{module_name_snake}}.{{module_name_snake}}_create import {{module_name}}CreateDTO
+from app.schemas.{{module_name_snake}}.{{module_name_snake}}_update import {{module_name}}UpdateDTO
+from app.schemas.{{module_name_snake}}.{{module_name_snake}}_response import {{module_name}}ResponseDTO
+from app.schemas.{{module_name_snake}}.{{module_name_snake}}_summary import {{module_name}}SummaryDTO
+from app.schemas.{{module_name_snake}}.{{module_name_snake}}_filters import {{module_name}}FilterDTO
+from app.schemas.{{module_name_snake}}.{{module_name_snake}}_query import {{module_name}}QueryDTO
+
+__all__ = [
+    "{{module_name}}CreateDTO",
+    "{{module_name}}UpdateDTO",
+    "{{module_name}}ResponseDTO",
+    "{{module_name}}SummaryDTO",
+    "{{module_name}}FilterDTO",
+    "{{module_name}}QueryDTO",
+]

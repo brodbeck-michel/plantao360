@@ -1,0 +1,67 @@
+manifest_version: 1
+
+module_id: medical.doctor
+
+module:
+  canonical_name: Doctor
+  storage_name: doctor
+  storage_table: doctors
+
+ownership:
+  aggregate: Doctor
+  bounded_context: Medical
+
+stability:
+  level: stable
+  since: Sprint 2.5
+  adr: ADR-006
+
+lifecycle:
+  states:
+    - active
+    - inactive
+    - suspended
+  initial_state: active
+  terminal_states:
+    - inactive
+
+capabilities:
+  model: true
+  repository: true
+  repository_interface: true
+  service: true
+  mapper: true
+  validator: true
+  router: true
+
+  state_machine: false
+  policy: false
+  events: true
+  contracts: false
+  value_objects: false
+
+  dtos:
+    create: true
+    update: true
+    response: true
+    filters: true
+    query: true
+    summary: true
+    detail: true
+
+  tests:
+    unit: true
+    integration: false
+    contracts: true
+
+aliases:
+  - name: medicos
+    type: api
+    description: Portuguese plural for API route
+
+validation_profile: enterprise
+
+adr_references:
+  - id: ADR-006
+    title: Role Médico
+    decision: Medical entity is a first-class aggregate with full lifecycle

@@ -1,0 +1,25 @@
+from app.validators.base_validator import BaseValidator, ValidationResult
+from app.validators.rules import validate_{{unique_field}}
+from app.schemas.{{module_name_snake}}.{{module_name_snake}}_create import {{module_name}}CreateDTO
+from app.schemas.{{module_name_snake}}.{{module_name_snake}}_update import {{module_name}}UpdateDTO
+
+
+class {{module_name}}Validator(BaseValidator):
+    def _validate(self, data: {{module_name}}CreateDTO | {{module_name}}UpdateDTO, result: ValidationResult) -> None:
+        if isinstance(data, {{module_name}}CreateDTO):
+            self._validate_create(data, result)
+        elif isinstance(data, {{module_name}}UpdateDTO):
+            self._validate_update(data, result)
+
+    def _validate_create(self, data: {{module_name}}CreateDTO, result: ValidationResult) -> None:
+        {% for rule in validation_rules %}
+        for error in validate_{{rule}}(data.{{rule}}):
+            result.add_error(error)
+        {% endfor %}
+
+    def _validate_update(self, data: {{module_name}}UpdateDTO, result: ValidationResult) -> None:
+        {% for rule in validation_rules %}
+        if data.{{rule}} is not None:
+            for error in validate_{{rule}}(data.{{rule}}):
+                result.add_error(error)
+        {% endfor %}

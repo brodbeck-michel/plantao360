@@ -1,0 +1,43 @@
+from app.mappers.{{module_name_snake}}_mapper import {{module_name}}Mapper
+from app.schemas.{{module_name_snake}}.{{module_name_snake}}_create import {{module_name}}CreateDTO
+from app.models.{{module_name_snake}} import {{module_name}}
+
+
+def test_mapper_to_response():
+    mapper = {{module_name}}Mapper()
+    entity = {{module_name}}(id=1, {{mapper_create_fields}}, active=True)
+    dto = mapper.to_response(entity)
+    assert dto.id == 1
+
+
+def test_mapper_to_model():
+    mapper = {{module_name}}Mapper()
+    dto = {{module_name}}CreateDTO({{mapper_dto_fields}})
+    model = mapper.to_model(dto)
+    assert model is not None
+
+
+def test_mapper_to_response_list():
+    mapper = {{module_name}}Mapper()
+    entities = [
+        {{module_name}}(id=1, {{mapper_create_fields}}, active=True),
+        {{module_name}}(id=2, {{mapper_create_fields}}, active=True),
+    ]
+    dtos = mapper.to_response_list(entities)
+    assert len(dtos) == 2
+
+
+def test_mapper_update_model():
+    mapper = {{module_name}}Mapper()
+    entity = {{module_name}}(id=1, {{mapper_create_fields}}, active=True)
+    dto = {{module_name}}CreateDTO({{mapper_dto_fields}})
+    updated = mapper.update_model(entity, dto)
+    assert updated is not None
+
+
+def test_mapper_to_summary():
+    mapper = {{module_name}}Mapper()
+    entity = {{module_name}}(id=1, {{mapper_create_fields}}, active=True)
+    summary = mapper.to_summary(entity)
+    assert summary["id"] == 1
+    assert summary["active"] is True

@@ -1,0 +1,69 @@
+manifest_version: 1
+
+module_id: scheduling.shift
+
+module:
+  canonical_name: Shift
+  storage_name: shift
+  storage_table: shifts
+
+ownership:
+  aggregate: Shift
+  bounded_context: Scheduling
+
+stability:
+  level: stable
+  since: Sprint 4
+  adr: ADR-014
+
+lifecycle:
+  states:
+    - scheduled
+    - in_progress
+    - completed
+    - cancelled
+  initial_state: scheduled
+  terminal_states:
+    - completed
+    - cancelled
+
+capabilities:
+  model: true
+  repository: true
+  repository_interface: true
+  service: true
+  mapper: true
+  validator: true
+  router: true
+
+  state_machine: true
+  policy: false
+  events: true
+  contracts: true
+  value_objects: true
+
+  dtos:
+    create: true
+    update: true
+    response: true
+    filters: true
+    query: true
+    summary: true
+    detail: false
+
+  tests:
+    unit: true
+    integration: true
+    contracts: true
+
+aliases:
+  - name: plantoes
+    type: api
+    description: Portuguese plural for API route
+
+validation_profile: enterprise
+
+adr_references:
+  - id: ADR-014
+    title: Shift Aggregate
+    decision: Shift is the central operational Aggregate; modeled on lifecycle, not table

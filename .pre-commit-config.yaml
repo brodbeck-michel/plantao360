@@ -1,0 +1,58 @@
+repos:
+  - repo: https://github.com/psf/black
+    rev: 24.4.2
+    hooks:
+      - id: black
+        language_version: python3.12
+        args: [--check]
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.4.4
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+
+  - repo: local
+    hooks:
+      - id: architecture-validator
+        name: Architecture Validator
+        entry: python tools/validate_architecture.py --all
+        language: system
+        files: \.py$
+        pass_filenames: false
+
+      - id: architecture-linter
+        name: Architecture Linter
+        entry: python tools/lint_architecture.py
+        language: system
+        files: \.py$
+        pass_filenames: false
+
+      - id: golden-guard
+        name: Golden Guard
+        entry: python tools/golden_guard.py
+        language: system
+        files: \.py$
+        pass_filenames: false
+
+      - id: template-check
+        name: Template Consistency
+        entry: python tools/check_templates.py
+        language: system
+        files: \.py$
+        pass_filenames: false
+
+      - id: adr-validator
+        name: ADR Validator
+        entry: python tools/check_adrs.py
+        language: system
+        files: \.md$
+        pass_filenames: false
+
+      - id: pytest
+        name: Pytest
+        entry: python -m pytest app/tests/ -x -q --tb=short --override-ini=addopts=-x -q --tb=short
+        language: system
+        files: \.py$
+        pass_filenames: false
+        working_directory: plantao360/backend/

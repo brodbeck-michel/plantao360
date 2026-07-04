@@ -1,0 +1,9 @@
+from pydantic import BaseModel, Field
+
+
+class {{module_name}}SummaryDTO(BaseModel):
+    id: int = Field(..., description="ID do {{module_name_lower}}")
+    {{summary_dto_fields}}
+    active: bool = Field(..., description="Status ativo/inativo")
+
+    model_config = {"from_attributes": True}

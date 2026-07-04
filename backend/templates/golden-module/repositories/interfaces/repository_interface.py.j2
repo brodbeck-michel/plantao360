@@ -1,0 +1,30 @@
+from typing import Protocol, Optional
+
+from app.models.{{module_name_snake}} import {{module_name}}
+
+
+class {{module_name}}RepositoryInterface(Protocol):
+    def get_by_id(self, id: int) -> Optional[{{module_name}}]: ...
+
+    def list(self, skip: int = 0, limit: int = 100) -> list[{{module_name}}]: ...
+
+    def search(
+        self,
+        skip: int = 0,
+        limit: int = 100,
+        sort_by: str = "id",
+        sort_direction: str = "asc",
+        **filters,
+    ) -> list[{{module_name}}]: ...
+
+    def count_filtered(self, **filters) -> int: ...
+
+    def create(self, entity: {{module_name}}) -> {{module_name}}: ...
+
+    def update(self, entity: {{module_name}}) -> {{module_name}}: ...
+
+    def soft_delete(self, id: int) -> bool: ...
+
+    def exists(self, id: int) -> bool: ...
+
+    def count(self) -> int: ...

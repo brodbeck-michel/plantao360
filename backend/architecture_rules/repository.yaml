@@ -1,0 +1,26 @@
+# Architecture Rules: Repository Layer
+# Repository handles data access, implements Interface
+
+forbidden_imports:
+  - fastapi
+  - app.services
+  - app.schemas
+
+allowed_imports:
+  - sqlalchemy
+  - app.database.base
+  - app.models
+  - app.repositories.base
+
+required_patterns:
+  - "BaseRepository"
+  - "class.*Repository"
+
+forbidden_patterns:
+  - "Response("
+  - "ApiResponse"
+
+interface:
+  required: true
+  suffix: "RepositoryInterface"
+  location: "repositories/interfaces/"

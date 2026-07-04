@@ -1,0 +1,67 @@
+manifest_version: 1
+
+module_id: scheduling.period
+
+module:
+  canonical_name: Period
+  storage_name: period
+  storage_table: periods
+
+ownership:
+  aggregate: Period
+  bounded_context: Scheduling
+
+stability:
+  level: stable
+  since: Sprint 3
+  adr: ADR-012
+
+lifecycle:
+  states:
+    - draft
+    - closed
+    - paid
+  initial_state: draft
+  terminal_states:
+    - paid
+
+capabilities:
+  model: true
+  repository: true
+  repository_interface: true
+  service: true
+  mapper: true
+  validator: true
+  router: true
+
+  state_machine: true
+  policy: true
+  events: true
+  contracts: false
+  value_objects: false
+
+  dtos:
+    create: true
+    update: true
+    response: true
+    filters: true
+    query: true
+    summary: true
+    detail: false
+
+  tests:
+    unit: true
+    integration: true
+    contracts: true
+
+aliases:
+  - name: periodos
+    type: api
+    description: Portuguese plural for API route
+
+validation_profile: enterprise
+
+adr_references:
+  - id: ADR-012
+    title: Period Aggregate
+    decision: Period is Aggregate Root with lifecycle state machine and policy separation

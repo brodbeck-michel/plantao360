@@ -1,0 +1,38 @@
+{
+  "name": "analytics",
+  "version": "1.0.0",
+  "description": "Módulo de analytics e relatórios",
+  "type": "feature",
+  "golden_module": false,
+  "routes": {
+    "list": {
+      "path": "/app/analytics",
+      "component": "AnalyticsScreen",
+      "personas": ["coordenador", "financeiro", "administrador"],
+      "endpoints": ["GET /api/v1/reports"],
+      "query_objects": ["ReportQuery"],
+      "read_models": ["ReportSummary"]
+    },
+    "detail": {
+      "path": "/app/analytics/:id",
+      "component": "ReportDetailScreen",
+      "personas": ["coordenador", "financeiro", "administrador"],
+      "endpoints": ["GET /api/v1/reports/{id}", "GET /api/v1/kpis/coverage-rate"],
+      "query_objects": ["ReportQuery"],
+      "read_models": ["ReportSummary"]
+    },
+    "explainability": {
+      "path": "/app/analytics/explain/:entityType/:entityId",
+      "component": "ExplainabilityScreen",
+      "personas": ["coordenador", "financeiro", "administrador"],
+      "endpoints": ["GET /api/v1/explain/{entityType}/{entityId}"],
+      "query_objects": ["ExplainQuery"],
+      "read_models": ["ExplainabilitySummary"]
+    }
+  },
+  "components": ["AnalyticsScreen", "ReportDetailScreen", "ExplainabilityScreen"],
+  "hooks": ["useReportList", "useReportDetail", "useExplainability"],
+  "services": ["analyticsQueries"],
+  "types": ["Report", "ReportSummary", "ExplainabilitySummary"],
+  "tests": {}
+}

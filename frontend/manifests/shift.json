@@ -1,0 +1,45 @@
+{
+  "name": "shift",
+  "version": "1.0.0",
+  "description": "Módulo de gestão de plantões",
+  "type": "feature",
+  "golden_module": false,
+  "routes": {
+    "list": {
+      "path": "/app/shifts",
+      "component": "ShiftListScreen",
+      "personas": ["coordenador", "medico"],
+      "endpoints": ["GET /api/v1/shifts"],
+      "query_objects": ["ShiftQuery"],
+      "read_models": ["ShiftSummary"]
+    },
+    "calendar": {
+      "path": "/app/shifts/calendar",
+      "component": "ShiftCalendarScreen",
+      "personas": ["coordenador", "medico"],
+      "endpoints": ["GET /api/v1/shifts"],
+      "query_objects": ["ShiftQuery"],
+      "read_models": ["ShiftSummary"]
+    },
+    "detail": {
+      "path": "/app/shifts/:id",
+      "component": "ShiftDetailScreen",
+      "personas": ["coordenador", "medico"],
+      "endpoints": ["GET /api/v1/shifts/{id}", "GET /api/v1/query/shifts"],
+      "query_objects": ["ShiftQuery"],
+      "read_models": ["ShiftSummary"]
+    },
+    "form": {
+      "path": ["/app/shifts/new", "/app/shifts/:id/edit"],
+      "component": "ShiftFormScreen",
+      "personas": ["coordenador"],
+      "endpoints": ["POST /api/v1/shifts", "PUT /api/v1/shifts/{id}"],
+      "mutations": ["CreateShift", "UpdateShift"]
+    }
+  },
+  "components": ["ShiftListScreen", "ShiftCalendarScreen", "ShiftDetailScreen", "ShiftFormScreen"],
+  "hooks": ["useShiftList", "useShiftDetail", "useCreateShift", "useUpdateShift", "useDeleteShift"],
+  "services": ["shiftQueries", "shiftMutations"],
+  "types": ["Shift", "ShiftSummary", "ShiftFilters"],
+  "tests": {}
+}

@@ -1,0 +1,97 @@
+# Module Manifest Schema — Plantão 360
+# Version: 1.0
+# Description: Schema definition for Module Manifests.
+#              Every aggregate must have a manifest following this schema.
+
+manifest_version: 1
+
+# ============================================================
+# MODULE IDENTITY
+# ============================================================
+module_id: "string"          # Permanent stable ID (e.g., scheduling.assignment)
+                              # Format: {bounded_context}.{domain_concept}
+
+module:
+  canonical_name: "string"    # Domain name (e.g., Assignment)
+  storage_name: "string"      # DB table/model name (e.g., shift_part)
+  storage_table: "string"     # DB table name (e.g., shift_parts)
+
+# ============================================================
+# OWNERSHIP
+# ============================================================
+ownership:
+  aggregate: "string"         # Aggregate root (e.g., Shift, Period)
+  bounded_context: "string"   # Bounded context (e.g., Scheduling)
+
+# ============================================================
+# STABILITY
+# ============================================================
+stability:
+  level: "string"             # experimental | stable | frozen
+  since: "string"             # Sprint when introduced (e.g., Sprint 5)
+  adr: "string"               # ADR reference (e.g., ADR-015)
+
+# ============================================================
+# LIFECYCLE
+# ============================================================
+lifecycle:
+  states:                     # List of valid states
+    - "string"
+  initial_state: "string"     # Starting state
+  terminal_states:            # States that end the lifecycle
+    - "string"
+
+# ============================================================
+# ARCHITECTURAL CAPABILITIES
+# ============================================================
+capabilities:
+  # Core layers
+  model: "boolean"
+  repository: "boolean"
+  repository_interface: "boolean"
+  service: "boolean"
+  mapper: "boolean"
+  validator: "boolean"
+  router: "boolean"
+
+  # Domain layer
+  state_machine: "boolean"
+  policy: "boolean"
+  events: "boolean"
+  contracts: "boolean"
+  value_objects: "boolean"
+
+  # DTOs (list which ones exist)
+  dtos:
+    create: "boolean"
+    update: "boolean"
+    response: "boolean"
+    filters: "boolean"
+    query: "boolean"
+
+  # Test layers
+  tests:
+    unit: "boolean"
+    integration: "boolean"
+    contracts: "boolean"
+
+# ============================================================
+# ALIASES (when domain name differs from storage name)
+# ============================================================
+aliases:
+  - name: "string"            # Alias name
+    type: "string"            # api | storage | domain
+    description: "string"     # Why this alias exists
+
+# ============================================================
+# VALIDATION PROFILE
+# ============================================================
+validation_profile: "string"  # strict | enterprise | legacy-compatible
+
+# ============================================================
+# ADR REFERENCES
+# ============================================================
+adr_references:
+  - id: "string"              # ADR ID (e.g., ADR-015)
+    title: "string"           # ADR title
+    decision: "string"        # Brief decision summary

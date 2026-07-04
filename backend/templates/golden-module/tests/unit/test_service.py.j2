@@ -1,0 +1,66 @@
+import pytest
+from app.services.{{module_name_snake}}_service import {{module_name}}Service
+from app.schemas.{{module_name_snake}}.{{module_name_snake}}_create import {{module_name}}CreateDTO
+from app.schemas.{{module_name_snake}}.{{module_name_snake}}_update import {{module_name}}UpdateDTO
+from app.schemas.{{module_name_snake}}.{{module_name_snake}}_filters import {{module_name}}FilterDTO
+from app.database.unit_of_work import UnitOfWork
+
+
+@pytest.fixture
+def service(uow):
+    return {{module_name}}Service(uow)
+
+
+def test_service_list(service):
+    filter_dto = {{module_name}}FilterDTO(page=1, size=10)
+    result = service.list(filter_dto)
+    assert result.items == []
+    assert result.total == 0
+
+
+def test_service_create(service):
+    dto = {{module_name}}CreateDTO({{service_create_fields}})
+    result = service.create(dto)
+    assert result.is_success
+
+
+def test_service_get_by_id(service):
+    dto = {{module_name}}CreateDTO({{service_create_fields}})
+    created = service.create(dto)
+    result = service.get_by_id(created.data.id)
+    assert result.is_success
+
+
+def test_service_get_by_id_not_found(service):
+    result = service.get_by_id(999)
+    assert result.is_failure
+    assert "NOT_FOUND" in result.code
+
+
+def test_service_update(service):
+    dto = {{module_name}}CreateDTO({{service_create_fields}})
+    created = service.create(dto)
+    update_dto = {{module_name}}UpdateDTO({{service_update_fields}})
+    result = service.update(created.data.id, update_dto)
+    assert result.is_success
+
+
+def test_service_update_not_found(service):
+    update_dto = {{module_name}}UpdateDTO({{service_update_fields}})
+    result = service.update(999, update_dto)
+    assert result.is_failure
+    assert "NOT_FOUND" in result.code
+
+
+def test_service_delete(service):
+    dto = {{module_name}}CreateDTO({{service_create_fields}})
+    created = service.create(dto)
+    result = service.delete(created.data.id)
+    assert result.is_success
+    assert result.data is True
+
+
+def test_service_delete_not_found(service):
+    result = service.delete(999)
+    assert result.is_failure
+    assert "NOT_FOUND" in result.code

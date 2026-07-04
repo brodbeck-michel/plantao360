@@ -1,0 +1,8 @@
+from app.models.{{module_name_snake}} import {{module_name}}
+
+
+def test_{{module_name_snake}}_repr(db_session):
+    entity = {{module_name}}({{repr_create_fields}})
+    db_session.add(entity)
+    db_session.commit()
+    assert repr(entity) is not None

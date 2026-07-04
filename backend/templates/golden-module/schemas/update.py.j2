@@ -1,0 +1,7 @@
+from pydantic import BaseModel, Field
+
+from app.schemas.base.base_dto import BaseUpdateDTO
+
+
+class {{module_name}}UpdateDTO(BaseUpdateDTO):
+    {{update_dto_fields}}

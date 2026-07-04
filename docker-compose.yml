@@ -1,0 +1,46 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: plantao360_backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env.development
+    volumes:
+      - plantao360_data:/app/data
+    networks:
+      - plantao360
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: plantao360_frontend
+    ports:
+      - "3001:80"
+    networks:
+      - plantao360
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/nginx-health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+volumes:
+  plantao360_data:
+
+networks:
+  plantao360:
+    driver: bridge

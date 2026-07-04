@@ -1,0 +1,10 @@
+from enum import StrEnum
+
+
+class {{module_name}}ErrorCode(StrEnum):
+    {{module_name_upper}}_ALREADY_EXISTS = "{{module_name_upper}}_ALREADY_EXISTS"
+    {{module_name_upper}}_NOT_FOUND = "{{module_name_upper}}_NOT_FOUND"
+    {{module_name_upper}}_INACTIVE = "{{module_name_upper}}_INACTIVE"
+    {% for code in extra_error_codes %}
+    {{code}} = "{{code}}"
+    {% endfor %}

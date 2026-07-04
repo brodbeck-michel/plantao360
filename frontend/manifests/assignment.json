@@ -1,0 +1,37 @@
+{
+  "name": "assignment",
+  "version": "1.0.0",
+  "description": "Módulo de atribuição de plantões",
+  "type": "feature",
+  "golden_module": false,
+  "routes": {
+    "list": {
+      "path": "/app/assignments",
+      "component": "AssignmentListScreen",
+      "personas": ["coordenador", "administrador"],
+      "endpoints": ["GET /api/v1/assignments"],
+      "query_objects": ["AssignmentQuery"],
+      "read_models": ["AssignmentSummary"]
+    },
+    "detail": {
+      "path": "/app/assignments/:id",
+      "component": "AssignmentDetailScreen",
+      "personas": ["coordenador", "administrador"],
+      "endpoints": ["GET /api/v1/assignments/{id}"],
+      "query_objects": ["AssignmentQuery"],
+      "read_models": ["AssignmentSummary"]
+    },
+    "form": {
+      "path": ["/app/assignments/new", "/app/assignments/:id/edit"],
+      "component": "AssignmentFormScreen",
+      "personas": ["coordenador"],
+      "endpoints": ["POST /api/v1/assignments", "PUT /api/v1/assignments/{id}"],
+      "mutations": ["CreateAssignment", "UpdateAssignment"]
+    }
+  },
+  "components": ["AssignmentListScreen", "AssignmentDetailScreen", "AssignmentFormScreen"],
+  "hooks": ["useAssignmentList", "useAssignmentDetail", "useCreateAssignment", "useUpdateAssignment", "useDeleteAssignment"],
+  "services": ["assignmentQueries", "assignmentMutations"],
+  "types": ["Assignment", "AssignmentSummary", "AssignmentFilters"],
+  "tests": {}
+}

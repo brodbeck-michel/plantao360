@@ -1,0 +1,109 @@
+import os
+
+import pytest
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
+os.environ["ENVIRONMENT"] = "test"
+
+from app.database.base import Base
+import app.models  # noqa: F401
+from app.database.session import get_db
+from app.api.routes.{{module_name_snake}} import router as {{module_name_snake}}_router
+from app.api.exception_handlers import register_exception_handlers
+
+
+@pytest.fixture
+def client():
+    engine = create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False})
+    connection = engine.connect()
+    Base.metadata.create_all(bind=connection)
+    TestSession = sessionmaker(bind=connection)
+
+    test_app = FastAPI()
+    register_exception_handlers(test_app)
+    test_app.include_router({{module_name_snake}}_router, prefix="/api/v1")
+
+    def override_get_db():
+        db = TestSession()
+        try:
+            yield db
+        finally:
+            db.close()
+
+    test_app.dependency_overrides[get_db] = override_get_db
+
+    with TestClient(test_app) as c:
+        yield c
+
+    test_app.dependency_overrides.clear()
+    Base.metadata.drop_all(bind=connection)
+    connection.close()
+    engine.dispose()
+
+
+def test_list_{{module_name_plural}}(client):
+    response = client.get("{{route}}/")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["success"] is True
+    assert "items" in data["data"]
+    assert "X-Total-Count" in response.headers
+
+
+def test_create_{{module_name_snake}}(client):
+    response = client.post(
+        "{{route}}/",
+        json={{integration_create_json}},
+    )
+    assert response.status_code == 201
+    data = response.json()
+    assert data["success"] is True
+
+
+def test_get_{{module_name_snake}}(client):
+    create_resp = client.post(
+        "{{route}}/",
+        json={{integration_create_json}},
+    )
+    entity_id = create_resp.json()["data"]["id"]
+    response = client.get(f"{{route}}/{entity_id}")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["success"] is True
+
+
+def test_get_{{module_name_snake}}_not_found(client):
+    response = client.get("{{route}}/999")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["success"] is False
+
+
+def test_update_{{module_name_snake}}(client):
+    create_resp = client.post(
+        "{{route}}/",
+        json={{integration_create_json}},
+    )
+    entity_id = create_resp.json()["data"]["id"]
+    response = client.put(
+        f"{{route}}/{entity_id}",
+        json={{integration_update_json}},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["success"] is True
+
+
+def test_delete_{{module_name_snake}}(client):
+    create_resp = client.post(
+        "{{route}}/",
+        json={{integration_create_json}},
+    )
+    entity_id = create_resp.json()["data"]["id"]
+    response = client.delete(f"{{route}}/{entity_id}")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["success"] is True

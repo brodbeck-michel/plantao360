@@ -1,0 +1,66 @@
+from app.repositories.{{module_name_snake}}_repository import {{module_name}}Repository
+from app.models.{{module_name_snake}} import {{module_name}}
+
+
+def test_repository_create(db_session):
+    repo = {{module_name}}Repository(db_session)
+    entity = {{module_name}}({{repo_create_fields}})
+    created = repo.create(entity)
+    db_session.commit()
+    assert created.id is not None
+
+
+def test_repository_get_by_id(db_session):
+    repo = {{module_name}}Repository(db_session)
+    entity = {{module_name}}({{repo_create_fields}})
+    db_session.add(entity)
+    db_session.commit()
+    db_session.expire_all()
+    found = repo.get_by_id(entity.id)
+    assert found is not None
+
+
+def test_repository_list(db_session):
+    repo = {{module_name}}Repository(db_session)
+    db_session.add({{module_name}}({{repo_create_fields}}))
+    db_session.commit()
+    db_session.expire_all()
+    items = repo.list()
+    assert len(items) >= 1
+
+
+def test_repository_search(db_session):
+    repo = {{module_name}}Repository(db_session)
+    db_session.add({{module_name}}({{repo_create_fields}}))
+    db_session.commit()
+    db_session.expire_all()
+    results = repo.search()
+    assert len(results) >= 1
+
+
+def test_repository_count_filtered(db_session):
+    repo = {{module_name}}Repository(db_session)
+    db_session.add({{module_name}}({{repo_create_fields}}))
+    db_session.commit()
+    assert repo.count_filtered() >= 1
+
+
+def test_repository_soft_delete(db_session):
+    repo = {{module_name}}Repository(db_session)
+    entity = {{module_name}}({{repo_create_fields}})
+    db_session.add(entity)
+    db_session.commit()
+    db_session.expire_all()
+    result = repo.soft_delete(entity.id)
+    assert result is True
+    db_session.expire_all()
+    updated = repo.get_by_id(entity.id)
+    assert updated.active is False
+
+
+def test_repository_count(db_session):
+    repo = {{module_name}}Repository(db_session)
+    initial_count = repo.count()
+    db_session.add({{module_name}}({{repo_create_fields}}))
+    db_session.commit()
+    assert repo.count() == initial_count + 1

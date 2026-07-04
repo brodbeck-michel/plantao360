@@ -1,0 +1,30 @@
+{
+  "name": "readiness",
+  "version": "1.0.0",
+  "description": "Módulo de readiness payroll",
+  "type": "feature",
+  "golden_module": false,
+  "routes": {
+    "list": {
+      "path": "/app/readiness",
+      "component": "ReadinessListScreen",
+      "personas": ["coordenador", "financeiro", "administrador"],
+      "endpoints": ["GET /api/v1/payroll"],
+      "query_objects": ["PayrollQuery"],
+      "read_models": ["PayrollSummary"]
+    },
+    "detail": {
+      "path": "/app/readiness/:id",
+      "component": "ReadinessDetailScreen",
+      "personas": ["coordenador", "financeiro", "administrador"],
+      "endpoints": ["GET /api/v1/payroll/{id}"],
+      "query_objects": ["PayrollQuery"],
+      "read_models": ["PayrollSummary"]
+    }
+  },
+  "components": ["ReadinessListScreen", "ReadinessDetailScreen"],
+  "hooks": ["useReadinessList", "useReadinessDetail"],
+  "services": ["readinessQueries"],
+  "types": ["Readiness", "ReadinessSummary"],
+  "tests": {}
+}

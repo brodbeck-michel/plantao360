@@ -1,0 +1,37 @@
+{
+  "name": "payroll",
+  "version": "1.0.0",
+  "description": "Módulo de folha de pagamento",
+  "type": "feature",
+  "golden_module": false,
+  "routes": {
+    "list": {
+      "path": "/app/payroll",
+      "component": "PayrollListScreen",
+      "personas": ["financeiro", "administrador"],
+      "endpoints": ["GET /api/v1/payroll"],
+      "query_objects": ["PayrollQuery"],
+      "read_models": ["PayrollSummary"]
+    },
+    "detail": {
+      "path": "/app/payroll/:id",
+      "component": "PayrollDetailScreen",
+      "personas": ["financeiro", "administrador"],
+      "endpoints": ["GET /api/v1/payroll/{id}", "GET /api/v1/query/payroll"],
+      "query_objects": ["PayrollQuery"],
+      "read_models": ["PayrollSummary"]
+    },
+    "form": {
+      "path": ["/app/payroll/new", "/app/payroll/:id/edit"],
+      "component": "PayrollFormScreen",
+      "personas": ["financeiro", "administrador"],
+      "endpoints": ["POST /api/v1/payroll", "PUT /api/v1/payroll/{id}"],
+      "mutations": ["CreatePayroll", "UpdatePayroll"]
+    }
+  },
+  "components": ["PayrollListScreen", "PayrollDetailScreen", "PayrollFormScreen"],
+  "hooks": ["usePayrollList", "usePayrollDetail", "useCreatePayroll", "useUpdatePayroll", "useDeletePayroll"],
+  "services": ["payrollQueries", "payrollMutations"],
+  "types": ["Payroll", "PayrollSummary", "PayrollFilters"],
+  "tests": {}
+}

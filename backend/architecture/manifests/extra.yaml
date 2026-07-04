@@ -1,0 +1,72 @@
+manifest_version: 1
+
+module_id: scheduling.extra
+
+module:
+  canonical_name: Extra
+  storage_name: shift_extra
+  storage_table: shift_extras
+
+ownership:
+  aggregate: Extra
+  bounded_context: Scheduling
+
+stability:
+  level: stable
+  since: Sprint 6
+  adr: ADR-018
+
+lifecycle:
+  states:
+    - pending
+    - approved
+    - rejected
+    - cancelled
+  initial_state: pending
+  terminal_states:
+    - rejected
+    - cancelled
+
+capabilities:
+  model: true
+  repository: true
+  repository_interface: false
+  service: true
+  mapper: false
+  validator: false
+  router: true
+
+  state_machine: true
+  policy: false
+  events: false
+  contracts: false
+  value_objects: false
+
+  dtos:
+    create: true
+    update: true
+    response: true
+    filters: true
+    query: false
+    summary: false
+    detail: false
+
+  tests:
+    unit: true
+    integration: false
+    contracts: false
+
+aliases:
+  - name: extras
+    type: api
+    description: Portuguese plural for API route
+  - name: shift_extra
+    type: storage
+    description: Storage name for the entity
+
+validation_profile: default
+
+adr_references:
+  - id: ADR-018
+    title: Extras de Plantão
+    decision: Extra entity manages shift extra hours with pending/approved/rejected/cancelled lifecycle

@@ -1,0 +1,8 @@
+import re
+
+
+def validate_{{unique_field}}(value: str | None) -> list[str]:
+    errors = []
+    if not value or not value.strip():
+        errors.append("{{unique_field_label}} é obrigatório")
+    return errors

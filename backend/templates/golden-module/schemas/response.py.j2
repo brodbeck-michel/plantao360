@@ -1,0 +1,10 @@
+from pydantic import BaseModel, Field
+
+from app.schemas.base.base_dto import BaseResponseDTO
+
+
+class {{module_name}}ResponseDTO(BaseResponseDTO):
+    {{response_dto_fields}}
+    active: bool = Field(..., description="Status ativo/inativo")
+
+    model_config = {"from_attributes": True}

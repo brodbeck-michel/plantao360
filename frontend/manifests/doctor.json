@@ -1,0 +1,75 @@
+{
+  "name": "doctor",
+  "version": "1.0.0",
+  "description": "Módulo de gestão de médicos",
+  "type": "feature",
+  "golden_module": true,
+  "routes": {
+    "list": {
+      "path": "/app/doctors",
+      "component": "DoctorListScreen",
+      "personas": ["coordenador", "rh", "administrador"],
+      "endpoints": ["GET /api/v1/doctors"],
+      "query_objects": ["DoctorQuery"],
+      "read_models": ["DoctorSummary"]
+    },
+    "detail": {
+      "path": "/app/doctors/:id",
+      "component": "DoctorDetailScreen",
+      "personas": ["coordenador", "rh", "administrador"],
+      "endpoints": ["GET /api/v1/doctors/{id}", "GET /api/v1/query/doctors"],
+      "query_objects": ["DoctorQuery"],
+      "read_models": ["DoctorSummary"]
+    },
+    "form": {
+      "path": ["/app/doctors/new", "/app/doctors/:id/edit"],
+      "component": "DoctorFormScreen",
+      "personas": ["coordenador", "rh", "administrador"],
+      "endpoints": ["POST /api/v1/doctors", "PUT /api/v1/doctors/{id}"],
+      "mutations": ["CreateDoctor", "UpdateDoctor"]
+    }
+  },
+  "components": [
+    "DoctorAvatar",
+    "DoctorCard",
+    "DoctorListScreen",
+    "DoctorDetailScreen",
+    "DoctorFormScreen"
+  ],
+  "hooks": [
+    "useDoctorList",
+    "useDoctorDetail",
+    "useCreateDoctor",
+    "useUpdateDoctor",
+    "useDeleteDoctor"
+  ],
+  "services": [
+    "doctorQueries",
+    "doctorMutations",
+    "fetchDoctors",
+    "fetchDoctor",
+    "createDoctor",
+    "updateDoctor",
+    "deleteDoctor"
+  ],
+  "types": [
+    "Doctor",
+    "DoctorSummary",
+    "DoctorFilters",
+    "DoctorListSort",
+    "DoctorListState",
+    "DoctorFormState"
+  ],
+  "tests": {
+    "unit": [
+      "doctor-avatar.test.tsx",
+      "doctor-card.test.tsx"
+    ],
+    "hooks": [
+      "use-doctors.test.ts"
+    ],
+    "integration": [
+      "doctor-api.test.ts"
+    ]
+  }
+}

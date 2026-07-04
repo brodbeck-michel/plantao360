@@ -1,0 +1,36 @@
+# Architecture Rules: Router Layer
+# Router must NOT contain business logic or direct database access
+
+forbidden_imports:
+  - sqlalchemy
+  - sessionmaker
+  - create_engine
+  - declarative_base
+
+allowed_imports:
+  - fastapi
+  - app.database.session
+  - app.database.unit_of_work
+  - app.services
+  - app.schemas
+  - app.common.api_response
+  - app.common.openapi
+
+forbidden_patterns:
+  - "Session("
+  - "session.query"
+  - "session.add"
+  - "session.commit"
+  - "session.flush"
+
+required_patterns:
+  - "ApiResponse"
+  - "Depends(get_db)"
+
+forbidden_complexity:
+  max_if_statements: 0
+  max_try_except: 0
+  max_for_loops: 0
+
+required_headers:
+  - "X-Total-Count"

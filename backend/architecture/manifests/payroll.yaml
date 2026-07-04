@@ -1,0 +1,74 @@
+manifest_version: 1
+
+module_id: payroll.payroll
+
+module:
+  canonical_name: Payroll
+  storage_name: payroll
+  storage_table: payrolls
+
+ownership:
+  aggregate: PayrollCompetency
+  bounded_context: Financial
+
+stability:
+  level: stable
+  since: Sprint 9
+  adr: ADR-021
+
+lifecycle:
+  states:
+    - draft
+    - calculated
+    - reviewed
+    - approved
+    - exported
+    - paid
+    - archived
+  initial_state: draft
+  terminal_states:
+    - archived
+
+capabilities:
+  model: true
+  repository: true
+  repository_interface: false
+  service: true
+  mapper: false
+  validator: false
+  router: true
+
+  state_machine: true
+  policy: false
+  events: true
+  contracts: false
+  value_objects: true
+
+  dtos:
+    create: true
+    update: false
+    response: true
+    filters: true
+    query: false
+    summary: false
+    detail: false
+
+  tests:
+    unit: true
+    integration: false
+    contracts: false
+
+aliases:
+  - name: payrolls
+    type: api
+    description: Portuguese plural for API route
+  - name: payroll
+    type: storage
+    description: Storage name for the entity
+
+validation_profile: default
+
+adr_references:
+  - id: ADR-021
+    title: Competência Financeira
+    decision: Payroll represents official financial competency with versioning, seal, and audit trail

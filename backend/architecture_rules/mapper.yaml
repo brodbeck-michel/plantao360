@@ -1,0 +1,28 @@
+# Architecture Rules: Mapper Layer
+# Mapper converts between Models and DTOs
+
+forbidden_imports:
+  - fastapi
+  - sqlalchemy.orm
+  - app.services
+
+allowed_imports:
+  - app.database.base
+  - app.models
+  - app.schemas
+  - app.mappers.base_mapper
+
+required_patterns:
+  - "BaseMapper"
+
+forbidden_patterns:
+  - "session."
+  - "Response("
+
+generics:
+  required: true
+  count: 3
+  types:
+    - "ModelType"
+    - "CreateDTOType"
+    - "ResponseDTOType"

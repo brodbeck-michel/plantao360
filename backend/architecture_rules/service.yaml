@@ -1,0 +1,38 @@
+# Architecture Rules: Service Layer
+# Service handles business logic, uses Repository Interface
+
+forbidden_imports:
+  - sqlalchemy.orm
+  - sqlalchemy.create_engine
+
+allowed_imports:
+  - app.database.unit_of_work
+  - app.repositories
+  - app.schemas
+  - app.common.result
+  - app.common.api_response
+  - app.events.event_dispatcher
+  - app.domain.events.event_names
+  - app.domain.errors
+  - app.core.logging
+
+required_patterns:
+  - "UnitOfWork"
+  - "Result"
+  - "Success"
+  - "Failure"
+  - "EventDispatcher"
+  - "ErrorCode"
+
+forbidden_patterns:
+  - "session.query"
+  - "session.add"
+  - "session.commit"
+
+event_versioning:
+  required: true
+  suffix: ".v1"
+
+error_codes:
+  required: true
+  type: "StrEnum"

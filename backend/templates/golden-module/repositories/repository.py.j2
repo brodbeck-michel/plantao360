@@ -1,0 +1,58 @@
+from typing import Optional
+
+from sqlalchemy import func
+
+from app.models.{{module_name_snake}} import {{module_name}}
+from app.repositories.base.base_repository import BaseRepository
+
+
+class {{module_name}}Repository(BaseRepository[{{module_name}}]):
+    def __init__(self, session):
+        super().__init>({{module_name}}, session)
+
+    def search(
+        self,
+        skip: int = 0,
+        limit: int = 100,
+        sort_by: str = "id",
+        sort_direction: str = "asc",
+        **filters,
+    ) -> list[{{module_name}}]:
+        query = self.session.query({{module_name}})
+
+        for key, value in filters.items():
+            if value is not None and hasattr({{module_name}}, key):
+                column = getattr({{module_name}}, key)
+                if isinstance(value, str):
+                    query = query.filter(column.ilike(f"%{value}%"))
+                else:
+                    query = query.filter(column == value)
+
+        sort_column = getattr({{module_name}}, sort_by, {{module_name}}.id)
+        if sort_direction == "desc":
+            query = query.order_by(sort_column.desc())
+        else:
+            query = query.order_by(sort_column.asc())
+
+        return query.offset(skip).limit(limit).all()
+
+    def count_filtered(self, **filters) -> int:
+        query = self.session.query(func.count({{module_name}}.id))
+
+        for key, value in filters.items():
+            if value is not None and hasattr({{module_name}}, key):
+                column = getattr({{module_name}}, key)
+                if isinstance(value, str):
+                    query = query.filter(column.ilike(f"%{value}%"))
+                else:
+                    query = query.filter(column == value)
+
+        return query.scalar()
+
+    def soft_delete(self, id: int) -> bool:
+        entity = self.get_by_id(id)
+        if entity:
+            entity.active = False
+            self.session.flush()
+            return True
+        return False

@@ -1,0 +1,27 @@
+{
+  "name": "dashboard",
+  "version": "1.0.0",
+  "description": "Dashboard principal",
+  "type": "feature",
+  "golden_module": false,
+  "routes": {
+    "home": {
+      "path": "/app/dashboard",
+      "component": "DashboardScreen",
+      "personas": ["all"],
+      "endpoints": [
+        "GET /api/v1/kpis/coverage-rate",
+        "GET /api/v1/kpis/cost-efficiency",
+        "GET /api/v1/kpis/doctor-satisfaction",
+        "GET /api/v1/kpis/assignment-rate"
+      ],
+      "query_objects": [],
+      "read_models": ["KPISummary"]
+    }
+  },
+  "components": ["DashboardScreen", "KPICardGroup", "AlertPanel"],
+  "hooks": ["useKPIs"],
+  "services": ["dashboardQueries"],
+  "types": ["DashboardData", "KPISummary"],
+  "tests": {}
+}

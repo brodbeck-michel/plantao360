@@ -1,0 +1,26 @@
+from datetime import datetime, timezone
+
+from sqlalchemy import DateTime, func
+from sqlalchemy.orm import Mapped, mapped_column
+
+
+class TimestampMixin:
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )
+
+
+class SoftDeleteMixin:
+    active: Mapped[bool] = mapped_column(
+        nullable=False,
+        default=True,
+        server_default="1",
+    )

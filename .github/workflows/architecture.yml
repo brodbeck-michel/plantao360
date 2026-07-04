@@ -1,0 +1,64 @@
+name: Architecture Gate
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main]
+
+jobs:
+  architecture-validation:
+    name: Architecture Validation
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: plantao360/backend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov pyyaml
+
+      - name: Architecture Validator
+        run: python tools/validate_architecture.py --all
+
+      - name: Architecture Linter
+        run: python tools/lint_architecture.py
+
+      - name: Golden Guard
+        run: python tools/golden_guard.py
+
+      - name: Template Consistency
+        run: python tools/check_templates.py
+
+      - name: ADR Validator
+        run: python tools/check_adrs.py
+
+      - name: Architecture Rules Engine
+        run: python tools/lint_architecture.py --rules
+
+      - name: Compliance Report
+        run: python tools/compliance_report.py --all
+
+      - name: Architecture Score
+        run: python tools/architecture_score.py
+
+      - name: Upload Architecture Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: architecture-report
+          path: |
+            plantao360/backend/reports/*.md
+            plantao360/backend/reports/*.json

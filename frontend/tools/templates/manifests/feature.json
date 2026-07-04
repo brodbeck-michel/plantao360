@@ -1,0 +1,31 @@
+{
+  "name": "{{FEATURE_NAME}}",
+  "version": "1.0.0",
+  "description": "Módulo de gestão de {{FEATURE_NAME}}",
+  "type": "feature",
+  "golden_module": false,
+  "generated_from": "doctor",
+  "golden_version": "1.0.0",
+  "owner": "unassigned",
+  "maturity": "alpha",
+  "routes": {
+    "list": {
+      "path": "/app/{{FEATURE_NAME}}",
+      "component": "{{FEATURE_PASCAL}}ListPage",
+      "personas": ["coordenador", "administrador"],
+      "endpoints": ["GET /api/v1/{{FEATURE_NAME}}"]
+    },
+    "detail": {
+      "path": "/app/{{FEATURE_NAME}}/:id",
+      "component": "{{FEATURE_PASCAL}}DetailPage",
+      "personas": ["coordenador", "administrador"],
+      "endpoints": ["GET /api/v1/{{FEATURE_NAME}}/{id}"]
+    }
+  },
+  "components": ["{{FEATURE_PASCAL}}Card", "{{FEATURE_PASCAL}}Header", "{{FEATURE_PASCAL}}Toolbar"],
+  "hooks": ["use{{FEATURE_PASCAL}}sList", "use{{FEATURE_PASCAL}}Detail", "useCreate{{FEATURE_PASCAL}}", "useUpdate{{FEATURE_PASCAL}}", "useDelete{{FEATURE_PASCAL}}"],
+  "services": ["{{FEATURE_NAME}}Queries", "{{FEATURE_NAME}}Mutations"],
+  "types": ["{{FEATURE_PASCAL}}", "{{FEATURE_PASCAL}}Filters"],
+  "tests": {},
+  "shared_dependencies": ["EntityAvatar", "StatusChip", "PageHeader", "DataTable", "FilterBar", "EmptyState", "LoadingSpinner", "ErrorBoundary"]
+}

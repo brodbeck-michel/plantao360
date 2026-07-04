@@ -1,0 +1,9 @@
+from app.models.{{module_name_snake}} import {{module_name}}
+from app.schemas.{{module_name_snake}}.{{module_name_snake}}_create import {{module_name}}CreateDTO
+from app.schemas.{{module_name_snake}}.{{module_name_snake}}_response import {{module_name}}ResponseDTO
+from app.mappers.base_mapper import BaseMapper
+
+
+class {{module_name}}Mapper(BaseMapper[{{module_name}}, {{module_name}}CreateDTO, {{module_name}}ResponseDTO]):
+    def __init__(self):
+        super().__init__({{module_name}}, {{module_name}}CreateDTO, {{module_name}}ResponseDTO)

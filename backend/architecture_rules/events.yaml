@@ -1,0 +1,29 @@
+# Architecture Rules: Events Layer
+# Domain events must be versioned
+
+forbidden_imports:
+  - fastapi
+  - sqlalchemy
+
+allowed_imports:
+  - app.events.event_dispatcher
+
+required_patterns:
+  - "EventDispatcher"
+  - "Event("
+
+versioning:
+  required: true
+  suffix: ".v1"
+  format: "{entity}.{action}.v1"
+
+naming_convention:
+  created: "{entity}.created.v1"
+  updated: "{entity}.updated.v1"
+  deleted: "{entity}.deleted.v1"
+  deactivated: "{entity}.deactivated.v1"
+
+event_names:
+  location: "app/domain/events/event_names.py"
+  type: "StrEnum"
+  class_name: "DomainEventName"

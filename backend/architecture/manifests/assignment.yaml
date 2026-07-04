@@ -1,0 +1,73 @@
+manifest_version: 1
+
+module_id: scheduling.assignment
+
+module:
+  canonical_name: Assignment
+  storage_name: shift_part
+  storage_table: shift_parts
+
+ownership:
+  aggregate: Shift
+  bounded_context: Scheduling
+
+stability:
+  level: stable
+  since: Sprint 5
+  adr: ADR-015
+
+lifecycle:
+  states:
+    - planned
+    - confirmed
+    - started
+    - completed
+    - cancelled
+  initial_state: planned
+  terminal_states:
+    - completed
+    - cancelled
+
+capabilities:
+  model: true
+  repository: true
+  repository_interface: true
+  service: true
+  mapper: false
+  validator: false
+  router: true
+
+  state_machine: true
+  policy: false
+  events: true
+  contracts: false
+  value_objects: true
+
+  dtos:
+    create: true
+    update: true
+    response: true
+    filters: true
+    query: false
+    summary: false
+    detail: false
+
+  tests:
+    unit: true
+    integration: true
+    contracts: true
+
+aliases:
+  - name: shift_part
+    type: storage
+    description: DB table name kept for backward compatibility
+  - name: assignments
+    type: api
+    description: API route uses domain name for clarity
+
+validation_profile: enterprise
+
+adr_references:
+  - id: ADR-015
+    title: Assignment Domain
+    decision: ShiftPart kept as storage_name; domain uses Assignment naming

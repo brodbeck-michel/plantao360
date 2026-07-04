@@ -1,0 +1,37 @@
+{
+  "name": "coverage",
+  "version": "1.0.0",
+  "description": "Módulo de cobertura de plantões",
+  "type": "feature",
+  "golden_module": false,
+  "routes": {
+    "list": {
+      "path": "/app/coverages",
+      "component": "CoverageListScreen",
+      "personas": ["coordenador", "administrador"],
+      "endpoints": ["GET /api/v1/coverages"],
+      "query_objects": ["CoverageQuery"],
+      "read_models": ["CoverageSummary"]
+    },
+    "detail": {
+      "path": "/app/coverages/:id",
+      "component": "CoverageDetailScreen",
+      "personas": ["coordenador", "administrador"],
+      "endpoints": ["GET /api/v1/coverages/{id}"],
+      "query_objects": ["CoverageQuery"],
+      "read_models": ["CoverageSummary"]
+    },
+    "form": {
+      "path": ["/app/coverages/new", "/app/coverages/:id/edit"],
+      "component": "CoverageFormScreen",
+      "personas": ["coordenador"],
+      "endpoints": ["POST /api/v1/coverages", "PUT /api/v1/coverages/{id}"],
+      "mutations": ["CreateCoverage", "UpdateCoverage"]
+    }
+  },
+  "components": ["CoverageListScreen", "CoverageDetailScreen", "CoverageFormScreen"],
+  "hooks": ["useCoverageList", "useCoverageDetail", "useCreateCoverage", "useUpdateCoverage", "useDeleteCoverage"],
+  "services": ["coverageQueries", "coverageMutations"],
+  "types": ["Coverage", "CoverageSummary", "CoverageFilters"],
+  "tests": {}
+}

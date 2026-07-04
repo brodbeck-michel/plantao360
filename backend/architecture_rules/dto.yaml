@@ -1,0 +1,36 @@
+# Architecture Rules: DTO Layer
+# DTOs handle data transfer between layers
+
+forbidden_imports:
+  - sqlalchemy
+  - fastapi
+  - app.services
+  - app.repositories
+
+allowed_imports:
+  - pydantic
+  - app.schemas.base
+
+required_patterns:
+  - "BaseCreateDTO"
+  - "BaseUpdateDTO"
+  - "BaseResponseDTO"
+
+required_dto_types:
+  - "create"
+  - "update"
+  - "response"
+  - "filters"
+  - "query"
+
+naming_convention:
+  create: "*CreateDTO"
+  update: "*UpdateDTO"
+  response: "*ResponseDTO"
+  summary: "*SummaryDTO"
+  filters: "*FilterDTO"
+  query: "*QueryDTO"
+
+model_config:
+  response:
+    from_attributes: true

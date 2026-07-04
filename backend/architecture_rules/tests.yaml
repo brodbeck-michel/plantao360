@@ -1,0 +1,43 @@
+# Architecture Rules: Tests Layer
+# Tests must follow Golden Module pattern
+
+required_test_types:
+  - "unit"
+  - "integration"
+  - "contracts"
+
+unit_tests:
+  required_files:
+    - "test_*_model.py"
+    - "test_*_repository.py"
+    - "test_*_service.py"
+    - "test_*_mapper.py"
+    - "test_*_validator.py"
+  min_functions: 3
+
+integration_tests:
+  required_files:
+    - "test_*_api.py"
+  required_fixtures:
+    - "client"
+  must_test:
+    - "list"
+    - "create"
+    - "get"
+    - "get_not_found"
+    - "update"
+    - "delete"
+
+contract_tests:
+  required_files:
+    - "test_*_contracts.py"
+  required_classes:
+    - "Test*ResponseContract"
+    - "Test*ErrorContract"
+
+conftest:
+  required: true
+  location: "tests/conftest.py"
+  required_fixtures:
+    - "db_session"
+    - "uow"
