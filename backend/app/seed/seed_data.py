@@ -26,6 +26,7 @@ from app.models.shift import Shift
 from app.models.shift_part import ShiftPart
 from app.models.shift_extra import ShiftExtra
 from app.models.payroll import Payroll
+from app.domain.constants.competency_dates import get_competency_dates
 
 # ============================================================
 # Constants
@@ -121,9 +122,9 @@ def generate_demo_data() -> dict:
     for period in periods_data:
         month = period["month"]
         year = period["year"]
-        num_days = days_in_month(year, month)
-        for day in range(1, num_days + 1):
-            d = date(year, month, day)
+        start_date, end_date = get_competency_dates(year, month)
+        current = start_date
+        while current <= end_date:
             num_shifts = random.randint(1, 2)
             available_types = ["T1", "T2", "T3"]
             for _ in range(num_shifts):
@@ -131,16 +132,17 @@ def generate_demo_data() -> dict:
                 st = SHIFT_TYPE_MAP[shift_type]
                 shift_status = "completed" if month < 5 else random.choice(["scheduled", "in_progress"])
                 shifts_data.append({
-                    "shift_date": d,
+                    "shift_date": current,
                     "shift_type": shift_type,
                     "status": shift_status,
                     "period_month": month,
                     "period_year": year,
-                    "scheduled_start": datetime.combine(d, st["start"]),
-                    "scheduled_end": datetime.combine(d + timedelta(days=1 if st["end"] <= st["start"] else 0), st["end"]),
+                    "scheduled_start": datetime.combine(current, st["start"]),
+                    "scheduled_end": datetime.combine(current + timedelta(days=1 if st["end"] <= st["start"] else 0), st["end"]),
                     "total_duration_minutes": st["hours"],
                     "doctor_count": 1,
                 })
+            current += timedelta(days=1)
 
     print(f"  - {len(doctors_data)} doctors")
     print(f"  - {len(periods_data)} periods")

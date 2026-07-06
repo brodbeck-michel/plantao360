@@ -73,5 +73,15 @@ class Shift(Base, TimestampMixin):
     def is_cancelled(self) -> bool:
         return self.status == ShiftStatus.CANCELLED
 
+    @property
+    def aggregate_id(self) -> int | None:
+        return self.id
+
+    def before_transition(self, from_status: str, to_status: str) -> None:
+        pass
+
+    def after_transition(self, from_status: str, to_status: str) -> None:
+        pass
+
     def __repr__(self) -> str:
         return f"<Shift(id={self.id}, date={self.shift_date}, type={self.shift_type}, status={self.status})>"

@@ -7,7 +7,7 @@ services:
     ports:
       - "8000:8000"
     env_file:
-      - .env.development
+      - .env
     volumes:
       - plantao360_data:/app/data
     networks:
@@ -23,6 +23,8 @@ services:
     build:
       context: .
       dockerfile: frontend/Dockerfile
+      args:
+        VITE_MVP_MODE: "true"
     container_name: plantao360_frontend
     ports:
       - "3001:80"

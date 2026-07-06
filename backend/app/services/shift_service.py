@@ -70,6 +70,16 @@ class ShiftService:
         return Success(data=ShiftResponseDTO.model_validate(entity))
 
     def create(self, dto: ShiftCreateDTO) -> Result[ShiftResponseDTO]:
+        from app.models.period import Period
+        period = self.uow.session.query(Period).filter(Period.id == dto.period_id).first()
+        if period:
+            start_date, end_date = get_competency_dates(period.year, period.month)
+            if dto.shift_date < start_date or dto.shift_date > end_date:
+                return Failure(
+                    error=f"Data do turno ({dto.shift_date}) fora da competencia ({start_date} a {end_date})",
+                    code=ShiftErrorCode.SHIFT_IMMUTABLE,
+                )
+
         entity = Shift(
             period_id=dto.period_id,
             shift_date=dto.shift_date,

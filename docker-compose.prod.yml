@@ -29,6 +29,8 @@ services:
     build:
       context: .
       dockerfile: frontend/Dockerfile
+      args:
+        VITE_MVP_MODE: "true"
     container_name: plantao360_frontend_prod
     restart: always
     ports:

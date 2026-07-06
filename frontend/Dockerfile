@@ -1,5 +1,8 @@
 FROM node:20-alpine AS builder
 
+ARG VITE_MVP_MODE=true
+ENV VITE_MVP_MODE=$VITE_MVP_MODE
+
 WORKDIR /app
 
 COPY frontend/package.json ./
