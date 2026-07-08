@@ -16,6 +16,36 @@ from app.core.runtime import RuntimeManager, RuntimeMode, create_runtime
 logger = logging.getLogger(__name__)
 
 
+def _ensure_admin_user() -> None:
+    """Create default admin user if no users exist."""
+    try:
+        from sqlalchemy import func
+        from app.database.base import SessionLocal
+        from app.models.user import User
+        from app.core.security.password import hash_password
+
+        session = SessionLocal()
+        try:
+            user_count = session.query(func.count(User.id)).scalar()
+            if user_count == 0:
+                admin = User(
+                    name="Administrador",
+                    email="admin@plantao360.local",
+                    password_hash=hash_password("admin123"),
+                    role="ADMIN",
+                    active=True,
+                )
+                session.add(admin)
+                session.commit()
+                logger.info("Admin user created: admin@plantao360.local")
+            else:
+                logger.info("Users already exist, skipping admin creation")
+        finally:
+            session.close()
+    except Exception as e:
+        logger.warning("Failed to create admin user: %s", e)
+
+
 @asynccontextmanager
 async def app_lifespan(runtime: RuntimeManager) -> AsyncGenerator[None, None]:
     """Application lifespan handler.
@@ -38,6 +68,9 @@ async def app_lifespan(runtime: RuntimeManager) -> AsyncGenerator[None, None]:
         success = runtime.run_migrations()
         if not success:
             logger.error("Lifespan: migrations failed — application may not work correctly")
+
+        # Create admin user if no users exist (all modes except TEST)
+        _ensure_admin_user()
 
         # Seed only in DEMO mode
         success = runtime.seed_data(dataset="demo", clear=True)
