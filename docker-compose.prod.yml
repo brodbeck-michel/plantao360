@@ -34,7 +34,7 @@ services:
     container_name: plantao360_frontend_prod
     restart: always
     ports:
-      - "3000:80"
+      - "3001:80"
     networks:
       - plantao360_prod
     depends_on:
