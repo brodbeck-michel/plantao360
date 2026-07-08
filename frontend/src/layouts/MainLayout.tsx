@@ -23,8 +23,8 @@ import {
   ChevronRight as ChevronRightIcon, ExpandMore as ExpandMoreIcon,
   ExpandLess as ExpandLessIcon, Sync as SyncIcon, Circle as CircleIcon,
   PushPin as PinIcon, PushPinOutlined as PinOutlinedIcon,
-  ChevronLeft as ChevronLeftIcon, ChevronRight as ChevronRightIcon,
-  Logout as LogoutIcon,
+  ChevronLeft as ChevronLeftIcon,
+  Logout as LogoutIcon, Settings as SettingsIcon,
 } from '@mui/icons-material';
 import { useQuery } from '@tanstack/react-query';
 import { ROUTES, NAV_ITEMS, type NavItem } from '../routes/routes';
@@ -43,12 +43,14 @@ const iconMap: Record<string, React.ReactNode> = {
   LocalHospital: <LocalHospitalIcon />, Receipt: <ReceiptIcon />,
   Insights: <InsightsIcon />, Timeline: <TimelineIcon />,
   Description: <DescriptionIcon />, AttachMoney: <AttachMoneyIcon />,
+  Settings: <SettingsIcon />,
 };
 
 const segmentLabelMap: Record<string, string> = {
   dashboard: 'Dashboard', doctors: 'Medicos', periods: 'Competencias',
   shifts: 'Plantoes', assignments: 'Distribuicao', coverage: 'Cobertura',
   extras: 'Extras', payroll: 'Financeiro', analytics: 'Analytics',
+  users: 'Usuarios',
 };
 
 async function fetchDashboardContext() {
@@ -137,10 +139,10 @@ function SidebarOperationalContext({ collapsed }: { collapsed: boolean }) {
 }
 
 export default function MainLayout() {
-  const { user, logout } = useAuth();
+  const { user, logout, hasRole } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
-    Operacional: true, 'Gestao de Pessoal': false, Financeiro: false, Analytics: false,
+    Operacional: true, 'Gestao de Pessoal': false, Financeiro: false, Analytics: false, Sistema: false,
   });
   const [collapsed, setCollapsed] = useState(() => {
     return localStorage.getItem('sidebar_collapsed') === 'true';
@@ -157,8 +159,11 @@ export default function MainLayout() {
   const isExpanded = !collapsed || hoverExpanded;
   const currentWidth = isExpanded ? DRAWER_WIDTH : DRAWER_COLLAPSED_WIDTH;
 
-  const visibleNavItems = FEATURE_FLAGS.MVP_MODE
-    ? NAV_ITEMS.reduce<NavItem[]>((acc, item) => {
+  const visibleNavItems = (() => {
+    let items = NAV_ITEMS;
+
+    if (FEATURE_FLAGS.MVP_MODE) {
+      items = NAV_ITEMS.reduce<NavItem[]>((acc, item) => {
         if (item.path === ROUTES.DASHBOARD) {
           acc.push(item);
         } else if (item.label === 'Operacional' && item.children) {
@@ -168,10 +173,20 @@ export default function MainLayout() {
               c.path === ROUTES.WORKSPACE || c.path === ROUTES.PERIODS
             ),
           });
+        } else if (item.label === 'Sistema') {
+          acc.push(item);
         }
         return acc;
-      }, [])
-    : NAV_ITEMS;
+      }, []);
+    }
+
+    return items
+      .filter((item) => !item.roles || item.roles.some((r) => hasRole(r)))
+      .map((item) => ({
+        ...item,
+        children: item.children?.filter((c) => !c.roles || c.roles.some((r) => hasRole(r))),
+      }));
+  })();
 
   const handleToggleCollapse = useCallback(() => {
     const newCollapsed = !collapsed;
@@ -221,7 +236,7 @@ export default function MainLayout() {
   const isChildActive = (children?: NavItem[]) => children?.some((c) => location.pathname === c.path) ?? false;
 
   useEffect(() => {
-    const expanded: Record<string, boolean> = { Operacional: true, 'Gestao de Pessoal': false, Financeiro: false, Analytics: false };
+    const expanded: Record<string, boolean> = { Operacional: true, 'Gestao de Pessoal': false, Financeiro: false, Analytics: false, Sistema: false };
     NAV_ITEMS.forEach((item) => {
       if (item.children?.some((child) => location.pathname === child.path)) expanded[item.label] = true;
     });

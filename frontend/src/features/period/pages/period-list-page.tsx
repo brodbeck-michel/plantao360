@@ -19,9 +19,13 @@ import {
 } from '../hooks/use-periods';
 import { MONTH_NAMES, STATUS_LABELS } from '../types/period-types';
 import type { PeriodData } from '../types/period-types';
+import { useAuth } from '../../../contexts/AuthContext';
+import { canEdit } from '../../../rbac';
 
 export function PeriodListPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const canModify = canEdit(user?.role, 'competencias');
   const { showError, showSuccess } = useErrorExperience();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create');
@@ -115,36 +119,40 @@ export function PeriodListPage() {
               <OpenIcon fontSize="small" />
             </IconButton>
           </Tooltip>
-          <Tooltip title="Editar">
-            <IconButton size="small" onClick={() => { setEditingPeriod(row); setDialogMode('edit'); setDialogOpen(true); }}>
-              <EditIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-          {row.status === 'draft' && (
+          {canModify && (
             <>
-              <Tooltip title="Fechar">
-                <IconButton size="small" onClick={() => setCloseConfirm(row)}>
-                  <CloseIcon fontSize="small" />
+              <Tooltip title="Editar">
+                <IconButton size="small" onClick={() => { setEditingPeriod(row); setDialogMode('edit'); setDialogOpen(true); }}>
+                  <EditIcon fontSize="small" />
                 </IconButton>
               </Tooltip>
-              <Tooltip title="Duplicar">
-                <IconButton size="small" onClick={() => handleDuplicate(row)}>
-                  <DuplicateIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Excluir">
-                <IconButton size="small" onClick={() => setDeleteConfirm(row)}>
-                  <DeleteIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
+              {row.status === 'draft' && (
+                <>
+                  <Tooltip title="Fechar">
+                    <IconButton size="small" onClick={() => setCloseConfirm(row)}>
+                      <CloseIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Duplicar">
+                    <IconButton size="small" onClick={() => handleDuplicate(row)}>
+                      <DuplicateIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Excluir">
+                    <IconButton size="small" onClick={() => setDeleteConfirm(row)}>
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                </>
+              )}
+              {row.status === 'closed' && (
+                <Tooltip title="Reabrir">
+                  <IconButton size="small" onClick={() => setReopenConfirm(row)}>
+                    <ReopenIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              )}
             </>
-          )}
-          {row.status === 'closed' && (
-            <Tooltip title="Reabrir">
-              <IconButton size="small" onClick={() => setReopenConfirm(row)}>
-                <ReopenIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
           )}
         </Box>
       ),
@@ -157,13 +165,15 @@ export function PeriodListPage() {
         <Typography variant="h4" fontWeight={600}>
           Competencias
         </Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => { setEditingPeriod(undefined); setDialogMode('create'); setDialogOpen(true); }}
-        >
-          Nova Competencia
-        </Button>
+        {canModify && (
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => { setEditingPeriod(undefined); setDialogMode('create'); setDialogOpen(true); }}
+          >
+            Nova Competencia
+          </Button>
+        )}
       </Box>
 
       <DataTable

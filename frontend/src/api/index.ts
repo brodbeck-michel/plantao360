@@ -9,3 +9,4 @@
 
 export { apiClient, createApiClient, mapError } from './client';
 export type { ApiClientConfig, AppError, RequestContext } from './client';
+export { usersApi } from './users';

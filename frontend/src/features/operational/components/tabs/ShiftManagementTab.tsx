@@ -29,11 +29,12 @@ interface ShiftManagementTabProps {
   onShiftCreated?: () => void;
   onShiftUpdated?: () => void;
   onShiftDeleted?: () => void;
+  canModify?: boolean;
 }
 
 const EMPTY_FORM = { shift_date: '', shift_type: 'T1', doctor_count: 1, total_duration_minutes: 360 };
 
-export function ShiftManagementTab({ period, onShiftCreated, onShiftUpdated, onShiftDeleted }: ShiftManagementTabProps) {
+export function ShiftManagementTab({ period, onShiftCreated, onShiftUpdated, onShiftDeleted, canModify = false }: ShiftManagementTabProps) {
   const [shifts, setShifts] = useState<ShiftRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -129,15 +130,17 @@ export function ShiftManagementTab({ period, onShiftCreated, onShiftUpdated, onS
         <Typography variant="h6" fontWeight={700}>
           Gestao de Turnos
         </Typography>
-        <Button
-          variant="contained"
-          size="small"
-          startIcon={<AddIcon />}
-          onClick={() => { setNewShift(EMPTY_FORM); setCreateDialogOpen(true); setError(''); }}
-          sx={{ bgcolor: '#00995D', '&:hover': { bgcolor: '#007A4D' } }}
-        >
-          Novo Turno
-        </Button>
+        {canModify && (
+          <Button
+            variant="contained"
+            size="small"
+            startIcon={<AddIcon />}
+            onClick={() => { setNewShift(EMPTY_FORM); setCreateDialogOpen(true); setError(''); }}
+            sx={{ bgcolor: '#00995D', '&:hover': { bgcolor: '#007A4D' } }}
+          >
+            Novo Turno
+          </Button>
+        )}
       </Box>
 
       {error && <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>{error}</Alert>}
@@ -188,17 +191,20 @@ export function ShiftManagementTab({ period, onShiftCreated, onShiftUpdated, onS
                     {s.doctor_count || 0}
                   </TableCell>
                   <TableCell align="right">
-
-                    <Tooltip title="Editar">
-                      <IconButton size="small" onClick={() => { setEditDialog(s); setError(''); }}>
-                        <EditIcon sx={{ fontSize: 16 }} />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Remover">
-                      <IconButton size="small" onClick={() => handleDelete(s.id)} sx={{ color: '#FF4842' }}>
-                        <DeleteIcon sx={{ fontSize: 16 }} />
-                      </IconButton>
-                    </Tooltip>
+                    {canModify && (
+                      <>
+                        <Tooltip title="Editar">
+                          <IconButton size="small" onClick={() => { setEditDialog(s); setError(''); }}>
+                            <EditIcon sx={{ fontSize: 16 }} />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Remover">
+                          <IconButton size="small" onClick={() => handleDelete(s.id)} sx={{ color: '#FF4842' }}>
+                            <DeleteIcon sx={{ fontSize: 16 }} />
+                          </IconButton>
+                        </Tooltip>
+                      </>
+                    )}
                   </TableCell>
                 </TableRow>
               ))

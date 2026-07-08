@@ -80,6 +80,9 @@ def list_periods(
     use_case = ListPeriods(repo)
     result = use_case(filter_dto=filter_dto)
 
+    if result.is_failure:
+        return ApiResponse.fail_with_code(code=result.code, message=result.error)
+
     page_data = result.data
     response.headers["X-Total-Count"] = str(page_data.total)
     response.headers["X-Page"] = str(page_data.page)

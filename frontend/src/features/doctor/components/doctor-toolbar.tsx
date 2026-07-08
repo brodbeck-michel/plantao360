@@ -20,13 +20,14 @@ interface DoctorToolbarProps {
   onCreate: () => void;
   onExport?: () => void;
   selectedCount?: number;
+  canModify?: boolean;
 }
 
 // ============================================================
 // Component
 // ============================================================
 
-export function DoctorToolbar({ total, onCreate, onExport, selectedCount = 0 }: DoctorToolbarProps) {
+export function DoctorToolbar({ total, onCreate, onExport, selectedCount = 0, canModify = false }: DoctorToolbarProps) {
   return (
     <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
       <Box display="flex" alignItems="center" gap={2}>
@@ -47,15 +48,17 @@ export function DoctorToolbar({ total, onCreate, onExport, selectedCount = 0 }: 
             Exportar
           </Button>
         )}
-        <Button
-          startIcon={<Add />}
-          onClick={onCreate}
-          variant="contained"
-          size="small"
-          aria-label="Novo médico"
-        >
-          Novo Médico
-        </Button>
+        {canModify && (
+          <Button
+            startIcon={<Add />}
+            onClick={onCreate}
+            variant="contained"
+            size="small"
+            aria-label="Novo médico"
+          >
+            Novo Médico
+          </Button>
+        )}
       </Box>
     </Box>
   );

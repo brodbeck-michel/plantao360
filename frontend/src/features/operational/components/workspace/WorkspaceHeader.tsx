@@ -19,9 +19,10 @@ interface WorkspaceHeaderProps {
   onNavigate: (offset: number) => void;
   onRefresh: () => void;
   onPeriodAction?: (action: 'close' | 'reopen' | 'duplicate' | 'delete' | 'copy-from') => void;
+  canModify?: boolean;
 }
 
-export function WorkspaceHeader({ period, summary, onNavigate, onRefresh, onPeriodAction }: WorkspaceHeaderProps) {
+export function WorkspaceHeader({ period, summary, onNavigate, onRefresh, onPeriodAction, canModify = false }: WorkspaceHeaderProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const statusColor = getStatusColor(period.status);
 
@@ -74,6 +75,7 @@ export function WorkspaceHeader({ period, summary, onNavigate, onRefresh, onPeri
           size="small"
           variant="outlined"
           onClick={(e) => setAnchorEl(e.currentTarget)}
+          disabled={!canModify}
         >
           <MoreIcon sx={{ fontSize: 18 }} />
         </Button>

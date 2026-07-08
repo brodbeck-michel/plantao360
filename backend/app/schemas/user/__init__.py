@@ -36,6 +36,10 @@ class LoginRequestDTO(BaseModel):
     password: str
 
 
+class ChangePasswordDTO(BaseModel):
+    password: str = Field(..., min_length=6, max_length=128)
+
+
 class LoginResponseDTO(BaseModel):
     access_token: str
     token_type: str = "bearer"

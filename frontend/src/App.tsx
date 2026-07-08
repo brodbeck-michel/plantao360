@@ -15,6 +15,8 @@ const WorkspacePage = React.lazy(() => import('./features/operational/pages/work
 const WorkspaceRedirect = React.lazy(() => import('./features/operational/pages/workspace-redirect').then((m) => ({ default: m.WorkspaceRedirect })));
 const PeriodListPage = React.lazy(() => import('./features/period/pages/period-list-page').then((m) => ({ default: m.PeriodListPage })));
 const ShiftListPage = React.lazy(() => import('./features/shift/pages/shift-list-page').then((m) => ({ default: m.ShiftListPage })));
+const UserListPage = React.lazy(() => import('./pages/UserListPage'));
+const AccessDeniedPage = React.lazy(() => import('./pages/AccessDeniedPage'));
 
 function PageLoader() {
   return (
@@ -37,6 +39,24 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
+  }
+
+  return <>{children}</>;
+}
+
+function AdminRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, isLoading, hasRole } = useAuth();
+
+  if (isLoading) {
+    return <PageLoader />;
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (!hasRole('ADMIN')) {
+    return <Navigate to={ROUTES.DASHBOARD} replace />;
   }
 
   return <>{children}</>;
@@ -84,6 +104,10 @@ function App() {
         <Route path={ROUTES.TIMELINE} element={<LazyPage><DashboardPage /></LazyPage>} />
         <Route path={ROUTES.REPORTS} element={<LazyPage><DashboardPage /></LazyPage>} />
         <Route path={ROUTES.READINESS} element={<LazyPage><DashboardPage /></LazyPage>} />
+
+        <Route path={ROUTES.USERS} element={<AdminRoute><LazyPage><UserListPage /></LazyPage></AdminRoute>} />
+
+        <Route path="/access-denied" element={<LazyPage><AccessDeniedPage /></LazyPage>} />
       </Route>
     </Routes>
   );

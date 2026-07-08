@@ -26,6 +26,8 @@ import {
 } from '../hooks/use-doctors';
 import type { Doctor } from '../types/doctor-types';
 import { ROUTES } from '../../../routes/routes';
+import { useAuth } from '../../../contexts/AuthContext';
+import { canEdit } from '../../../rbac';
 
 // ============================================================
 // Component
@@ -33,6 +35,8 @@ import { ROUTES } from '../../../routes/routes';
 
 export function DoctorListPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const canModify = canEdit(user?.role, 'medicos');
   const { filters, updateFilter, clearFilters } = useDoctorFilters();
   const { sort, updateSort } = useDoctorSort();
   const { page, pageSize, updatePage, updatePageSize } = useDoctorPagination();
@@ -82,6 +86,7 @@ export function DoctorListPage() {
               total={total}
               onCreate={() => setCreateOpen(true)}
               selectedCount={selectedIds.length}
+              canModify={canModify}
             />
           }
         />

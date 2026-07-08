@@ -21,6 +21,7 @@ interface CellContextMenuProps {
   onDuplicateWeek: () => void;
   hasClipboardData: boolean;
   hasAssignments: boolean;
+  canModify?: boolean;
 }
 
 export function CellContextMenu({
@@ -34,37 +35,40 @@ export function CellContextMenu({
   onDuplicateWeek,
   hasClipboardData,
   hasAssignments,
+  canModify = false,
 }: CellContextMenuProps) {
   const menuItems: ContextMenuItem[] = [
     {
       label: 'Copiar médico',
       icon: <ContentCopy sx={{ fontSize: 18 }} />,
       onClick: () => { onCopyDoctor(); onClose(); },
-      disabled: !hasAssignments,
+      disabled: !hasAssignments || !canModify,
     },
     {
       label: 'Colar médico',
       icon: <ContentPaste sx={{ fontSize: 18 }} />,
       onClick: () => { onPaste(); onClose(); },
-      disabled: !hasClipboardData,
+      disabled: !hasClipboardData || !canModify,
     },
     { label: '', icon: null, onClick: () => {}, divider: true },
     {
       label: 'Duplicar dia inteiro',
       icon: <CalendarMonth sx={{ fontSize: 18 }} />,
       onClick: () => { onDuplicateDay(); onClose(); },
+      disabled: !canModify,
     },
     {
       label: 'Duplicar semana',
       icon: <CalendarMonth sx={{ fontSize: 18 }} />,
       onClick: () => { onDuplicateWeek(); onClose(); },
+      disabled: !canModify,
     },
     { label: '', icon: null, onClick: () => {}, divider: true },
     {
       label: 'Limpar célula',
       icon: <Delete sx={{ fontSize: 18 }} />,
       onClick: () => { onClearCell(); onClose(); },
-      disabled: !hasAssignments,
+      disabled: !hasAssignments || !canModify,
     },
   ];
 

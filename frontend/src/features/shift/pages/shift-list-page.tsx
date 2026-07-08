@@ -11,9 +11,13 @@ import { apiClient } from '../../../api/client';
 import { queryClient } from '../../../providers/query-provider';
 import { SHIFT_TYPES, SHIFT_LABELS, SHIFT_TIMES } from '../types/shift-types';
 import type { ShiftData } from '../types/shift-types';
+import { useAuth } from '../../../contexts/AuthContext';
+import { canEdit } from '../../../rbac';
 
 export function ShiftListPage() {
   const { showError, showSuccess } = useErrorExperience();
+  const { user } = useAuth();
+  const canModify = canEdit(user?.role, 'turnos');
   const [shifts, setShifts] = useState<ShiftData[]>([]);
   const [loading, setLoading] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -77,16 +81,20 @@ export function ShiftListPage() {
     {
       id: 'actions', label: 'Acoes', width: 120, render: (row) => (
         <Box display="flex" gap={0.5}>
-          <Tooltip title="Editar">
-            <IconButton size="small" onClick={() => { setEditingShift(row); setShiftType(row.shift_type); setShiftDate(row.shift_date); setDialogOpen(true); }}>
-              <EditIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Excluir">
-            <IconButton size="small" onClick={() => setDeleteConfirm(row)}>
-              <DeleteIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
+          {canModify && (
+            <>
+              <Tooltip title="Editar">
+                <IconButton size="small" onClick={() => { setEditingShift(row); setShiftType(row.shift_type); setShiftDate(row.shift_date); setDialogOpen(true); }}>
+                  <EditIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Excluir">
+                <IconButton size="small" onClick={() => setDeleteConfirm(row)}>
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </>
+          )}
         </Box>
       ),
     },
@@ -96,9 +104,11 @@ export function ShiftListPage() {
     <Container maxWidth="lg">
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Typography variant="h4" fontWeight={600}>Turnos</Typography>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={() => { setEditingShift(null); setShiftDate(''); setShiftType('T1'); setDialogOpen(true); }}>
-          Novo Turno
-        </Button>
+        {canModify && (
+          <Button variant="contained" startIcon={<AddIcon />} onClick={() => { setEditingShift(null); setShiftDate(''); setShiftType('T1'); setDialogOpen(true); }}>
+            Novo Turno
+          </Button>
+        )}
       </Box>
 
       <Paper sx={{ mb: 2, p: 2 }}>

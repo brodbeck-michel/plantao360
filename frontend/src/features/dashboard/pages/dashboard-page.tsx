@@ -30,16 +30,15 @@ import {
 import { SkeletonCard } from '../../../shared/components/loading/SkeletonCard';
 import { AutoRefreshIndicator } from '../../../shared/components/loading/AutoRefreshIndicator';
 import { ContentTransition } from '../../../shared/components/loading/ContentTransition';
+import { apiClient } from '../../../api/client';
 
 // ============================================================
 // API
 // ============================================================
 
 async function fetchDashboard() {
-  const response = await fetch('/api/v1/query/dashboard');
-  if (!response.ok) throw new Error('Failed to fetch dashboard');
-  const json = await response.json();
-  return json.data ?? json;
+  const response = await apiClient.get('/query/dashboard');
+  return response.data.data ?? response.data;
 }
 
 // ============================================================

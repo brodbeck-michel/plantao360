@@ -144,3 +144,12 @@ class UserService:
 
         logger.info("user.authenticated", extra={"user_id": user.id})
         return Success(data=LoginResponseDTO(access_token=token, user=user_dto))
+
+    def change_password(self, user_id: int, new_password: str) -> Result[bool]:
+        user = self.repo.get_by_id(user_id)
+        if not user:
+            return Failure(error="Usuario nao encontrado", code="USER_NOT_FOUND")
+        user.password_hash = hash_password(new_password)
+        self.repo.update(user)
+        logger.info("user.password_changed", extra={"user_id": user_id})
+        return Success(data=True)

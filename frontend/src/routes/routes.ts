@@ -70,6 +70,9 @@ export const ROUTES = {
 
   // Readiness
   READINESS: '/app/readiness',
+
+  // Users (Admin only)
+  USERS: '/app/users',
 } as const;
 
 // ============================================================
@@ -81,7 +84,7 @@ export interface NavItem {
   path: string;
   icon: string;
   children?: NavItem[];
-  personas?: string[];
+  roles?: string[];
 }
 
 export const NAV_ITEMS: NavItem[] = [
@@ -110,7 +113,7 @@ export const NAV_ITEMS: NavItem[] = [
     label: 'Financeiro',
     path: '',
     icon: 'AttachMoney',
-    personas: ['financeiro', 'administrador', 'diretor'],
+    roles: ['ADMIN', 'COORDENADOR', 'FINANCEIRO'],
     children: [
       { label: 'Payroll', path: ROUTES.PAYROLL, icon: 'Receipt' },
     ],
@@ -122,7 +125,16 @@ export const NAV_ITEMS: NavItem[] = [
     children: [
       { label: 'Dashboard', path: ROUTES.ANALYTICS, icon: 'Insights' },
       { label: 'Timeline', path: ROUTES.TIMELINE, icon: 'Timeline' },
-      { label: 'Relatórios', path: ROUTES.REPORTS, icon: 'Description' },
+      { label: 'Relatorios', path: ROUTES.REPORTS, icon: 'Description' },
+    ],
+  },
+  {
+    label: 'Sistema',
+    path: '',
+    icon: 'Settings',
+    roles: ['ADMIN'],
+    children: [
+      { label: 'Usuarios', path: ROUTES.USERS, icon: 'People' },
     ],
   },
 ];

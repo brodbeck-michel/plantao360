@@ -17,6 +17,8 @@ import { ShiftManagementTab } from '../components/tabs/ShiftManagementTab';
 import { FinancialTab } from '../components/tabs/FinancialTab';
 import { ReportsTab } from '../components/tabs/ReportsTab';
 import { SHIFT_TYPES, SHIFT_TIMES } from '../types/operational-types';
+import { useAuth } from '../../../contexts/AuthContext';
+import { canEdit } from '../../../rbac';
 import type { CellPosition } from '../hooks/use-workspace-keyboard';
 
 interface CellContext {
@@ -44,6 +46,8 @@ export default function WorkspacePage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const periodId = id || '1';
+  const { user } = useAuth();
+  const canModify = canEdit(user?.role, 'workspace');
 
   const { data: workspace, isLoading, refetch } = useWorkspace(periodId);
 
@@ -210,6 +214,7 @@ export default function WorkspacePage() {
   }, [cellContext, workspace, assignDoctor, swapDoctor, removeAssignment, showToast, undoRedo, refetch, markSaved]);
 
   const handleAssign = useCallback(async (doctorId: number) => {
+    if (!canModify) return;
     if (!cellContext || !workspace) return;
     const existingAssignments = workspace.days.find((d) => d.date === cellContext.date)?.shifts[cellContext.shiftType]?.assignments || [];
     if (existingAssignments.find((a) => a.doctor_id === doctorId)) {
@@ -239,6 +244,7 @@ export default function WorkspacePage() {
   }, [cellContext, workspace, showToast, executeAssign]);
 
   const handleRemove = useCallback(async (assignmentId: number) => {
+    if (!canModify) return;
     const assignment = workspace?.days.flatMap((d) => SHIFT_TYPES.map((st) => ({ ...d.shifts[st], date: d.date, shiftType: st }))).flatMap((c) => c.assignments).find((a) => a.id === assignmentId);
     try {
       await removeAssignment.mutateAsync(assignmentId);
@@ -268,6 +274,7 @@ export default function WorkspacePage() {
   }, [activeCell, workspace, handleRemove]);
 
   const handleClear = useCallback(async () => {
+    if (!canModify) return;
     if (!cellContext || !workspace) return;
     const existingAssignments = workspace.days.find((d) => d.date === cellContext.date)?.shifts[cellContext.shiftType]?.assignments || [];
     try {
@@ -308,6 +315,7 @@ export default function WorkspacePage() {
   }, [activeCell, workspace, showToast]);
 
   const handlePaste = useCallback(async (targetDate?: string, targetShift?: string) => {
+    if (!canModify) return;
     const date = targetDate || contextMenu?.date;
     const shift = targetShift || contextMenu?.shiftType;
     if (!date || !shift || !clipboard || !workspace) return;
@@ -341,6 +349,7 @@ export default function WorkspacePage() {
   }, [activeCell, workspace, clipboard, handlePaste]);
 
   const handleDuplicateDay = useCallback(async () => {
+    if (!canModify) return;
     if (!contextMenu || !workspace) return;
     const sourceDate = contextMenu.date;
     const nextDay = new Date(sourceDate + 'T12:00:00');
@@ -366,6 +375,7 @@ export default function WorkspacePage() {
   }, [contextMenu, workspace, duplicateDayMut, showToast, markSaved]);
 
   const handleDuplicateWeek = useCallback(async () => {
+    if (!canModify) return;
     if (!contextMenu || !workspace) return;
     const sourceDate = new Date(contextMenu.date + 'T12:00:00');
     const dayOfWeek = sourceDate.getDay();
@@ -390,6 +400,7 @@ export default function WorkspacePage() {
   }, [contextMenu, workspace, duplicateWeekMut, showToast, markSaved]);
 
   const handleDrop = useCallback(async (sourceAssignmentId: number, _sourceDoctorId: number, targetDate: string, targetShiftType: string, targetShiftId: number | null) => {
+    if (!canModify) return;
     if (!workspace) return;
     const assignment = workspace.days.flatMap((d) => SHIFT_TYPES.map((st) => ({ ...d.shifts[st], date: d.date, shiftType: st }))).flatMap((c) => c.assignments).find((a) => a.id === sourceAssignmentId);
     if (!assignment) return;
@@ -419,6 +430,7 @@ export default function WorkspacePage() {
   }, [workspace, moveAssignment, showToast, markSaved]);
 
   const handlePeriodAction = useCallback(async (action: 'close' | 'reopen' | 'duplicate' | 'delete' | 'copy-from') => {
+    if (!canModify) return;
     try {
       if (action === 'close') {
         await fetch(`/api/v1/periods/${periodId}/close`, { method: 'POST' });
@@ -513,6 +525,7 @@ export default function WorkspacePage() {
         onNavigate={handleNavigatePeriod}
         onRefresh={() => refetch()}
         onPeriodAction={handlePeriodAction}
+        canModify={canModify}
       />
       <WorkspaceTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
@@ -526,12 +539,12 @@ export default function WorkspacePage() {
       )}
       {activeTab === 1 && <SummaryTab summary={workspace.summary} days={workspace.days} doctors={workspace.doctors} />}
       {activeTab === 2 && <DoctorsTab doctors={workspace.doctors} doctorStats={doctorStats} periodId={periodId} onRefresh={() => refetch()} />}
-      {activeTab === 3 && <ShiftManagementTab period={workspace.period} onShiftCreated={() => refetch()} onShiftUpdated={() => refetch()} onShiftDeleted={() => refetch()} />}
+      {activeTab === 3 && <ShiftManagementTab period={workspace.period} onShiftCreated={() => refetch()} onShiftUpdated={() => refetch()} onShiftDeleted={() => refetch()} canModify={canModify} />}
       {activeTab === 4 && <FinancialTab days={workspace.days} doctors={workspace.doctors} />}
       {activeTab === 5 && <ReportsTab period={workspace.period} summary={workspace.summary} days={workspace.days} doctors={workspace.doctors} />}
 
       <QuickAssignPopover open={!!cellContext} anchorEl={cellContext?.anchorEl || null} doctors={workspace.doctors} assignedDoctorIds={cellContext?.existingAssignmentIds || []} doctorStats={doctorStats} onSelect={handleAssign} onClear={handleClear} onClose={() => setCellContext(null)} isLoading={isMutating} />
-      <CellContextMenu open={!!contextMenu} anchorEl={contextMenu?.anchorEl || null} onClose={() => setContextMenu(null)} onCopyDoctor={handleCopyDoctor} onPaste={() => handlePaste()} onClearCell={handleClear} onDuplicateDay={handleDuplicateDay} onDuplicateWeek={handleDuplicateWeek} hasClipboardData={!!clipboard} hasAssignments={!!contextMenu && (() => { const day = workspace.days.find((d) => d.date === contextMenu.date); return (day?.shifts[contextMenu.shiftType]?.assignments.length || 0) > 0; })()} />
+      <CellContextMenu open={!!contextMenu} anchorEl={contextMenu?.anchorEl || null} onClose={() => setContextMenu(null)} onCopyDoctor={handleCopyDoctor} onPaste={() => handlePaste()} onClearCell={handleClear} onDuplicateDay={handleDuplicateDay} onDuplicateWeek={handleDuplicateWeek} hasClipboardData={!!clipboard} hasAssignments={!!contextMenu && (() => { const day = workspace.days.find((d) => d.date === contextMenu.date); return (day?.shifts[contextMenu.shiftType]?.assignments.length || 0) > 0; })()} canModify={canModify} />
 
       <Snackbar open={toast.open} autoHideDuration={3000} onClose={() => setToast((prev) => ({ ...prev, open: false }))} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
         <Alert onClose={() => setToast((prev) => ({ ...prev, open: false }))} severity={toast.severity} variant="filled" sx={{ width: '100%' }}>{toast.message}</Alert>

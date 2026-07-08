@@ -25,11 +25,15 @@ export interface LoginResponse {
 export const authApi = {
   login: async (data: LoginRequest): Promise<LoginResponse> => {
     const response = await apiClient.post('/auth/login', data);
-    return response.data.data;
+    return response.data;
   },
 
   me: async (): Promise<User> => {
     const response = await apiClient.get('/auth/me');
-    return response.data.data;
+    return response.data;
+  },
+
+  changeMyPassword: async (password: string): Promise<void> => {
+    await apiClient.put('/auth/me/password', { password });
   },
 };

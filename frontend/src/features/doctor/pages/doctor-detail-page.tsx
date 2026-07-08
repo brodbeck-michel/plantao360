@@ -22,6 +22,8 @@ import { LoadingSpinner } from '../../../shared/components/loading-spinner';
 import { ErrorBoundary } from '../../../shared/components/error-boundary';
 import { useDoctorDetail, useDoctorSummary } from '../hooks/use-doctors';
 import { ROUTES } from '../../../routes/routes';
+import { useAuth } from '../../../contexts/AuthContext';
+import { canEdit } from '../../../rbac';
 
 // ============================================================
 // Types
@@ -44,6 +46,8 @@ function TabPanel({ children, value, index }: TabPanelProps) {
 export function DoctorDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const canModify = canEdit(user?.role, 'medicos');
   const [tab, setTab] = useState(0);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -84,14 +88,16 @@ export function DoctorDetailPage() {
               >
                 Voltar
               </Button>
-              <Button
-                startIcon={<Edit />}
-                onClick={() => setEditOpen(true)}
-                variant="outlined"
-                size="small"
-              >
-                Editar
-              </Button>
+              {canModify && (
+                <Button
+                  startIcon={<Edit />}
+                  onClick={() => setEditOpen(true)}
+                  variant="outlined"
+                  size="small"
+                >
+                  Editar
+                </Button>
+              )}
             </Box>
           }
         />

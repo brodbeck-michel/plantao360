@@ -8,6 +8,7 @@ interface AuthContextType {
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  hasRole: (...roles: string[]) => boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
 }
@@ -43,6 +44,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
   }, [token, logout]);
 
+  const hasRole = useCallback((...roles: string[]) => {
+    if (!user) return false;
+    return roles.includes(user.role);
+  }, [user]);
+
   const login = async (email: string, password: string) => {
     const response = await authApi.login({ email, password });
     localStorage.setItem(TOKEN_KEY, response.access_token);
@@ -51,7 +57,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, isAuthenticated: !!user, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ user, token, isAuthenticated: !!user, isLoading, hasRole, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

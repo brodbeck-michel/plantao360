@@ -17,6 +17,8 @@ import { ActionsMenu, ActionItem } from '../../../shared/components/actions-menu
 import { Edit, Delete, Visibility, Block } from '@mui/icons-material';
 import type { Doctor } from '../types/doctor-types';
 import { ROUTES } from '../../../routes/routes';
+import { useAuth } from '../../../contexts/AuthContext';
+import { canEdit } from '../../../rbac';
 
 // ============================================================
 // Types
@@ -64,35 +66,44 @@ export function DoctorTable({
   onDeactivate,
 }: DoctorTableProps) {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const canModify = canEdit(user?.role, 'medicos');
 
-  const getActions = (doctor: Doctor): ActionItem[] => [
-    {
-      id: 'view',
-      label: 'Visualizar',
-      icon: <Visibility fontSize="small" />,
-      onClick: () => navigate(`${ROUTES.DOCTORS}/${doctor.id}`),
-    },
-    {
-      id: 'edit',
-      label: 'Editar',
-      icon: <Edit fontSize="small" />,
-      onClick: () => onEdit(doctor),
-    },
-    {
-      id: 'deactivate',
-      label: doctor.active ? 'Desativar' : 'Ativar',
-      icon: <Block fontSize="small" />,
-      onClick: () => onDeactivate(doctor),
-      divider: true,
-    },
-    {
-      id: 'delete',
-      label: 'Excluir',
-      icon: <Delete fontSize="small" />,
-      onClick: () => onDelete(doctor),
-      color: 'error',
-    },
-  ];
+  const getActions = (doctor: Doctor): ActionItem[] => {
+    const actions: ActionItem[] = [
+      {
+        id: 'view',
+        label: 'Visualizar',
+        icon: <Visibility fontSize="small" />,
+        onClick: () => navigate(`${ROUTES.DOCTORS}/${doctor.id}`),
+      },
+    ];
+    if (canModify) {
+      actions.push(
+        {
+          id: 'edit',
+          label: 'Editar',
+          icon: <Edit fontSize="small" />,
+          onClick: () => onEdit(doctor),
+        },
+        {
+          id: 'deactivate',
+          label: doctor.active ? 'Desativar' : 'Ativar',
+          icon: <Block fontSize="small" />,
+          onClick: () => onDeactivate(doctor),
+          divider: true,
+        },
+        {
+          id: 'delete',
+          label: 'Excluir',
+          icon: <Delete fontSize="small" />,
+          onClick: () => onDelete(doctor),
+          color: 'error',
+        },
+      );
+    }
+    return actions;
+  };
 
   const columns: Column<Doctor>[] = [
     {
