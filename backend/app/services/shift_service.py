@@ -17,6 +17,7 @@ from app.domain.state_machines.shift_state_machine import ShiftStateMachine
 from app.domain.rules.shift_rules import ShiftRules
 from app.domain.constants.shift_status import ShiftStatus
 from app.domain.constants.competency_dates import get_competency_dates
+from app.services.shift_lifecycle_service import ShiftLifecycleService
 from app.core.logging import get_logger
 
 logger = get_logger("service.shift")
@@ -51,6 +52,10 @@ class ShiftService:
             sort_direction=filter_dto.sort_direction,
             **filters,
         )
+
+        lifecycle = ShiftLifecycleService(self.uow.session)
+        lifecycle.refresh_statuses(items)
+
         total = self.repo.count_filtered(**filters)
         dtos = [ShiftResponseDTO.model_validate(d) for d in items]
         return Page(
@@ -67,6 +72,8 @@ class ShiftService:
                 error=ShiftErrorCode.SHIFT_NOT_FOUND,
                 code=ShiftErrorCode.SHIFT_NOT_FOUND,
             )
+        lifecycle = ShiftLifecycleService(self.uow.session)
+        lifecycle.refresh_status(entity)
         return Success(data=ShiftResponseDTO.model_validate(entity))
 
     def create(self, dto: ShiftCreateDTO) -> Result[ShiftResponseDTO]:

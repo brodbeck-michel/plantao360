@@ -16,19 +16,28 @@ HOST="${HOST:-0.0.0.0}"
 
 echo "[startup] Mode: $ENVIRONMENT"
 
+# Step 0: Ensure data directory exists (may be empty before volume mount)
+mkdir -p /app/data
+echo "[startup] Data directory ready: /app/data"
+
 # Step 1: Database migrations (skip for test mode)
 if [ "$ENVIRONMENT" != "test" ]; then
     echo "[startup] Running database migrations..."
     alembic upgrade head
+    echo "[startup] Migrations completed successfully."
 fi
 
 # Step 2: Seed data (only in DEMO mode)
+# NOTE: Seed failures must NOT prevent the server from starting.
 if [ "$ENVIRONMENT" = "development" ]; then
-    # Check if DEMO_MODE is set via env var or .env file
     DEMO_MODE="${DEMO_MODE:-false}"
     if [ "$DEMO_MODE" = "true" ]; then
         echo "[startup] DEMO_MODE detected — seeding demo data..."
-        python -m app.seed.seed_data --dataset demo --clear
+        if python -m app.seed.seed_data --dataset demo --clear; then
+            echo "[startup] Seed completed successfully."
+        else
+            echo "[startup] WARNING: Seed failed (exit code $?). Server will start anyway."
+        fi
     else
         echo "[startup] No seed — DEVELOPMENT mode without DEMO_MODE"
     fi

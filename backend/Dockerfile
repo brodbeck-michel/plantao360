@@ -14,13 +14,15 @@ RUN pip install --no-cache-dir --upgrade pip && \
 
 COPY . .
 
-RUN chown -R appuser:appuser /app
+# Create data directory and set permissions (self-contained, no host dependency)
+RUN mkdir -p /app/data && \
+    chown -R appuser:appuser /app
 
 USER appuser
 
 EXPOSE 8000
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=5 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health')" || exit 1
 
 CMD ["sh", "start.sh"]

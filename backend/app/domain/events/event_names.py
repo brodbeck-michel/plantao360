@@ -17,6 +17,8 @@ class DomainEventName(StrEnum):
     SHIFT_COMPLETED_V1 = "shift.completed.v1"
     SHIFT_CANCELLED_V1 = "shift.cancelled.v1"
     SHIFT_DELETED_V1 = "shift.deleted.v1"
+    SHIFT_STARTED_AUTOMATICALLY_V1 = "shift.started.automatically.v1"
+    SHIFT_COMPLETED_AUTOMATICALLY_V1 = "shift.completed.automatically.v1"
 
     EXTRA_CREATED_V1 = "extra.created.v1"
     EXTRA_DELETED_V1 = "extra.deleted.v1"

@@ -79,6 +79,10 @@ class DashboardService:
         cancelled_shifts = 0
 
         if current_period:
+            from app.services.shift_lifecycle_service import ShiftLifecycleService
+            lifecycle = ShiftLifecycleService(self._session)
+            lifecycle.refresh_period(current_period.id)
+
             total_shifts = (
                 self._session.query(func.count(Shift.id))
                 .filter(Shift.period_id == current_period.id)

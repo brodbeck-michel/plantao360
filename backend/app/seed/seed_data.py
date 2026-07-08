@@ -1,4 +1,4 @@
-﻿"""
+"""
 Seed Data - Plantao 360
 
 Populates the database with realistic demo data.
@@ -255,13 +255,34 @@ def generate_showcase_data() -> dict:
 # ============================================================
 
 def clear_database(session: Session):
-    """Remove all data from tables."""
+    """Remove all data from tables (defensively checks existence first)."""
+    from sqlalchemy import inspect as sa_inspect
+
     print("Clearing database...")
-    session.execute(ShiftExtra.__table__.delete())
-    session.execute(ShiftPart.__table__.delete())
-    session.execute(Shift.__table__.delete())
-    session.execute(Period.__table__.delete())
-    session.execute(Doctor.__table__.delete())
+    inspector = sa_inspect(session.bind)
+    existing_tables = set(inspector.get_table_names())
+
+    # Order matters: delete children before parents (FK constraints)
+    tables_to_clear = [
+        ShiftExtra,
+        ShiftPart,
+        Shift,
+        Period,
+        Doctor,
+    ]
+
+    for model in tables_to_clear:
+        table_name = model.__tablename__
+        if table_name in existing_tables:
+            try:
+                session.execute(model.__table__.delete())
+                print(f"  Cleared table: {table_name}")
+            except Exception as e:
+                print(f"  Warning: could not clear table {table_name}: {e}")
+                session.rollback()
+        else:
+            print(f"  Skipped table (not found): {table_name}")
+
     session.commit()
     print("  Database cleared.")
 

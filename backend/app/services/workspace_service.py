@@ -9,6 +9,7 @@ from app.models.doctor import Doctor
 from app.domain.constants.shift_types import ShiftType
 from app.domain.constants.shift_status import ShiftStatus
 from app.domain.constants.competency_dates import get_competency_dates
+from app.services.shift_lifecycle_service import ShiftLifecycleService
 
 
 SHIFT_TYPE_LABELS = {
@@ -50,6 +51,9 @@ class WorkspaceService:
             Shift.shift_date <= end_date,
             Shift.status != ShiftStatus.CANCELLED,
         ).all()
+
+        lifecycle = ShiftLifecycleService(self.db)
+        lifecycle.refresh_statuses(existing_shifts)
 
         shift_map: dict[tuple[date, str], Shift] = {}
         for s in existing_shifts:
@@ -97,12 +101,14 @@ class WorkspaceService:
                     shifts_data[st] = {
                         "shift_id": shift.id,
                         "shift_type": st,
+                        "shift_status": shift.status,
                         "assignments": assignments,
                     }
                 else:
                     shifts_data[st] = {
                         "shift_id": None,
                         "shift_type": st,
+                        "shift_status": None,
                         "assignments": [],
                     }
             days.append({
