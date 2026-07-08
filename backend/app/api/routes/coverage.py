@@ -8,8 +8,9 @@ from app.database.unit_of_work import UnitOfWork
 from app.services.coverage_service import CoverageService
 from app.common.api_response import ApiResponse
 from app.common.openapi import standard_responses
+from app.core.security.dependencies import get_current_user
 
-router = APIRouter(prefix="/coverage", tags=["Coverage"])
+router = APIRouter(prefix="/coverage", tags=["Coverage"], dependencies=[Depends(get_current_user)])
 
 
 @router.post("/consolidate/{period_id}", responses=standard_responses)

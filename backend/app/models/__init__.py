@@ -10,6 +10,7 @@ from app.models.payroll import Payroll
 from app.models.financial_fact import FinancialFact
 from app.models.coverage_snapshot import CoverageSnapshot
 from app.models.financial_snapshot import FinancialSnapshot
+from app.models.user import User
 
 __all__ = [
     "TimestampMixin",
@@ -23,4 +24,5 @@ __all__ = [
     "FinancialFact",
     "CoverageSnapshot",
     "FinancialSnapshot",
+    "User",
 ]

@@ -1,35 +1,52 @@
-"""
-Security dependencies para FastAPI.
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+from sqlalchemy.orm import Session
 
-TODO: Implementar quando JWT estiver habilitado:
-- get_current_user
-- require_role
-- require_permission
-"""
+from app.database.session import get_db
+from app.core.security.jwt import decode_access_token
+from app.models.user import User
 
-from typing import Any
-
-from fastapi import Depends, Request
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
 
-# TODO: Implementar get_current_user com JWT
-async def get_current_user(request: Request) -> dict[str, Any] | None:
-    """Retorna o usuário atual da requisição."""
-    # TODO: Verificar token JWT no header Authorization
-    # TODO: Decodificar e validar token
-    # TODO: Retornar payload do usuário
-    return getattr(request.state, "user", None)
+async def get_current_user(
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db),
+) -> User:
+    try:
+        payload = decode_access_token(token)
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token invalido ou expirado",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    user_id = payload.get("sub")
+    if user_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token invalido",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    user = db.query(User).filter(User.id == int(user_id)).first()
+    if user is None or not user.active:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Usuario nao encontrado ou inativo",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    return user
 
 
-# TODO: Implementar require_role
-def require_role(*roles):
-    """Factory de dependência para verificação de role."""
-    # TODO: Criar dependência que verifica se o usuário tem a role necessária
-    pass
-
-
-# TODO: Implementar require_permission
-def require_permission(permission: str):
-    """Factory de dependência para verificação de permissão."""
-    # TODO: Criar dependência que verifica se o usuário tem a permissão necessária
-    pass
+def require_role(*roles: str):
+    def role_checker(current_user: User = Depends(get_current_user)) -> User:
+        if current_user.role not in roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Acesso negado",
+            )
+        return current_user
+    return role_checker

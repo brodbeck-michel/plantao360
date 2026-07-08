@@ -61,6 +61,12 @@ export function createApiClient(config: ApiClientConfig): AxiosInstance {
       // Attach request ID to headers
       requestConfig.headers['X-Request-ID'] = requestId;
 
+      // Attach JWT token if present
+      const token = localStorage.getItem('plantao360.token');
+      if (token) {
+        requestConfig.headers['Authorization'] = `Bearer ${token}`;
+      }
+
       // Store context for response interceptor
       (requestConfig as any).__context = context;
 
@@ -77,6 +83,11 @@ export function createApiClient(config: ApiClientConfig): AxiosInstance {
       return response;
     },
     (error: AxiosError) => {
+      // Auto-logout on 401
+      if (error.response?.status === 401) {
+        localStorage.removeItem('plantao360.token');
+        window.location.href = '/login';
+      }
       const mappedError = mapError(error);
       return Promise.reject(mappedError);
     }

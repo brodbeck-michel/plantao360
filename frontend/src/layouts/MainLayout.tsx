@@ -24,11 +24,13 @@ import {
   ExpandLess as ExpandLessIcon, Sync as SyncIcon, Circle as CircleIcon,
   PushPin as PinIcon, PushPinOutlined as PinOutlinedIcon,
   ChevronLeft as ChevronLeftIcon, ChevronRight as ChevronRightIcon,
+  Logout as LogoutIcon,
 } from '@mui/icons-material';
 import { useQuery } from '@tanstack/react-query';
 import { ROUTES, NAV_ITEMS, type NavItem } from '../routes/routes';
 import { FEATURE_FLAGS } from '../config';
 import { tokens } from '../theme';
+import { useAuth } from '../contexts/AuthContext';
 
 const DRAWER_WIDTH = 280;
 const DRAWER_COLLAPSED_WIDTH = 64;
@@ -135,6 +137,7 @@ function SidebarOperationalContext({ collapsed }: { collapsed: boolean }) {
 }
 
 export default function MainLayout() {
+  const { user, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     Operacional: true, 'Gestao de Pessoal': false, Financeiro: false, Analytics: false,
@@ -433,9 +436,11 @@ export default function MainLayout() {
                 {theme.palette.mode === 'dark' ? <LightModeIcon fontSize="small" /> : <DarkModeIcon fontSize="small" />}
               </IconButton>
             </Tooltip>
-            <Tooltip title="Perfil">
-              <IconButton color="inherit" sx={{ color: tokens.colors.text.secondary }}>
-                <Avatar sx={{ width: 32, height: 32, bgcolor: tokens.colors.primary.main, color: '#fff', fontSize: '0.875rem', fontWeight: 600 }}>CO</Avatar>
+            <Tooltip title={`${user?.name || 'Usuario'} (${user?.role || ''}) — Clique para sair`}>
+              <IconButton color="inherit" onClick={logout} sx={{ color: tokens.colors.text.secondary }}>
+                <Avatar sx={{ width: 32, height: 32, bgcolor: tokens.colors.primary.main, color: '#fff', fontSize: '0.875rem', fontWeight: 600 }}>
+                  {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                </Avatar>
               </IconButton>
             </Tooltip>
           </Box>

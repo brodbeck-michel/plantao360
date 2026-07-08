@@ -10,8 +10,9 @@ from app.schemas.assignment.assignment_update import AssignmentUpdateDTO
 from app.schemas.assignment.assignment_filters import AssignmentFilterDTO
 from app.common.api_response import ApiResponse
 from app.common.openapi import standard_responses
+from app.core.security.dependencies import get_current_user
 
-router = APIRouter(prefix="/assignments", tags=["Assignments"])
+router = APIRouter(prefix="/assignments", tags=["Assignments"], dependencies=[Depends(get_current_user)])
 
 
 def _recalculate_shift_status(db: Session, shift_id: int) -> None:

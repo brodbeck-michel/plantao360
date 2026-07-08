@@ -9,8 +9,9 @@ from app.schemas.doctor.doctor_update import DoctorUpdateDTO
 from app.schemas.doctor.doctor_filters import DoctorFilterDTO
 from app.common.api_response import ApiResponse
 from app.common.openapi import standard_responses
+from app.core.security.dependencies import get_current_user
 
-router = APIRouter(prefix="/doctors", tags=["Doctors"])
+router = APIRouter(prefix="/doctors", tags=["Doctors"], dependencies=[Depends(get_current_user)])
 
 
 @router.get("", responses=standard_responses)

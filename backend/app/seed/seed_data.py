@@ -400,6 +400,8 @@ def populate_database(data: dict, clear: bool = False):
         if data.get("extras"):
             load_extras(session, data["extras"], [], doctors)
 
+        create_admin_user(session)
+
         session.commit()
         print("\nDatabase populated successfully!")
     except Exception as e:
@@ -408,6 +410,28 @@ def populate_database(data: dict, clear: bool = False):
         raise
     finally:
         session.close()
+
+
+def create_admin_user(session: Session):
+    """Create default admin user if no users exist."""
+    from app.models.user import User
+    from sqlalchemy import func
+    from app.core.security.password import hash_password
+
+    user_count = session.query(func.count(User.id)).scalar()
+    if user_count == 0:
+        admin = User(
+            name="Administrador",
+            email="admin@plantao360.local",
+            password_hash=hash_password("admin123"),
+            role="ADMIN",
+            active=True,
+        )
+        session.add(admin)
+        session.flush()
+        print("  Created admin user: admin@plantao360.local / admin123")
+    else:
+        print("  Users already exist, skipping admin creation")
 
 
 # ============================================================

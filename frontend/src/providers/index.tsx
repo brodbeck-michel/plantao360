@@ -20,6 +20,7 @@ import { QueryProvider } from './query-provider';
 import { ThemeProvider } from './theme-provider';
 import { ToastProvider } from '../shared/providers/toast-provider';
 import { FeedbackProvider } from '../shared/providers/FeedbackProvider';
+import { AuthProvider } from '../contexts/AuthContext';
 
 // ============================================================
 // Provider Composition
@@ -31,14 +32,16 @@ interface AppProvidersProps {
 
 export function AppProviders({ children }: AppProvidersProps) {
   return (
-    <ThemeProvider>
-      <QueryProvider>
-        <ToastProvider>
-          <FeedbackProvider>
-            {children}
-          </FeedbackProvider>
-        </ToastProvider>
-      </QueryProvider>
-    </ThemeProvider>
+    <AuthProvider>
+      <ThemeProvider>
+        <QueryProvider>
+          <ToastProvider>
+            <FeedbackProvider>
+              {children}
+            </FeedbackProvider>
+          </ToastProvider>
+        </QueryProvider>
+      </ThemeProvider>
+    </AuthProvider>
   );
 }

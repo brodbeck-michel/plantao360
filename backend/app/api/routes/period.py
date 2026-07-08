@@ -14,8 +14,9 @@ from app.schemas.period.period_update import PeriodUpdateDTO
 from app.schemas.period.period_filters import PeriodFilterDTO
 from app.common.api_response import ApiResponse
 from app.common.openapi import standard_responses
+from app.core.security.dependencies import get_current_user
 
-router = APIRouter(prefix="/periods", tags=["Periods"])
+router = APIRouter(prefix="/periods", tags=["Periods"], dependencies=[Depends(get_current_user)])
 
 
 class PeriodErrorResponse(BaseModel):

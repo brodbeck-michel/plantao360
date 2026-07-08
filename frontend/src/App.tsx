@@ -1,8 +1,10 @@
 ﻿import React, { Suspense } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { Box, CircularProgress } from '@mui/material';
 import MainLayout from './layouts/MainLayout';
 import { ROUTES } from './routes/routes';
+import { useAuth } from './contexts/AuthContext';
+import LoginPage from './pages/LoginPage';
 
 const HomePage = React.lazy(() => import('./pages/HomePage'));
 const HealthPage = React.lazy(() => import('./pages/HealthPage'));
@@ -26,10 +28,32 @@ function LazyPage({ children }: { children: React.ReactNode }) {
   return <Suspense fallback={<PageLoader />}>{children}</Suspense>;
 }
 
+function PrivateRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <PageLoader />;
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <>{children}</>;
+}
+
 function App() {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <PageLoader />;
+  }
+
   return (
     <Routes>
-      <Route element={<MainLayout />}>
+      <Route path={ROUTES.LOGIN} element={isAuthenticated ? <Navigate to={ROUTES.DASHBOARD} replace /> : <LoginPage />} />
+
+      <Route element={<PrivateRoute><MainLayout /></PrivateRoute>}>
         <Route path={ROUTES.HOME} element={<LazyPage><HomePage /></LazyPage>} />
         <Route path={ROUTES.HEALTH} element={<LazyPage><HealthPage /></LazyPage>} />
         <Route path={ROUTES.DASHBOARD} element={<LazyPage><DashboardPage /></LazyPage>} />

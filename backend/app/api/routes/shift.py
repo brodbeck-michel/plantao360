@@ -9,8 +9,9 @@ from app.schemas.shift.shift_update import ShiftUpdateDTO
 from app.schemas.shift.shift_filters import ShiftFilterDTO
 from app.common.api_response import ApiResponse
 from app.common.openapi import standard_responses
+from app.core.security.dependencies import get_current_user
 
-router = APIRouter(prefix="/shifts", tags=["Shifts"])
+router = APIRouter(prefix="/shifts", tags=["Shifts"], dependencies=[Depends(get_current_user)])
 
 
 @router.get("", responses=standard_responses)

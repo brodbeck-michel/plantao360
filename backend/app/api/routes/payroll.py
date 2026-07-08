@@ -17,8 +17,9 @@ from app.schemas.payroll.payroll_governance import (
 )
 from app.common.api_response import ApiResponse
 from app.common.openapi import standard_responses
+from app.core.security.dependencies import get_current_user
 
-router = APIRouter(prefix="/payrolls", tags=["Payrolls"])
+router = APIRouter(prefix="/payrolls", tags=["Payrolls"], dependencies=[Depends(get_current_user)])
 
 
 @router.get("", responses=standard_responses)
