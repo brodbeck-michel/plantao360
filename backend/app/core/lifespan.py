@@ -64,10 +64,20 @@ async def app_lifespan(runtime: RuntimeManager) -> AsyncGenerator[None, None]:
     if runtime.mode == RuntimeMode.TEST:
         logger.info("Lifespan: test mode — no startup actions (fixtures handle DB)")
     else:
-        # Run migrations
+        # Run migrations. A migration failure means the schema is not ready —
+        # serving requests against a broken/empty database only produces 500s
+        # that are hard to diagnose (see: "no such table"). Fail fast so the
+        # container crashes visibly (and restarts) instead of starting broken.
         success = runtime.run_migrations()
         if not success:
-            logger.error("Lifespan: migrations failed — application may not work correctly")
+            logger.critical(
+                "Lifespan: migrations failed — aborting startup. "
+                "The database schema is not ready; refusing to serve requests."
+            )
+            raise RuntimeError(
+                "Database migrations failed (alembic upgrade head). "
+                "Startup aborted to avoid serving against an uninitialized schema."
+            )
 
         # Create admin user if no users exist (all modes except TEST)
         _ensure_admin_user()
