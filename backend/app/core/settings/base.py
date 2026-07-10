@@ -10,6 +10,11 @@ class BaseAppSettings(BaseSettings):
     LOG_LEVEL: str = "INFO"
     ALLOWED_ORIGINS: str = "http://localhost:3000,http://localhost:5173"
 
+    # Bootstrap admin (criado no startup quando não há usuários).
+    # Em produção, ProductionSettings valida e recusa a senha padrão.
+    ADMIN_EMAIL: str = "admin@plantao360.local"
+    ADMIN_PASSWORD: str = "admin123"
+
     ENABLE_JWT: bool = False
     ENABLE_AUDIT_LOG: bool = False
     ENABLE_BI: bool = False

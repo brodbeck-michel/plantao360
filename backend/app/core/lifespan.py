@@ -23,6 +23,11 @@ def _ensure_admin_user() -> None:
         from app.database.base import SessionLocal
         from app.models.user import User
         from app.core.security.password import hash_password
+        from app.core.config import get_settings
+
+        settings = get_settings()
+        admin_email = settings.ADMIN_EMAIL
+        admin_password = settings.ADMIN_PASSWORD
 
         session = SessionLocal()
         try:
@@ -30,14 +35,14 @@ def _ensure_admin_user() -> None:
             if user_count == 0:
                 admin = User(
                     name="Administrador",
-                    email="admin@plantao360.local",
-                    password_hash=hash_password("admin123"),
+                    email=admin_email,
+                    password_hash=hash_password(admin_password),
                     role="ADMIN",
                     active=True,
                 )
                 session.add(admin)
                 session.commit()
-                logger.info("Admin user created: admin@plantao360.local")
+                logger.info("Admin user created: %s", admin_email)
             else:
                 logger.info("Users already exist, skipping admin creation")
         finally:
