@@ -73,9 +73,9 @@ distintos, sem dependência pendente). Rótulos `[US#]` mapeiam às histórias d
 **Meta**: em produção nenhum seed roda automaticamente; seed é comando manual.
 **Teste independente**: logs de boot de produção sem seed; seed manual popula sob demanda em teste.
 
-- [ ] T021 [US4] Garantir `DEMO_MODE=false` em `plantao360/.env.production` e no `.env.production.example`.
-- [ ] T022 [US4] Revisar `backend/start.sh` para confirmar que o bloco de seed só executa em `ENVIRONMENT=development` + `DEMO_MODE=true` (nunca em production); ajustar comentário/guarda se necessário.
-- [ ] T023 [P] [US4] Documentar o comando de seed manual (`python -m app.seed.seed_data --dataset demo --clear`) no `quickstart.md`/guia de deploy.
+- [x] T021 [US4] Garantir `DEMO_MODE=false` em `plantao360/.env.production` e no `.env.production.example`.
+- [x] T022 [US4] Revisar `backend/start.sh` para confirmar que o bloco de seed só executa em `ENVIRONMENT=development` + `DEMO_MODE=true` (nunca em production); ajustar comentário/guarda se necessário.
+- [x] T023 [P] [US4] Documentar o comando de seed manual (`python -m app.seed.seed_data --dataset demo --clear`) no `quickstart.md`/guia de deploy.
 
 ---
 
@@ -84,18 +84,18 @@ distintos, sem dependência pendente). Rótulos `[US#]` mapeiam às histórias d
 **Meta**: imagem sem segredos; backup do Postgres restaurável.
 **Teste independente**: inspecionar imagem (sem segredo); gerar e restaurar backup em banco limpo.
 
-- [ ] T024 [US5] Confirmar que `.env.production` continua fora do git (`.gitignore`) e que o compose carrega segredos via `env_file` em runtime (não como `ARG`/`build`).
-- [ ] T025 [US5] Criar `plantao360/scripts/backup.sh`: `docker exec plantao360_db pg_dump -U <user> <db>` para `backups/plantao360_<data>.sql`; imprimir caminho gerado.
-- [ ] T026 [P] [US5] Documentar restauração (`psql < arquivo.sql`) e recomendação de cron no `quickstart.md`.
+- [x] T024 [US5] Confirmar que `.env.production` continua fora do git (`.gitignore`) e que o compose carrega segredos via `env_file` em runtime (não como `ARG`/`build`).
+- [x] T025 [US5] Criar `plantao360/scripts/backup.sh`: `docker exec plantao360_db pg_dump -U <user> <db>` para `backups/plantao360_<data>.sql`; imprimir caminho gerado.
+- [x] T026 [P] [US5] Documentar restauração (`psql < arquivo.sql`) e recomendação de cron no `quickstart.md`.
 
 ---
 
 ## Phase 9 — Polish & validação transversal
 
-- [ ] T027 Escrever/atualizar o guia de deploy no `README.md` (ou `docs/deploy.md`): pré-requisitos do servidor, `docker login ghcr.io`, criação do `.env.production`, `deploy.sh`, rollback, backup (FR-011).
-- [ ] T028 Verificar se os gates de CI existentes (`.github/workflows/architecture.yml`, `release-readiness.yml`) não bloqueiam o novo `release-images.yml`; se bloquearem indevidamente, relaxar o gate (constituição supera os ADRs de freeze).
-- [ ] T029 Executar o checklist de validação do [quickstart.md](./quickstart.md) (SC-001 a SC-008) num ambiente de teste e registrar o resultado.
-- [ ] T030 Remover artefatos obsoletos de SQLite em produção (referências ao volume `plantao360_prod_data` e ao caminho `/app/data/*.db` no compose/env de produção) após confirmar que Postgres está estável.
+- [x] T027 Escrever/atualizar o guia de deploy no `README.md` (ou `docs/deploy.md`): pré-requisitos do servidor, `docker login ghcr.io`, criação do `.env.production`, `deploy.sh`, rollback, backup (FR-011).
+- [x] T028 Verificar se os gates de CI existentes (`.github/workflows/architecture.yml`, `release-readiness.yml`) não bloqueiam o novo `release-images.yml`; se bloquearem indevidamente, relaxar o gate (constituição supera os ADRs de freeze).
+- [~] T029 (PENDENTE: exige Docker/servidor — validar apos reiniciar Docker) Executar o checklist de validação do [quickstart.md](./quickstart.md) (SC-001 a SC-008) num ambiente de teste e registrar o resultado.
+- [x] T030 Remover artefatos obsoletos de SQLite em produção (referências ao volume `plantao360_prod_data` e ao caminho `/app/data/*.db` no compose/env de produção) após confirmar que Postgres está estável.
 
 ---
 

@@ -2,6 +2,11 @@
 
 Sistema de gestão de plantões médicos para intranet da Unimed.
 
+> **Deploy em produção:** as instruções abaixo (`docker compose up -d`) são para
+> **desenvolvimento** (SQLite). Em produção o banco é **PostgreSQL** e as imagens são
+> construídas no GitHub Actions e publicadas no GHCR — o servidor apenas baixa e sobe.
+> Veja o guia completo em **[docs/deploy.md](docs/deploy.md)**.
+
 ## Pré-requisitos
 
 - Docker e Docker Compose
