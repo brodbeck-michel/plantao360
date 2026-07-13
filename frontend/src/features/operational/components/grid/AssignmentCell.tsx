@@ -1,7 +1,8 @@
 import React, { useCallback } from 'react';
-import { Box, Typography, IconButton, Tooltip } from '@mui/material';
+import { Box, Typography, IconButton, Tooltip, useTheme } from '@mui/material';
 import { Add as AddIcon, Close as CloseIcon, DragIndicator as DragIcon } from '@mui/icons-material';
 import type { ShiftCellData } from '../../types/operational-types';
+import { tokens, darkTokens } from '../../../../theme';
 
 interface AssignmentCellProps {
   cell: ShiftCellData;
@@ -34,6 +35,8 @@ export function AssignmentCell({
   onDrop,
   isDragOver,
 }: AssignmentCellProps) {
+  const theme = useTheme();
+  const colors = theme.palette.mode === 'dark' ? darkTokens.colors : tokens.colors;
   const hasAssignments = cell.assignments.length > 0;
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -65,15 +68,15 @@ export function AssignmentCell({
       sx={{
         p: 0.5,
         minHeight: 44,
-        borderRight: '1px solid #E5E7EB',
-        bgcolor: isDragOver ? '#D4F5E4' : isWeekend ? '#FAFBFC' : '#FFFFFF',
+        borderRight: `1px solid ${theme.palette.divider}`,
+        bgcolor: isDragOver ? colors.operational.healthyBg : isWeekend ? theme.palette.action.hover : theme.palette.background.paper,
         cursor: 'pointer',
         transition: 'background-color 150ms, box-shadow 150ms',
-        outline: isActive ? '2px solid #00995D' : 'none',
+        outline: isActive ? `2px solid ${theme.palette.primary.main}` : 'none',
         outlineOffset: -2,
-        boxShadow: isActive ? '0 0 0 1px rgba(0,153,93,0.3)' : isDragOver ? '0 0 0 2px #00995D' : 'none',
+        boxShadow: isActive ? `0 0 0 1px ${theme.palette.primary.main}4D` : isDragOver ? `0 0 0 2px ${theme.palette.primary.main}` : 'none',
         '&:hover': {
-          bgcolor: isActive ? '#D4F5E4' : isDragOver ? '#D4F5E4' : '#E6F7EF',
+          bgcolor: isActive || isDragOver ? colors.operational.healthyBg : colors.operational.healthyBg,
         },
         verticalAlign: 'middle',
       }}
@@ -98,8 +101,8 @@ export function AssignmentCell({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                bgcolor: isSameDayConflict ? '#FEF3C7' : '#E6F7EF',
-                border: `1px solid ${isSameDayConflict ? '#FCD34D' : '#A7F3D0'}`,
+                bgcolor: isSameDayConflict ? colors.operational.attentionBg : colors.operational.healthyBg,
+                border: `1px solid ${isSameDayConflict ? colors.operational.attentionBorder : colors.operational.healthyBorder}`,
                 borderRadius: '4px',
                 px: 0.75,
                 py: 0.25,
@@ -108,13 +111,13 @@ export function AssignmentCell({
                 '&:hover': { boxShadow: '0 2px 4px rgba(0,0,0,0.1)' },
               }}
             >
-              <DragIcon sx={{ fontSize: 12, color: '#9CA3AF', mr: 0.5, flexShrink: 0 }} />
+              <DragIcon sx={{ fontSize: 12, color: theme.palette.text.disabled, mr: 0.5, flexShrink: 0 }} />
               <Tooltip title={`${a.doctor_name} (${a.start_time}–${a.end_time})`} arrow>
                 <Typography
                   variant="caption"
                   fontWeight={500}
                   fontSize="0.8125rem"
-                  color={isSameDayConflict ? '#92400E' : '#065F46'}
+                  color={isSameDayConflict ? colors.operational.attention : colors.operational.healthy}
                   noWrap
                   sx={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}
                 >
@@ -130,8 +133,8 @@ export function AssignmentCell({
                 sx={{
                   ml: 0.5,
                   p: 0,
-                  color: '#9CA3AF',
-                  '&:hover': { color: '#FF4842', bgcolor: '#FFEBEE' },
+                  color: theme.palette.text.disabled,
+                  '&:hover': { color: colors.operational.critical, bgcolor: colors.operational.criticalBg },
                 }}
               >
                 <CloseIcon sx={{ fontSize: 14 }} />
@@ -147,9 +150,9 @@ export function AssignmentCell({
             justifyContent: 'center',
             height: '100%',
             minHeight: 36,
-            color: '#9CA3AF',
+            color: theme.palette.text.disabled,
             fontSize: '0.8125rem',
-            '&:hover': { color: '#00995D' },
+            '&:hover': { color: theme.palette.primary.main },
           }}
         >
           <AddIcon sx={{ fontSize: 16, opacity: 0.5 }} />

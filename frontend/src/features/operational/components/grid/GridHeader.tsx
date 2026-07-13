@@ -1,10 +1,13 @@
 import React from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, useTheme } from '@mui/material';
 import { SHIFT_TYPES, SHIFT_LABELS, SHIFT_TIMES } from '../../types/operational-types';
 
 export function GridHeader() {
+  const theme = useTheme();
+  const headerBg = theme.palette.grey[100];
+
   return (
-    <Box component="tr" sx={{ bgcolor: '#F3F4F6', borderBottom: '2px solid #E5E7EB' }}>
+    <Box component="tr" sx={{ bgcolor: headerBg, borderBottom: `2px solid ${theme.palette.divider}` }}>
       <Box
         component="th"
         sx={{
@@ -12,13 +15,13 @@ export function GridHeader() {
           textAlign: 'left',
           fontWeight: 600,
           fontSize: '0.8125rem',
-          color: '#374151',
+          color: theme.palette.text.secondary,
           width: 140,
           minWidth: 140,
           position: 'sticky',
           left: 0,
           top: 0,
-          bgcolor: '#F3F4F6',
+          bgcolor: headerBg,
           zIndex: 3,
         }}
       >
@@ -33,12 +36,12 @@ export function GridHeader() {
             textAlign: 'center',
             fontWeight: 600,
             fontSize: '0.75rem',
-            color: '#374151',
+            color: theme.palette.text.secondary,
             minWidth: 180,
             width: 180,
             position: 'sticky',
             top: 0,
-            bgcolor: '#F3F4F6',
+            bgcolor: headerBg,
             zIndex: 2,
           }}
         >

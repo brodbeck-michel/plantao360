@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, useTheme } from '@mui/material';
 import { AssignmentCell } from './AssignmentCell';
 import { SHIFT_TYPES } from '../../types/operational-types';
 import type { DayData } from '../../types/operational-types';
@@ -17,9 +17,12 @@ interface AssignmentRowProps {
 }
 
 export function AssignmentRow({ day, dayIndex, activeCell, onOpenCell, onRemove, onContextMenu, onDrop, sameDayConflicts }: AssignmentRowProps) {
+  const theme = useTheme();
   const dayNum = new Date(day.date + 'T12:00:00').getDate();
   const isWeekend = day.day_of_week === 'Sab' || day.day_of_week === 'Dom';
   const [dragOverShift, setDragOverShift] = useState<string | null>(null);
+  const weekendBg = theme.palette.mode === 'dark' ? theme.palette.primary.main + '14' : '#F0FDF4';
+  const weekdayBg = theme.palette.mode === 'dark' ? theme.palette.background.paper : '#F9FAFB';
 
   const handleDragOver = useCallback((shiftType: string) => {
     setDragOverShift(shiftType);
@@ -43,22 +46,22 @@ export function AssignmentRow({ day, dayIndex, activeCell, onOpenCell, onRemove,
   }, []);
 
   return (
-    <Box component="tr" sx={{ borderBottom: '1px solid #E5E7EB' }} onDragLeave={handleDragLeave}>
+    <Box component="tr" sx={{ borderBottom: `1px solid ${theme.palette.divider}` }} onDragLeave={handleDragLeave}>
       <Box
         component="td"
         sx={{
           p: 1.5,
           fontWeight: isWeekend ? 700 : 500,
           fontSize: '0.8125rem',
-          color: isWeekend ? '#00995D' : '#374151',
-          bgcolor: isWeekend ? '#F0FDF4' : '#F9FAFB',
-          borderBottom: '1px solid #E5E7EB',
+          color: isWeekend ? theme.palette.primary.main : theme.palette.text.secondary,
+          bgcolor: isWeekend ? weekendBg : weekdayBg,
+          borderBottom: `1px solid ${theme.palette.divider}`,
           position: 'sticky',
           left: 0,
           zIndex: 1,
           whiteSpace: 'nowrap',
           minWidth: 140,
-          outline: activeCell?.dayIndex === dayIndex ? '2px solid #00995D' : 'none',
+          outline: activeCell?.dayIndex === dayIndex ? `2px solid ${theme.palette.primary.main}` : 'none',
           outlineOffset: -2,
         }}
       >
@@ -88,7 +91,7 @@ export function AssignmentRow({ day, dayIndex, activeCell, onOpenCell, onRemove,
           />
         );
       })}
-      <Box component="td" sx={{ width: 40, minWidth: 40, borderBottom: '1px solid #E5E7EB' }} />
+      <Box component="td" sx={{ width: 40, minWidth: 40, borderBottom: `1px solid ${theme.palette.divider}` }} />
     </Box>
   );
 }

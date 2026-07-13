@@ -24,6 +24,7 @@ import { useDoctorDetail, useDoctorSummary } from '../hooks/use-doctors';
 import { ROUTES } from '../../../routes/routes';
 import { useAuth } from '../../../contexts/AuthContext';
 import { canEdit } from '../../../rbac';
+import { useBreadcrumbLabel } from '../../../contexts/BreadcrumbContext';
 
 // ============================================================
 // Types
@@ -55,6 +56,8 @@ export function DoctorDetailPage() {
 
   const { data: doctor, isLoading: doctorLoading } = useDoctorDetail(id!);
   const { data: summary, isLoading: summaryLoading } = useDoctorSummary(id!);
+
+  useBreadcrumbLabel(doctor?.name);
 
   const isLoading = doctorLoading || summaryLoading;
 

@@ -164,132 +164,178 @@ export const tokens = {
 } as const;
 
 // ============================================================
-// Dark Mode Tokens (prepared, not applied)
+// Dark Mode Tokens
 // ============================================================
 
 export const darkTokens = {
   colors: {
     primary: tokens.colors.primary,
     secondary: { main: '#94A3B8', light: '#CBD5E1', dark: '#64748B', contrastText: '#0F172A' },
-    background: { default: '#0F172A', paper: '#1E293B' },
-    text: { primary: '#F1F5F9', secondary: '#94A3B8' },
+    operational: {
+      healthy: '#10D890',
+      healthyBg: 'rgba(16,216,144,0.14)',
+      healthyBorder: 'rgba(16,216,144,0.35)',
+      attention: '#FFC13D',
+      attentionBg: 'rgba(255,193,61,0.14)',
+      attentionBorder: 'rgba(255,193,61,0.35)',
+      critical: '#FF6B66',
+      criticalBg: 'rgba(255,107,102,0.14)',
+      criticalBorder: 'rgba(255,107,102,0.35)',
+      informative: '#5B9BFF',
+      informativeBg: 'rgba(91,155,255,0.14)',
+      informativeBorder: 'rgba(91,155,255,0.35)',
+    },
+    success: { main: '#10D890', light: 'rgba(16,216,144,0.35)', dark: '#00B87A' },
+    warning: { main: '#FFC13D', light: 'rgba(255,193,61,0.35)', dark: '#D97706' },
+    error: { main: '#FF6B66', light: 'rgba(255,107,102,0.35)', dark: '#DC2626' },
+    info: { main: '#5B9BFF', light: 'rgba(91,155,255,0.35)', dark: '#1E40AF' },
+    background: { default: '#0B1220', paper: '#141C2E' },
+    text: { primary: '#F1F5F9', secondary: '#B4C0D3', muted: '#7C8BA3' },
     grey: {
-      50: '#1E293B', 100: '#334155', 200: '#475569', 300: '#64748B',
-      400: '#94A3B8', 500: '#CBD5E1', 600: '#E2E8F0', 700: '#F1F5F9',
-      800: '#F8FAFC', 900: '#FFFFFF',
+      50: '#1B2436', 100: '#232E44', 200: '#2E3A54', 300: '#3E4C6B',
+      400: '#5A6B8C', 500: '#7C8BA3', 600: '#9AA8C0', 700: '#C2CCDE',
+      800: '#E2E7F0', 900: '#F8FAFC',
     },
   },
   elevation: {
     none: 'none',
-    sm: '0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2)',
-    md: '0 4px 6px rgba(0,0,0,0.35), 0 2px 4px rgba(0,0,0,0.2)',
-    lg: '0 10px 15px rgba(0,0,0,0.4), 0 4px 6px rgba(0,0,0,0.2)',
-    xl: '0 20px 25px rgba(0,0,0,0.45), 0 8px 10px rgba(0,0,0,0.2)',
+    sm: '0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3)',
+    md: '0 4px 6px rgba(0,0,0,0.45), 0 2px 4px rgba(0,0,0,0.3)',
+    lg: '0 10px 15px rgba(0,0,0,0.5), 0 4px 6px rgba(0,0,0,0.3)',
+    xl: '0 20px 25px rgba(0,0,0,0.55), 0 8px 10px rgba(0,0,0,0.3)',
+    glow: '0 0 20px rgba(16,216,144,0.20)',
   },
 } as const;
 
+export type ColorMode = 'light' | 'dark';
+
 // ============================================================
-// MUI Theme
+// MUI Theme factory
 // ============================================================
 
-let theme = createTheme({
-  palette: {
-    primary: tokens.colors.primary,
-    secondary: tokens.colors.secondary,
-    success: tokens.colors.success,
-    warning: tokens.colors.warning,
-    error: tokens.colors.error,
-    info: tokens.colors.info,
-    grey: tokens.colors.grey,
-    background: tokens.colors.background,
-    text: tokens.colors.text,
-  },
-  typography: {
-    fontFamily: tokens.typography.fontFamily,
-    h1: tokens.typography.h1,
-    h2: tokens.typography.h2,
-    h3: tokens.typography.h3,
-    h4: tokens.typography.h4,
-    h5: tokens.typography.h5,
-    h6: tokens.typography.h6,
-    body1: tokens.typography.body1,
-    body2: tokens.typography.body2,
-    caption: tokens.typography.caption,
-  },
-  shape: {
-    borderRadius: 8,
-  },
-  spacing: 8,
-  components: {
-    MuiButton: {
-      defaultProps: {
-        disableElevation: true,
-      },
-      styleOverrides: {
-        root: {
-          textTransform: 'none',
-          fontWeight: 600,
-          borderRadius: 8,
-          padding: '8px 16px',
-          transition: tokens.transition.fast,
-          '&:hover': {
-            transform: 'translateY(-1px)',
-          },
-          '&:active': {
-            transform: 'translateY(0px) scale(0.98)',
-          },
-        },
-      },
-    },
-    MuiCard: {
-      defaultProps: {
-        elevation: 0,
-      },
-      styleOverrides: {
-        root: {
-          border: '1px solid #E5E7EB',
-          borderRadius: 12,
-          transition: tokens.transition.normal,
-          '&:hover': {
-            boxShadow: tokens.elevation.sm,
-            borderColor: '#D1D5DB',
-          },
-        },
-      },
-    },
-    MuiChip: {
-      defaultProps: {
-        variant: 'filled',
-      },
-      styleOverrides: {
-        root: {
-          borderRadius: 24,
-          fontWeight: 600,
-          fontSize: '0.75rem',
-        },
-      },
-    },
-    MuiTextField: {
-      defaultProps: {
-        variant: 'outlined',
-        size: 'small',
-      },
-    },
-    MuiFormControl: {
-      defaultProps: {
-        variant: 'outlined',
-        size: 'small',
-      },
-    },
-    MuiSkeleton: {
-      defaultProps: {
-        animation: 'wave',
-      },
-    },
-  },
-}, ptBR);
+export function getTheme(mode: ColorMode) {
+  const isDark = mode === 'dark';
+  const palette = isDark ? darkTokens.colors : tokens.colors;
+  const elevation = isDark ? darkTokens.elevation : tokens.elevation;
+  const cardBorder = isDark ? palette.grey[200] : '#E5E7EB';
+  const cardBorderHover = isDark ? palette.grey[300] : '#D1D5DB';
 
-theme = responsiveFontSizes(theme);
+  let theme = createTheme({
+    palette: {
+      mode,
+      primary: palette.primary,
+      secondary: palette.secondary,
+      success: palette.success,
+      warning: palette.warning,
+      error: palette.error,
+      info: palette.info,
+      grey: palette.grey,
+      background: palette.background,
+      text: palette.text,
+      divider: isDark ? palette.grey[200] : tokens.colors.grey[200],
+    },
+    typography: {
+      fontFamily: tokens.typography.fontFamily,
+      h1: tokens.typography.h1,
+      h2: tokens.typography.h2,
+      h3: tokens.typography.h3,
+      h4: tokens.typography.h4,
+      h5: tokens.typography.h5,
+      h6: tokens.typography.h6,
+      body1: tokens.typography.body1,
+      body2: tokens.typography.body2,
+      caption: tokens.typography.caption,
+    },
+    shape: {
+      borderRadius: 8,
+    },
+    spacing: 8,
+    components: {
+      MuiButton: {
+        defaultProps: {
+          disableElevation: true,
+        },
+        styleOverrides: {
+          root: {
+            textTransform: 'none',
+            fontWeight: 600,
+            borderRadius: 8,
+            padding: '8px 16px',
+            transition: tokens.transition.fast,
+            '&:hover': {
+              transform: 'translateY(-1px)',
+            },
+            '&:active': {
+              transform: 'translateY(0px) scale(0.98)',
+            },
+          },
+        },
+      },
+      MuiCard: {
+        defaultProps: {
+          elevation: 0,
+        },
+        styleOverrides: {
+          root: {
+            border: `1px solid ${cardBorder}`,
+            borderRadius: 12,
+            transition: tokens.transition.normal,
+            '&:hover': {
+              boxShadow: elevation.sm,
+              borderColor: cardBorderHover,
+            },
+          },
+        },
+      },
+      MuiPaper: {
+        styleOverrides: {
+          root: {
+            backgroundImage: 'none',
+          },
+        },
+      },
+      MuiAppBar: {
+        styleOverrides: {
+          root: {
+            backgroundImage: 'none',
+          },
+        },
+      },
+      MuiChip: {
+        defaultProps: {
+          variant: 'filled',
+        },
+        styleOverrides: {
+          root: {
+            borderRadius: 24,
+            fontWeight: 600,
+            fontSize: '0.75rem',
+          },
+        },
+      },
+      MuiTextField: {
+        defaultProps: {
+          variant: 'outlined',
+          size: 'small',
+        },
+      },
+      MuiFormControl: {
+        defaultProps: {
+          variant: 'outlined',
+          size: 'small',
+        },
+      },
+      MuiSkeleton: {
+        defaultProps: {
+          animation: 'wave',
+        },
+      },
+    },
+  }, ptBR);
 
-export { theme };
+  theme = responsiveFontSizes(theme);
+  return theme;
+}
+
+export const theme = getTheme('light');
 export default theme;

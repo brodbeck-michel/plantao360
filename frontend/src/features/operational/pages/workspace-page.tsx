@@ -1,6 +1,6 @@
 ﻿import React, { useState, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, CircularProgress, Typography, Snackbar, Alert } from '@mui/material';
+import { Box, CircularProgress, Typography, Snackbar, Alert, useTheme } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import { useWorkspace, useAssignDoctor, useSwapDoctor, useRemoveAssignment, useMoveAssignment, useDuplicateDay, useDuplicateWeek } from '../hooks/use-workspace';
 import { useWorkspaceKeyboard } from '../hooks/use-workspace-keyboard';
@@ -16,9 +16,10 @@ import { DoctorsTab } from '../components/tabs/DoctorsTab';
 import { ShiftManagementTab } from '../components/tabs/ShiftManagementTab';
 import { FinancialTab } from '../components/tabs/FinancialTab';
 import { ReportsTab } from '../components/tabs/ReportsTab';
-import { SHIFT_TYPES, SHIFT_TIMES } from '../types/operational-types';
+import { SHIFT_TYPES, SHIFT_TIMES, MONTH_NAMES } from '../types/operational-types';
 import { useAuth } from '../../../contexts/AuthContext';
 import { canEdit } from '../../../rbac';
+import { useBreadcrumbLabel } from '../../../contexts/BreadcrumbContext';
 import type { CellPosition } from '../hooks/use-workspace-keyboard';
 
 interface CellContext {
@@ -43,6 +44,7 @@ interface ToastState {
 }
 
 export default function WorkspacePage() {
+  const theme = useTheme();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const periodId = id || '1';
@@ -50,6 +52,10 @@ export default function WorkspacePage() {
   const canModify = canEdit(user?.role, 'workspace');
 
   const { data: workspace, isLoading, refetch } = useWorkspace(periodId);
+
+  useBreadcrumbLabel(
+    workspace?.period ? `${MONTH_NAMES[workspace.period.month - 1]} ${workspace.period.year}` : undefined
+  );
 
   const { data: periodsData } = useQuery({
     queryKey: ['periods', 'list'],
@@ -495,12 +501,12 @@ export default function WorkspacePage() {
         <Box sx={{ display: 'flex', gap: 2 }}>
           <Box sx={{ flex: 1 }}>
             {Array.from({ length: 5 }).map((_, i) => (
-              <Box key={i} sx={{ height: 44, mb: 0.5, bgcolor: '#F3F4F6', borderRadius: 1 }} />
+              <Box key={i} sx={{ height: 44, mb: 0.5, bgcolor: theme.palette.action.hover, borderRadius: 1 }} />
             ))}
           </Box>
           <Box sx={{ width: 240 }}>
             {Array.from({ length: 4 }).map((_, i) => (
-              <Box key={i} sx={{ height: 60, mb: 1, bgcolor: '#F3F4F6', borderRadius: 1 }} />
+              <Box key={i} sx={{ height: 60, mb: 1, bgcolor: theme.palette.action.hover, borderRadius: 1 }} />
             ))}
           </Box>
         </Box>
@@ -552,11 +558,11 @@ export default function WorkspacePage() {
 
       {confirmDialog && (
         <Box sx={{ position: 'fixed', inset: 0, bgcolor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1300 }} onClick={() => setConfirmDialog(null)}>
-          <Box sx={{ bgcolor: 'white', borderRadius: 2, p: 3, maxWidth: 400, width: '90%' }} onClick={(e) => e.stopPropagation()}>
+          <Box sx={{ bgcolor: theme.palette.background.paper, borderRadius: 2, p: 3, maxWidth: 400, width: '90%' }} onClick={(e) => e.stopPropagation()}>
             <Typography variant="body1" mb={2}>{confirmDialog.message}</Typography>
             <Box display="flex" justifyContent="flex-end" gap={1}>
-              <Box onClick={() => setConfirmDialog(null)} sx={{ px: 2, py: 1, borderRadius: 1, cursor: 'pointer', bgcolor: '#F3F4F6', fontSize: '0.875rem', fontWeight: 500 }}>Cancelar</Box>
-              <Box onClick={confirmDialog.onConfirm} sx={{ px: 2, py: 1, borderRadius: 1, cursor: 'pointer', bgcolor: '#00995D', color: 'white', fontSize: '0.875rem', fontWeight: 500 }}>Confirmar</Box>
+              <Box onClick={() => setConfirmDialog(null)} sx={{ px: 2, py: 1, borderRadius: 1, cursor: 'pointer', bgcolor: theme.palette.action.hover, fontSize: '0.875rem', fontWeight: 500 }}>Cancelar</Box>
+              <Box onClick={confirmDialog.onConfirm} sx={{ px: 2, py: 1, borderRadius: 1, cursor: 'pointer', bgcolor: theme.palette.primary.main, color: theme.palette.primary.contrastText, fontSize: '0.875rem', fontWeight: 500 }}>Confirmar</Box>
             </Box>
           </Box>
         </Box>

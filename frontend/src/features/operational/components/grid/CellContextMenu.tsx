@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, MenuItem, ListItemIcon, ListItemText, Divider, Typography } from '@mui/material';
+import { Menu, MenuItem, ListItemIcon, ListItemText, Divider, Typography, useTheme } from '@mui/material';
 import { ContentCopy, ContentPaste, Delete, CalendarMonth } from '@mui/icons-material';
 
 interface ContextMenuItem {
@@ -37,6 +37,7 @@ export function CellContextMenu({
   hasAssignments,
   canModify = false,
 }: CellContextMenuProps) {
+  const theme = useTheme();
   const menuItems: ContextMenuItem[] = [
     {
       label: 'Copiar médico',
@@ -95,14 +96,14 @@ export function CellContextMenu({
             disabled={item.disabled}
             sx={{ py: 1, px: 1.5 }}
           >
-            <ListItemIcon sx={{ minWidth: 32, color: item.disabled ? '#D1D5DB' : '#6B7280' }}>
+            <ListItemIcon sx={{ minWidth: 32, color: item.disabled ? theme.palette.text.disabled : theme.palette.text.secondary }}>
               {item.icon}
             </ListItemIcon>
             <ListItemText
               primary={item.label}
               primaryTypographyProps={{
                 fontSize: '0.875rem',
-                color: item.disabled ? '#D1D5DB' : '#374151',
+                color: item.disabled ? theme.palette.text.disabled : theme.palette.text.primary,
               }}
             />
           </MenuItem>

@@ -8,7 +8,7 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
   AppBar, Box, Drawer, IconButton, List, ListItemButton, ListItemIcon,
   ListItemText, Toolbar, Typography, Badge, Avatar, Tooltip, Divider,
-  Chip, InputBase, Breadcrumbs, Link, useTheme, Skeleton, Stack,
+  Chip, InputBase, Breadcrumbs, Link, Skeleton, Stack,
 } from '@mui/material';
 import {
   Menu as MenuIcon, Search as SearchIcon, Notifications as NotificationsIcon,
@@ -29,8 +29,10 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { ROUTES, NAV_ITEMS, type NavItem } from '../routes/routes';
 import { FEATURE_FLAGS } from '../config';
-import { tokens } from '../theme';
+import { tokens, darkTokens } from '../theme';
 import { useAuth } from '../contexts/AuthContext';
+import { useColorMode } from '../contexts/ColorModeContext';
+import { BreadcrumbProvider, useBreadcrumbLabels } from '../contexts/BreadcrumbContext';
 
 const DRAWER_WIDTH = 280;
 const DRAWER_COLLAPSED_WIDTH = 64;
@@ -61,6 +63,8 @@ async function fetchDashboardContext() {
 }
 
 function SidebarOperationalContext({ collapsed }: { collapsed: boolean }) {
+  const { mode } = useColorMode();
+  const colors = mode === 'dark' ? darkTokens.colors : tokens.colors;
   const { data, isLoading } = useQuery({
     queryKey: ['dashboard', 'context'],
     queryFn: fetchDashboardContext,
@@ -87,16 +91,16 @@ function SidebarOperationalContext({ collapsed }: { collapsed: boolean }) {
   const alertCount = data.operational_alerts?.length || 0;
   const statusLevel = alertCount > 0 ? 'critical' : coverage < 90 ? 'attention' : 'healthy';
   const statusCfg = {
-    healthy: { color: tokens.colors.operational.healthy, label: 'Operacao Normal', bg: tokens.colors.operational.healthyBg },
-    attention: { color: tokens.colors.operational.attention, label: 'Atencao', bg: tokens.colors.operational.attentionBg },
-    critical: { color: tokens.colors.operational.critical, label: 'Critico', bg: tokens.colors.operational.criticalBg },
+    healthy: { color: colors.operational.healthy, label: 'Operacao Normal', bg: colors.operational.healthyBg },
+    attention: { color: colors.operational.attention, label: 'Atencao', bg: colors.operational.attentionBg },
+    critical: { color: colors.operational.critical, label: 'Critico', bg: colors.operational.criticalBg },
   }[statusLevel];
 
   return (
     <Box sx={{ px: 2, py: 1.5 }}>
       <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 1.5 }}>
-        <LocalHospitalIcon sx={{ fontSize: 16, color: tokens.colors.primary.main }} />
-        <Typography variant="caption" sx={{ fontWeight: 600, color: tokens.colors.text.primary }}>
+        <LocalHospitalIcon sx={{ fontSize: 16, color: colors.primary.main }} />
+        <Typography variant="caption" sx={{ fontWeight: 600, color: colors.text.primary }}>
           PS Unimed Tubarao
         </Typography>
       </Stack>
@@ -112,25 +116,25 @@ function SidebarOperationalContext({ collapsed }: { collapsed: boolean }) {
         {alertCount > 0 && (
           <Chip label={alertCount} size="small" sx={{
             height: 18, fontSize: '0.6rem', fontWeight: 700,
-            bgcolor: tokens.colors.operational.critical, color: '#fff', minWidth: 24,
+            bgcolor: colors.operational.critical, color: '#fff', minWidth: 24,
           }} />
         )}
       </Box>
       <Stack spacing={0.75}>
         <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <Typography variant="caption" sx={{ color: tokens.colors.text.muted }}>Competencia</Typography>
-          <Typography variant="caption" sx={{ fontWeight: 600, color: tokens.colors.text.primary }}>{period.name}</Typography>
+          <Typography variant="caption" sx={{ color: colors.text.muted }}>Competencia</Typography>
+          <Typography variant="caption" sx={{ fontWeight: 600, color: colors.text.primary }}>{period.name}</Typography>
         </Stack>
         <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <Typography variant="caption" sx={{ color: tokens.colors.text.muted }}>Cobertura</Typography>
-          <Typography variant="caption" sx={{ fontWeight: 600, color: coverage < 90 ? tokens.colors.operational.attention : tokens.colors.text.primary }}>
+          <Typography variant="caption" sx={{ color: colors.text.muted }}>Cobertura</Typography>
+          <Typography variant="caption" sx={{ fontWeight: 600, color: coverage < 90 ? colors.operational.attention : colors.text.primary }}>
             {coverage}%
           </Typography>
         </Stack>
       </Stack>
-      <Stack direction="row" alignItems="center" spacing={0.5} sx={{ mt: 1.5, pt: 1, borderTop: `1px solid ${tokens.colors.grey[200]}` }}>
-        <SyncIcon sx={{ fontSize: 12, color: tokens.colors.text.muted }} />
-        <Typography variant="caption" sx={{ color: tokens.colors.text.muted, fontSize: '0.65rem' }}>
+      <Stack direction="row" alignItems="center" spacing={0.5} sx={{ mt: 1.5, pt: 1, borderTop: `1px solid ${colors.grey[200]}` }}>
+        <SyncIcon sx={{ fontSize: 12, color: colors.text.muted }} />
+        <Typography variant="caption" sx={{ color: colors.text.muted, fontSize: '0.65rem' }}>
           Sync: {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
         </Typography>
       </Stack>
@@ -139,7 +143,19 @@ function SidebarOperationalContext({ collapsed }: { collapsed: boolean }) {
 }
 
 export default function MainLayout() {
+  return (
+    <BreadcrumbProvider>
+      <MainLayoutContent />
+    </BreadcrumbProvider>
+  );
+}
+
+function MainLayoutContent() {
   const { user, logout, hasRole } = useAuth();
+  const { mode, toggleColorMode } = useColorMode();
+  const breadcrumbLabels = useBreadcrumbLabels();
+  const isDarkMode = mode === 'dark';
+  const colors = isDarkMode ? darkTokens.colors : tokens.colors;
   const [mobileOpen, setMobileOpen] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     Operacional: true, 'Gestao de Pessoal': false, Financeiro: false, Analytics: false, Sistema: false,
@@ -154,7 +170,6 @@ export default function MainLayout() {
   const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
-  const theme = useTheme();
 
   const isExpanded = !collapsed || hoverExpanded;
   const currentWidth = isExpanded ? DRAWER_WIDTH : DRAWER_COLLAPSED_WIDTH;
@@ -243,6 +258,14 @@ export default function MainLayout() {
     setExpandedSections(expanded);
   }, [location.pathname]);
 
+  const logoContainerSx = {
+    width: 44, height: 40, borderRadius: tokens.borderRadius.md,
+    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+    overflow: 'hidden', p: 0.5,
+    bgcolor: isDarkMode ? '#FFFFFF' : 'transparent',
+    boxShadow: isDarkMode ? tokens.elevation.sm : 'none',
+  };
+
   const drawerContent = (
     <Box
       sx={{ display: 'flex', flexDirection: 'column', height: '100%', width: currentWidth, transition: 'width 200ms ease' }}
@@ -251,56 +274,48 @@ export default function MainLayout() {
     >
       <Toolbar sx={{ px: isExpanded ? 2 : 1, minHeight: '56px !important', justifyContent: isExpanded ? 'flex-start' : 'center' }}>
         {isExpanded ? (
-          <Box display="flex" alignItems="center" gap={1} sx={{ flex: 1 }}>
-            <Box sx={{
-              width: 40, height: 36, borderRadius: tokens.borderRadius.md,
-              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-              overflow: 'hidden',
-            }}>
-              <img src="/logo.png" alt="Unimed Tubarão" style={{ height: 36, objectFit: 'contain' }} />
+          <Box display="flex" alignItems="center" gap={1.25} sx={{ flex: 1 }}>
+            <Box sx={logoContainerSx}>
+              <img src="/logo.png" alt="Unimed Tubarão" style={{ height: 30, objectFit: 'contain' }} />
             </Box>
             <Box sx={{ overflow: 'hidden' }}>
-              <Typography variant="subtitle1" fontWeight={700} sx={{ color: tokens.colors.primary.dark, whiteSpace: 'nowrap' }}>
+              <Typography variant="subtitle1" fontWeight={700} sx={{ color: colors.primary.dark, whiteSpace: 'nowrap' }}>
                 Plantao 360
               </Typography>
-              <Typography variant="caption" sx={{ color: tokens.colors.text.muted, fontSize: '0.65rem', whiteSpace: 'nowrap' }}>
+              <Typography variant="caption" sx={{ color: colors.text.muted, fontSize: '0.65rem', whiteSpace: 'nowrap' }}>
                 PS Unimed Tubarao
               </Typography>
             </Box>
           </Box>
         ) : (
           <Tooltip title="Plantao 360" placement="right">
-            <Box sx={{
-              width: 40, height: 36, borderRadius: tokens.borderRadius.md,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              overflow: 'hidden',
-            }}>
-              <img src="/logo.png" alt="Unimed Tubarão" style={{ height: 36, objectFit: 'contain' }} />
+            <Box sx={logoContainerSx}>
+              <img src="/logo.png" alt="Unimed Tubarão" style={{ height: 28, objectFit: 'contain' }} />
             </Box>
           </Tooltip>
         )}
       </Toolbar>
-      <Divider sx={{ borderColor: tokens.colors.grey[200] }} />
+      <Divider sx={{ borderColor: colors.grey[200] }} />
       <SidebarOperationalContext collapsed={!isExpanded} />
-      <Divider sx={{ borderColor: tokens.colors.grey[200] }} />
+      <Divider sx={{ borderColor: colors.grey[200] }} />
 
       <Box sx={{ px: 0.5, mt: 0.5, display: 'flex', justifyContent: 'center', gap: 0.5 }}>
         {isExpanded ? (
           <>
             <Tooltip title={pinned ? 'Desafixar sidebar' : 'Fixar sidebar'} placement="right">
-              <IconButton size="small" onClick={handleTogglePin} sx={{ color: tokens.colors.text.muted, '&:hover': { color: tokens.colors.primary.main } }}>
+              <IconButton size="small" onClick={handleTogglePin} sx={{ color: colors.text.muted, '&:hover': { color: colors.primary.main } }}>
                 {pinned ? <PinIcon sx={{ fontSize: 18 }} /> : <PinOutlinedIcon sx={{ fontSize: 18 }} />}
               </IconButton>
             </Tooltip>
             <Tooltip title="Recolher sidebar" placement="right">
-              <IconButton size="small" onClick={handleToggleCollapse} sx={{ color: tokens.colors.text.muted, '&:hover': { color: tokens.colors.primary.main } }}>
+              <IconButton size="small" onClick={handleToggleCollapse} sx={{ color: colors.text.muted, '&:hover': { color: colors.primary.main } }}>
                 <ChevronLeftIcon sx={{ fontSize: 18 }} />
               </IconButton>
             </Tooltip>
           </>
         ) : (
           <Tooltip title="Expandir sidebar" placement="right">
-            <IconButton size="small" onClick={handleToggleCollapse} sx={{ color: tokens.colors.text.muted, '&:hover': { color: tokens.colors.primary.main } }}>
+            <IconButton size="small" onClick={handleToggleCollapse} sx={{ color: colors.text.muted, '&:hover': { color: colors.primary.main } }}>
               <ChevronRightIcon sx={{ fontSize: 18 }} />
             </IconButton>
           </Tooltip>
@@ -316,12 +331,12 @@ export default function MainLayout() {
                 onClick={() => { if (item.path) { navigate(item.path); setMobileOpen(false); } }}
                 sx={{ borderRadius: tokens.borderRadius.md, mb: 0.5, position: 'relative', transition: 'all 150ms ease',
                   justifyContent: isExpanded ? 'flex-start' : 'center', px: isExpanded ? undefined : 1.5,
-                  '&:hover': { bgcolor: tokens.colors.primary.main + '08' },
-                  '&.Mui-selected': { bgcolor: tokens.colors.primary.main + '12',
-                    '&::before': { content: '""', position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, borderRadius: '0 3px 3px 0', bgcolor: tokens.colors.primary.main },
+                  '&:hover': { bgcolor: colors.primary.main + '08' },
+                  '&.Mui-selected': { bgcolor: colors.primary.main + '12',
+                    '&::before': { content: '""', position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, borderRadius: '0 3px 3px 0', bgcolor: colors.primary.main },
                   },
                 }}>
-                <ListItemIcon sx={{ minWidth: isExpanded ? 40 : 0, justifyContent: 'center', color: active ? tokens.colors.primary.main : tokens.colors.text.secondary }}>
+                <ListItemIcon sx={{ minWidth: isExpanded ? 40 : 0, justifyContent: 'center', color: active ? colors.primary.main : colors.text.secondary }}>
                   {iconMap[item.icon] || <DashboardIcon />}
                 </ListItemIcon>
                 {isExpanded && <ListItemText primary={item.label} primaryTypographyProps={{ fontWeight: active ? 600 : 400, fontSize: '0.875rem' }} />}
@@ -337,9 +352,9 @@ export default function MainLayout() {
             <ListItemButton key={item.label} selected={sectionActive} onClick={() => { if (isExpanded) toggleSection(item.label); else { navigate(item.children?.find(c => c.path)?.path || ''); } }}
               sx={{ borderRadius: tokens.borderRadius.md, mb: 0.5, transition: 'all 150ms ease',
                 justifyContent: isExpanded ? 'flex-start' : 'center', px: isExpanded ? undefined : 1.5,
-                '&:hover': { bgcolor: tokens.colors.primary.main + '08' },
+                '&:hover': { bgcolor: colors.primary.main + '08' },
               }}>
-              <ListItemIcon sx={{ minWidth: isExpanded ? 40 : 0, justifyContent: 'center', color: sectionActive ? tokens.colors.primary.main : tokens.colors.text.secondary }}>
+              <ListItemIcon sx={{ minWidth: isExpanded ? 40 : 0, justifyContent: 'center', color: sectionActive ? colors.primary.main : colors.text.secondary }}>
                 {iconMap[item.icon] || <DashboardIcon />}
               </ListItemIcon>
               {isExpanded && (
@@ -364,9 +379,9 @@ export default function MainLayout() {
                       <ListItemButton key={child.label} selected={childActive} disabled={child.path === ''}
                         onClick={() => { if (child.path) { navigate(child.path); setMobileOpen(false); } }}
                         sx={{ borderRadius: tokens.borderRadius.md, mb: 0.25, transition: 'all 150ms ease',
-                          '&:hover': { bgcolor: tokens.colors.primary.main + '08' },
-                          '&.Mui-selected': { bgcolor: tokens.colors.primary.main + '12',
-                            '&::before': { content: '""', position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, borderRadius: '0 3px 3px 0', bgcolor: tokens.colors.primary.main },
+                          '&:hover': { bgcolor: colors.primary.main + '08' },
+                          '&.Mui-selected': { bgcolor: colors.primary.main + '12',
+                            '&::before': { content: '""', position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, borderRadius: '0 3px 3px 0', bgcolor: colors.primary.main },
                           },
                         }}>
                         <ListItemText primary={
@@ -398,7 +413,9 @@ export default function MainLayout() {
         if (segments.length > 2 && segments[2] !== 'new') {
           crumbs.push({ label, path: `/${segments[0]}/${segments[1]}` });
           const last = segments[segments.length - 1];
-          crumbs.push({ label: last === 'edit' ? 'Editar' : `Detalhes #${segments[2]}`, path: location.pathname });
+          const entityLabel = breadcrumbLabels[location.pathname];
+          const fallback = entityLabel || `Detalhes #${segments[2]}`;
+          crumbs.push({ label: last === 'edit' ? 'Editar' : fallback, path: location.pathname });
         } else {
           crumbs.push({ label, path: `/${segments.slice(0, 2).join('/')}` });
         }
@@ -413,8 +430,10 @@ export default function MainLayout() {
     <Box sx={{ display: 'flex' }}>
       <AppBar position="fixed" sx={{
         width: { sm: `calc(100% - ${currentWidth}px)` }, ml: { sm: `${currentWidth}px` },
-        bgcolor: tokens.colors.background.paper, color: tokens.colors.text.primary,
-        borderBottom: `1px solid ${tokens.colors.grey[200]}`, boxShadow: 'none',
+        bgcolor: colors.background.paper, color: colors.text.primary,
+        borderBottom: `1px solid ${colors.grey[200]}`,
+        boxShadow: isDarkMode ? '0 1px 0 rgba(255,255,255,0.04)' : '0 1px 2px rgba(15,23,42,0.04)',
+        backdropFilter: 'blur(8px)',
         transition: 'width 200ms ease, margin 200ms ease',
       }}>
         <Toolbar sx={{ minHeight: '56px !important' }}>
@@ -424,36 +443,36 @@ export default function MainLayout() {
           {isExpanded && (
             <Tooltip title="Pesquisar (Ctrl+K)">
               <Box sx={{
-                display: 'flex', alignItems: 'center', bgcolor: tokens.colors.grey[50],
+                display: 'flex', alignItems: 'center', bgcolor: colors.grey[50],
                 borderRadius: tokens.borderRadius.md, px: 1.5, py: 0.5, minWidth: 200,
-                maxWidth: 400, flex: 1, border: `1px solid ${tokens.colors.grey[200]}`,
+                maxWidth: 400, flex: 1, border: `1px solid ${colors.grey[200]}`,
                 cursor: 'pointer', transition: 'all 150ms ease',
-                '&:hover': { borderColor: tokens.colors.primary.main + '40', bgcolor: '#fff' },
+                '&:hover': { borderColor: colors.primary.main + '40', bgcolor: colors.background.paper },
               }}>
-                <SearchIcon sx={{ color: tokens.colors.text.muted, mr: 1, fontSize: 20 }} />
-                <InputBase placeholder="Pesquisar..." sx={{ flex: 1, fontSize: '0.875rem', color: tokens.colors.text.muted }} disabled />
-                <Chip label="Ctrl+K" size="small" sx={{ height: 20, fontSize: '0.6rem', bgcolor: tokens.colors.grey[100], color: tokens.colors.text.muted, fontWeight: 600 }} />
+                <SearchIcon sx={{ color: colors.text.muted, mr: 1, fontSize: 20 }} />
+                <InputBase placeholder="Pesquisar..." sx={{ flex: 1, fontSize: '0.875rem', color: colors.text.muted }} disabled />
+                <Chip label="Ctrl+K" size="small" sx={{ height: 20, fontSize: '0.6rem', bgcolor: colors.grey[100], color: colors.text.muted, fontWeight: 600 }} />
               </Box>
             </Tooltip>
           )}
           <Box sx={{ flexGrow: 1 }} />
           <Box display="flex" alignItems="center" gap={0.5}>
             <Tooltip title="Notificacoes">
-              <IconButton color="inherit" sx={{ color: tokens.colors.text.secondary }}>
+              <IconButton color="inherit" sx={{ color: colors.text.secondary }}>
                 <Badge badgeContent={3} color="error" max={99}><NotificationsIcon fontSize="small" /></Badge>
               </IconButton>
             </Tooltip>
             <Tooltip title="Ajuda">
-              <IconButton color="inherit" sx={{ color: tokens.colors.text.secondary }}><HelpIcon fontSize="small" /></IconButton>
+              <IconButton color="inherit" sx={{ color: colors.text.secondary }}><HelpIcon fontSize="small" /></IconButton>
             </Tooltip>
-            <Tooltip title="Alternar tema">
-              <IconButton color="inherit" sx={{ color: tokens.colors.text.secondary }}>
-                {theme.palette.mode === 'dark' ? <LightModeIcon fontSize="small" /> : <DarkModeIcon fontSize="small" />}
+            <Tooltip title={isDarkMode ? 'Ativar tema claro' : 'Ativar tema escuro'}>
+              <IconButton color="inherit" onClick={toggleColorMode} sx={{ color: colors.text.secondary }}>
+                {isDarkMode ? <LightModeIcon fontSize="small" /> : <DarkModeIcon fontSize="small" />}
               </IconButton>
             </Tooltip>
             <Tooltip title={`${user?.name || 'Usuario'} (${user?.role || ''}) — Clique para sair`}>
-              <IconButton color="inherit" onClick={logout} sx={{ color: tokens.colors.text.secondary }}>
-                <Avatar sx={{ width: 32, height: 32, bgcolor: tokens.colors.primary.main, color: '#fff', fontSize: '0.875rem', fontWeight: 600 }}>
+              <IconButton color="inherit" onClick={logout} sx={{ color: colors.text.secondary }}>
+                <Avatar sx={{ width: 32, height: 32, bgcolor: colors.primary.main, color: '#fff', fontSize: '0.875rem', fontWeight: 600 }}>
                   {user?.name?.charAt(0)?.toUpperCase() || 'U'}
                 </Avatar>
               </IconButton>
@@ -470,7 +489,7 @@ export default function MainLayout() {
         </Drawer>
         <Drawer variant="permanent" sx={{
           display: { xs: 'none', sm: 'block' },
-          '& .MuiDrawer-paper': { boxSizing: 'border-box', width: currentWidth, borderRight: `1px solid ${tokens.colors.grey[200]}`, transition: 'width 200ms ease', overflowX: 'hidden' },
+          '& .MuiDrawer-paper': { boxSizing: 'border-box', width: currentWidth, borderRight: `1px solid ${colors.grey[200]}`, transition: 'width 200ms ease', overflowX: 'hidden' },
         }} open>
           {drawerContent}
         </Drawer>
@@ -478,7 +497,7 @@ export default function MainLayout() {
 
       <Box component="main" sx={{
         flexGrow: 1, width: { sm: `calc(100% - ${currentWidth}px)` },
-        bgcolor: tokens.colors.background.default, minHeight: '100vh',
+        bgcolor: colors.background.default, minHeight: '100vh',
         transition: 'width 200ms ease',
       }}>
         <Toolbar />
