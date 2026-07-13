@@ -95,6 +95,11 @@ def client(bootstrap_env):
 
     from app.api.app import create_app
     app = create_app()
+
+    # Endpoints exigem auth (RBAC); sobrescreve por um ADMIN falso para validar o pipeline.
+    from app.tests.integration._auth import install_auth_override
+    install_auth_override(app)
+
     with TestClient(app) as c:
         yield c
 

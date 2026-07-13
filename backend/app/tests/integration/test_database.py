@@ -184,32 +184,10 @@ def test_shift_part_create(session):
     assert part.id is not None
 
 
-def test_shift_part_time_order(session):
-    from sqlalchemy.exc import IntegrityError
-
-    doctor = Doctor(name="Dr. Time", crm="TIME01", hour_rate=100.0)
-    session.add(doctor)
-    session.flush()
-    period = Period(year=2026, month=4, status=PeriodStatus.DRAFT)
-    session.add(period)
-    session.flush()
-    shift = Shift(
-        period_id=period.id,
-        shift_date=date(2026, 4, 1),
-        shift_type=ShiftType.T3,
-    )
-    session.add(shift)
-    session.flush()
-    part = ShiftPart(
-        shift_id=shift.id,
-        doctor_id=doctor.id,
-        start_time=time(19, 0),
-        end_time=time(7, 0),
-    )
-    session.add(part)
-    with pytest.raises(IntegrityError):
-        session.commit()
-    session.rollback()
+# Removido: test_shift_part_time_order — afirmava que um ShiftPart das 19:00 às 07:00 deveria
+# violar uma constraint de "ordem de horário". Mas isso é um plantão NOTURNO (cruza a meia-noite),
+# que é válido no domínio. O teste testava um comportamento incorreto e não havia (nem deve haver)
+# tal constraint. Ver spec 003 (baseline de testes).
 
 
 def test_shift_extra_create(session):

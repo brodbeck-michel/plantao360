@@ -12,7 +12,7 @@ Escopo: **somente** `backend/app/tests/**` e `backend/pyproject.toml`. Nenhuma m
 
 ## Phase 1 — Setup
 
-- [ ] T001 Rebuild da imagem de teste e medir o baseline: `docker build -t plantao360-backend-test ./backend`; rodar a suíte (com `--ignore=app/tests/unit/test_manifests.py`) e registrar o número de falhas de partida (esperado: 52 failed / 692 passed).
+- [x] T001 Rebuild da imagem de teste e medir o baseline: `docker build -t plantao360-backend-test ./backend`; rodar a suíte (com `--ignore=app/tests/unit/test_manifests.py`) e registrar o número de falhas de partida (esperado: 52 failed / 692 passed).
 
 ---
 
@@ -21,15 +21,15 @@ Escopo: **somente** `backend/app/tests/**` e `backend/pyproject.toml`. Nenhuma m
 **Meta**: os `test_*_api` deixam de falhar com `401`.
 **Teste independente**: `pytest app/tests/integration -q` passa nos arquivos de API.
 
-- [ ] T002 [US2] Criar `backend/app/tests/integration/conftest.py` com: (a) um `User` ADMIN falso (`id=1`, `role="ADMIN"`, `active=True`, `name`/`email`) e (b) helper `install_auth_override(app)` que faz `app.dependency_overrides[get_current_user] = lambda: <fake admin>` (import de `app.core.security.dependencies.get_current_user`).
-- [ ] T003 [P] [US2] Em `backend/app/tests/integration/test_shift_api.py`, aplicar `install_auth_override(test_app)` na `client` fixture (após montar o app).
-- [ ] T004 [P] [US2] Idem em `backend/app/tests/integration/test_period_api.py`.
-- [ ] T005 [P] [US2] Idem em `backend/app/tests/integration/test_doctors_api.py`.
-- [ ] T006 [P] [US2] Idem em `backend/app/tests/integration/test_assignment_api.py`.
-- [ ] T007 [P] [US2] Idem em `backend/app/tests/integration/test_extra_api.py`.
-- [ ] T008 [US2] Investigar e corrigir `backend/app/tests/integration/test_database.py` (1 falha) — aplicar override se for o mesmo `401`, ou ajustar conforme a causa real.
-- [ ] T009 [US2] Investigar e corrigir `backend/app/tests/integration/test_bootstrap.py` (1 falha) — ajustar conforme a causa (provável dependência do fluxo de auth/admin).
-- [ ] T010 [US2] Rodar `pytest app/tests/integration -q` e confirmar 0 falhas nessa pasta.
+- [x] T002 [US2] Criar `backend/app/tests/integration/conftest.py` com: (a) um `User` ADMIN falso (`id=1`, `role="ADMIN"`, `active=True`, `name`/`email`) e (b) helper `install_auth_override(app)` que faz `app.dependency_overrides[get_current_user] = lambda: <fake admin>` (import de `app.core.security.dependencies.get_current_user`).
+- [x] T003 [P] [US2] Em `backend/app/tests/integration/test_shift_api.py`, aplicar `install_auth_override(test_app)` na `client` fixture (após montar o app).
+- [x] T004 [P] [US2] Idem em `backend/app/tests/integration/test_period_api.py`.
+- [x] T005 [P] [US2] Idem em `backend/app/tests/integration/test_doctors_api.py`.
+- [x] T006 [P] [US2] Idem em `backend/app/tests/integration/test_assignment_api.py`.
+- [x] T007 [P] [US2] Idem em `backend/app/tests/integration/test_extra_api.py`.
+- [x] T008 [US2] Investigar e corrigir `backend/app/tests/integration/test_database.py` (1 falha) — aplicar override se for o mesmo `401`, ou ajustar conforme a causa real.
+- [x] T009 [US2] Investigar e corrigir `backend/app/tests/integration/test_bootstrap.py` (1 falha) — ajustar conforme a causa (provável dependência do fluxo de auth/admin).
+- [x] T010 [US2] Rodar `pytest app/tests/integration -q` e confirmar 0 falhas nessa pasta.
 
 ---
 

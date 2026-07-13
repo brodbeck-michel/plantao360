@@ -16,7 +16,7 @@ from app.api.exception_handlers import register_exception_handlers
 
 
 @pytest.fixture
-def client():
+def client(auth_override):
     engine = create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False})
     connection = engine.connect()
     Base.metadata.create_all(bind=connection)
@@ -34,6 +34,7 @@ def client():
             db.close()
 
     test_app.dependency_overrides[get_db] = override_get_db
+    auth_override(test_app)
 
     with TestClient(test_app) as c:
         yield c
