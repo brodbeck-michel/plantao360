@@ -46,6 +46,7 @@ export default function UserListPage() {
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [passwordUserId, setPasswordUserId] = useState<number | null>(null);
   const [form, setForm] = useState<FormData>(INITIAL_FORM);
+  const [formError, setFormError] = useState<string | null>(null);
   const [newPassword, setNewPassword] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -67,12 +68,14 @@ export default function UserListPage() {
   const handleOpenCreate = () => {
     setEditingUser(null);
     setForm(INITIAL_FORM);
+    setFormError(null);
     setDialogOpen(true);
   };
 
   const handleOpenEdit = (user: User) => {
     setEditingUser(user);
     setForm({ name: user.name, email: user.email, password: '', role: user.role });
+    setFormError(null);
     setDialogOpen(true);
   };
 
@@ -83,18 +86,31 @@ export default function UserListPage() {
   };
 
   const handleSave = async () => {
+    // Validação no cliente — evita o erro genérico do servidor e orienta o usuário.
+    const name = form.name.trim();
+    const email = form.email.trim();
+    if (!name || !email) {
+      setFormError('Preencha nome e email.');
+      return;
+    }
+    if (!editingUser && form.password.length < 6) {
+      setFormError('A senha deve ter ao menos 6 caracteres.');
+      return;
+    }
+    setFormError(null);
     setSaving(true);
     try {
       if (editingUser) {
-        const updateData: Record<string, unknown> = { name: form.name, email: form.email, role: form.role };
+        const updateData: Record<string, unknown> = { name, email, role: form.role };
         await usersApi.update(editingUser.id, updateData);
       } else {
-        await usersApi.create(form);
+        await usersApi.create({ ...form, name, email });
       }
       setDialogOpen(false);
       await loadUsers();
-    } catch {
-      setError('Erro ao salvar usuario');
+    } catch (err) {
+      // O apiClient (mapError) já traduz o erro; mostramos a mensagem real, não uma genérica.
+      setFormError((err as { message?: string })?.message || 'Erro ao salvar usuário.');
     } finally {
       setSaving(false);
     }
@@ -206,10 +222,11 @@ export default function UserListPage() {
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>{editingUser ? 'Editar Usuario' : 'Novo Usuario'}</DialogTitle>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: '16px !important' }}>
-          <TextField label="Nome" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} fullWidth />
-          <TextField label="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} fullWidth type="email" />
+          {formError && <Alert severity="error" onClose={() => setFormError(null)}>{formError}</Alert>}
+          <TextField label="Nome" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} fullWidth required />
+          <TextField label="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} fullWidth type="email" required />
           {!editingUser && (
-            <TextField label="Senha" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} fullWidth type="password" />
+            <TextField label="Senha" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} fullWidth type="password" required helperText="Mínimo 6 caracteres" />
           )}
           <TextField label="Perfil" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} select fullWidth>
             <MenuItem value="ADMIN">Administrador</MenuItem>
