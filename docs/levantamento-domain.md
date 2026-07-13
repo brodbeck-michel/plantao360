@@ -62,15 +62,27 @@ Mover a lógica para o único service que a usa e deletar o módulo:
 (assignments, periods) é outra camada intermediária que consome muito `domain` — forte
 candidata a colapsar nos services.
 
-## ⚠️ Alertas a investigar ANTES de deletar
+## ⚠️ Alertas — VERIFICADOS em 2026-07-13
 
-1. **remuneration (prod=0)**: o motor de remuneração (6 arquivos) não é usado. Mas remuneração é
-   requisito real (calcular + exportar folha). **Verificar**: o `payroll_service` calcula os
-   valores de outra forma (lógica própria) — ou isso é um **gap** (funcionalidade não fiada)?
-   Deletar o motor é seguro; mas é preciso saber se a folha está sendo calculada em algum lugar.
-2. **overlap (prod=0)**: detecção de sobreposição de plantão é requisito (FR-005), mas nenhum
-   service importa `domain/overlap`. **Verificar** onde (se) a sobreposição é de fato barrada
-   (constraint de banco? `rules`? nada?). Pode ser um gap de produto a registrar no backlog.
+1. **remuneration (prod=0) → 🔴 GAP REAL CONFIRMADO.** A folha **não calcula valor** em lugar
+   nenhum do produto:
+   - `Payroll` (model) não tem campo de valor — só status/versão/timestamps; `create` só grava
+     period/year_month.
+   - `financial_fact`/`financial_snapshot` guardam **duração** (minutos), sem R$; o
+     `financial_snapshot_builder` diz no docstring: *"Does NOT calculate values. Only consolidates
+     rights."*
+   - O único `hour_rate × duração = R$` está em `domain/remuneration/remuneration_calculator.py`,
+     que tem **prod=0** (nunca chamado).
+   - **Consequência**: deletar o motor `domain/remuneration` é seguro (morto), MAS a
+     funcionalidade "calcular + exportar folha" (spec 001, US5) **nunca foi fiada**. Registrado
+     como gap no backlog (B-06). Não é trabalho de "simplificação" — é feature a construir (de
+     forma simples: função `duração × hour_rate` + campos de valor + exportação).
+
+2. **overlap (prod=0) → ✅ NÃO é gap.** A detecção de sobreposição **existe e funciona**, porém
+   **inline no `assignment_service.create()`** (não via `domain/overlap`): itera as alocações do
+   mesmo dia e checa cruzamento de horário, tratando inclusive plantão que passa da meia-noite
+   (`if existing_end <= existing_start: +24h`). Logo `domain/overlap` é **duplicata morta** →
+   seguro deletar.
 
 ## Ordem sugerida de execução
 

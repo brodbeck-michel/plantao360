@@ -43,6 +43,22 @@ retrabalho.
 - **Correção**: no Nginx, servir `index.html` com `Cache-Control: no-cache` (os assets com hash
   podem ser `immutable`). **Escopo**: `docker/nginx/nginx.conf`. Relevante à Fase 0 (deploy).
 
+## B-06 · Cálculo de remuneração/folha NÃO está implementado (gap funcional) — prioridade ALTA
+
+- Descoberto no levantamento da `domain/` (ver [levantamento-domain.md](levantamento-domain.md)).
+- **Fato**: o sistema consolida *quantas horas* cada médico fez (`financial_fact`/`financial_snapshot`
+  guardam duração), mas **nunca converte em R$**. `Payroll` não tem campo de valor; o
+  `payroll_service` só faz o ciclo de vida (draft→review→approve→export) sem calcular nada. O
+  único `hour_rate × duração` está no motor `domain/remuneration`, que **nunca é chamado**.
+- **Impacto**: a capacidade "calcular valores a pagar + exportar para o financeiro" (spec 001,
+  US5) **não existe de verdade** hoje.
+- **Ação (feature, não simplificação)**: implementar de forma simples — função
+  `duração × hour_rate` (com a tabela de valores por médico/tipo, conforme decidido), campos de
+  valor no `Payroll`/snapshot, e a exportação. Fazer DEPOIS do colapso da `domain/` (para
+  construir sobre a base já enxuta), reaproveitando o que for útil do motor antigo antes de
+  deletá-lo.
+- **Backend, requer decisão de produto** sobre a tabela de valores (já esboçada na spec 001).
+
 ---
 
 ## Nota de timing (recomendação do arquiteto)
