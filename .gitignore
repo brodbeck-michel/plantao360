@@ -66,9 +66,7 @@ htmlcov/
 coverage.xml
 .pytest_cache/
 
-# Alembic
-backend/alembic/versions/*.py
-!backend/alembic/versions/.gitkeep
+# Alembic — as migrations SÃO versionadas (histórico de schema é código)
 
 # Claude / Spec Kit (mantém skills e .specify versionados; ignora config local)
 .claude/settings.local.json

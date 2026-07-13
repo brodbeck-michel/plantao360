@@ -16,9 +16,28 @@ HOST="${HOST:-0.0.0.0}"
 
 echo "[startup] Mode: $ENVIRONMENT"
 
-# Step 0: Ensure data directory exists (may be empty before volume mount)
+# Step 0: Ensure data directory exists (legacy SQLite; harmless com Postgres)
 mkdir -p /app/data
 echo "[startup] Data directory ready: /app/data"
+
+# Step 0.5: Wait for the database when using Postgres (avoids restart loop on boot)
+case "${DATABASE_URL:-}" in
+    postgresql*)
+        echo "[startup] Waiting for database to be ready..."
+        ATTEMPTS=0
+        MAX_ATTEMPTS=30
+        until python -c "import os; from sqlalchemy import create_engine, text; create_engine(os.environ['DATABASE_URL']).connect().execute(text('SELECT 1'))" 2>/dev/null; do
+            ATTEMPTS=$((ATTEMPTS + 1))
+            if [ "$ATTEMPTS" -ge "$MAX_ATTEMPTS" ]; then
+                echo "[startup] ERROR: database not reachable after $MAX_ATTEMPTS attempts. Aborting."
+                exit 1
+            fi
+            echo "[startup] Database not ready (attempt $ATTEMPTS/$MAX_ATTEMPTS). Retrying in 2s..."
+            sleep 2
+        done
+        echo "[startup] Database is ready."
+        ;;
+esac
 
 # Step 1: Database migrations (skip for test mode)
 if [ "$ENVIRONMENT" != "test" ]; then

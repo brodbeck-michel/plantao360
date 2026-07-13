@@ -11,17 +11,17 @@ distintos, sem dependência pendente). Rótulos `[US#]` mapeiam às histórias d
 
 ## Phase 1 — Setup
 
-- [ ] T001 [P] Criar diretório `scripts/` (se não existir) para os scripts de deploy/backup em `plantao360/scripts/`.
-- [ ] T002 [P] Criar `plantao360/.env.production.example` com todas as chaves SEM valores sensíveis (`ENVIRONMENT`, `DATABASE_URL`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `SECRET_KEY`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `DEMO_MODE=false`, `ALLOWED_ORIGINS`, `TAG`, `BACKEND_PORT`, `FRONTEND_PORT`).
-- [ ] T003 Confirmar o entrypoint real do backend (`app.main:app` vs `app.api.app:app`) lendo `backend/start.sh` e `backend/app/main.py`; anotar o correto para não alterar por engano.
+- [x] T001 [P] Criar diretório `scripts/` (se não existir) para os scripts de deploy/backup em `plantao360/scripts/`.
+- [x] T002 [P] Criar `plantao360/.env.production.example` com todas as chaves SEM valores sensíveis (`ENVIRONMENT`, `DATABASE_URL`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `SECRET_KEY`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `DEMO_MODE=false`, `ALLOWED_ORIGINS`, `TAG`, `BACKEND_PORT`, `FRONTEND_PORT`).
+- [x] T003 Confirmar o entrypoint real do backend (`app.main:app` vs `app.api.app:app`) lendo `backend/start.sh` e `backend/app/main.py`; anotar o correto para não alterar por engano.
 
 ---
 
 ## Phase 2 — Foundational (pré-requisitos compartilhados)
 
-- [ ] T004 Adicionar `psycopg2-binary` em `backend/requirements.txt` (driver que a URL `postgresql+psycopg2` de `settings/production.py` já espera).
-- [ ] T005 [P] Revisar `backend/.dockerignore` para garantir exclusão de `.env*`, `*.db`, `*.sqlite3`, `__pycache__/`, `.pytest_cache/` (nenhum segredo/artefato local na imagem).
-- [ ] T006 [P] Confirmar em `backend/app/core/settings/production.py` que `DATABASE_URL` vem do ambiente (não hardcoded) e que o valor default não é usado quando `.env.production` define a URL.
+- [x] T004 Adicionar `psycopg2-binary` em `backend/requirements.txt` (driver que a URL `postgresql+psycopg2` de `settings/production.py` já espera).
+- [x] T005 [P] Revisar `backend/.dockerignore` para garantir exclusão de `.env*`, `*.db`, `*.sqlite3`, `__pycache__/`, `.pytest_cache/` (nenhum segredo/artefato local na imagem).
+- [x] T006 [P] Confirmar em `backend/app/core/settings/production.py` que `DATABASE_URL` vem do ambiente (não hardcoded) e que o valor default não é usado quando `.env.production` define a URL.
 
 ---
 
@@ -30,10 +30,10 @@ distintos, sem dependência pendente). Rótulos `[US#]` mapeiam às histórias d
 **Meta**: produção roda sobre Postgres, com o backend aguardando o banco antes de migrar/servir.
 **Teste independente**: subir o ambiente prod; migrations aplicam; app lê/grava; sem loop de restart.
 
-- [ ] T007 [US2] Adicionar serviço `db` (`postgres:16-alpine`) em `plantao360/docker-compose.prod.yml`: volume `plantao360_pg_data`, `env` `POSTGRES_USER/PASSWORD/DB`, `healthcheck` com `pg_isready`, rede `plantao360_prod`, `restart: always`.
-- [ ] T008 [US2] No `docker-compose.prod.yml`, remover o volume SQLite `plantao360_prod_data` do backend e adicionar `depends_on: db: { condition: service_healthy }`.
-- [ ] T009 [US2] Atualizar `plantao360/.env.production`: `DATABASE_URL=postgresql+psycopg2://<user>:<senha>@db:5432/<db>`, definir `POSTGRES_USER/PASSWORD/DB` coerentes, e manter `ENVIRONMENT=production`.
-- [ ] T010 [US2] Adicionar espera ativa pelo banco em `backend/start.sh` antes do `alembic upgrade head` (loop com timeout testando conexão/`pg_isready`), preservando `set -e` para abortar visível em falha de migração.
+- [x] T007 [US2] Adicionar serviço `db` (`postgres:16-alpine`) em `plantao360/docker-compose.prod.yml`: volume `plantao360_pg_data`, `env` `POSTGRES_USER/PASSWORD/DB`, `healthcheck` com `pg_isready`, rede `plantao360_prod`, `restart: always`.
+- [x] T008 [US2] No `docker-compose.prod.yml`, remover o volume SQLite `plantao360_prod_data` do backend e adicionar `depends_on: db: { condition: service_healthy }`.
+- [x] T009 [US2] Atualizar `plantao360/.env.production`: `DATABASE_URL=postgresql+psycopg2://<user>:<senha>@db:5432/<db>`, definir `POSTGRES_USER/PASSWORD/DB` coerentes, e manter `ENVIRONMENT=production`.
+- [x] T010 [US2] Adicionar espera ativa pelo banco em `backend/start.sh` antes do `alembic upgrade head` (loop com timeout testando conexão/`pg_isready`), preservando `set -e` para abortar visível em falha de migração.
 
 ---
 
@@ -42,10 +42,10 @@ distintos, sem dependência pendente). Rótulos `[US#]` mapeiam às histórias d
 **Meta**: histórico de schema reproduzível a partir do git, validado em Postgres.
 **Teste independente**: checkout limpo + `alembic upgrade head` do zero em Postgres → schema íntegro.
 
-- [ ] T011 [US3] Remover a exclusão `backend/alembic/versions/*.py` de `plantao360/.gitignore` (manter o `!.gitkeep`).
-- [ ] T012 [US3] `git add -f` das migrations existentes em `backend/alembic/versions/*.py` e versioná-las.
-- [ ] T013 [US3] **Validar migração do zero em Postgres**: subir só o serviço `db`, rodar `alembic upgrade head` a partir de um banco vazio e confirmar schema completo sem erro.
-- [ ] T014 [US3] Corrigir incompatibilidades SQLite→Postgres encontradas em T013 (ex.: `String` sem length, defaults, `Boolean`, `autoincrement`) nas migrations afetadas em `backend/alembic/versions/`. (Só se T013 acusar erro.)
+- [x] T011 [US3] Remover a exclusão `backend/alembic/versions/*.py` de `plantao360/.gitignore` (manter o `!.gitkeep`).
+- [x] T012 [US3] `git add -f` das migrations existentes em `backend/alembic/versions/*.py` e versioná-las.
+- [~] T013 (PENDENTE: exige Postgres real; Docker indisponivel nesta maquina) [US3] **Validar migração do zero em Postgres**: subir só o serviço `db`, rodar `alembic upgrade head` a partir de um banco vazio e confirmar schema completo sem erro.
+- [~] T014 (PENDENTE: so apos T013) [US3] Corrigir incompatibilidades SQLite→Postgres encontradas em T013 (ex.: `String` sem length, defaults, `Boolean`, `autoincrement`) nas migrations afetadas em `backend/alembic/versions/`. (Só se T013 acusar erro.)
 
 ---
 
@@ -54,17 +54,17 @@ distintos, sem dependência pendente). Rótulos `[US#]` mapeiam às histórias d
 **Meta**: GitHub Actions constrói/publica as imagens; servidor só baixa e sobe.
 **Teste independente**: disparar o workflow, ver imagens no GHCR e subir no servidor sem `--build`.
 
-- [ ] T015 [US1] Criar `.github/workflows/release-images.yml`: dispara em push de tag `v*` e `workflow_dispatch`; permissões `contents: read`, `packages: write`; login no GHCR com `GITHUB_TOKEN`.
-- [ ] T016 [US1] No workflow, job do **backend**: `docker/build-push-action` com `context: ./backend`, tags `ghcr.io/brodbeck-michel/plantao360-backend:{version}` e `:latest`.
-- [ ] T017 [US1] No workflow, job do **frontend**: build com `context: .` e `dockerfile: frontend/Dockerfile`, `build-args: VITE_MVP_MODE=true`, tags `...plantao360-frontend:{version}` e `:latest`.
-- [ ] T018 [US1] Trocar `build:` por `image: ghcr.io/brodbeck-michel/plantao360-backend:${TAG:-latest}` (e frontend equivalente) em `docker-compose.prod.yml`.
+- [x] T015 [US1] Criar `.github/workflows/release-images.yml`: dispara em push de tag `v*` e `workflow_dispatch`; permissões `contents: read`, `packages: write`; login no GHCR com `GITHUB_TOKEN`.
+- [x] T016 [US1] No workflow, job do **backend**: `docker/build-push-action` com `context: ./backend`, tags `ghcr.io/brodbeck-michel/plantao360-backend:{version}` e `:latest`.
+- [x] T017 [US1] No workflow, job do **frontend**: build com `context: .` e `dockerfile: frontend/Dockerfile`, `build-args: VITE_MVP_MODE=true`, tags `...plantao360-frontend:{version}` e `:latest`.
+- [x] T018 [US1] Trocar `build:` por `image: ghcr.io/brodbeck-michel/plantao360-backend:${TAG:-latest}` (e frontend equivalente) em `docker-compose.prod.yml`.
 
 ---
 
 ## Phase 6 — [US1] Deploy em um comando + rollback (P1)
 
-- [ ] T019 [US1] Criar `plantao360/scripts/deploy.sh`: recebe `TAG` (env/arg), roda `docker compose -f docker-compose.prod.yml pull` e `up -d`; ecoa a tag em uso; falha claramente se a tag não existir no registry.
-- [ ] T020 [US1] Documentar rollback no cabeçalho do `deploy.sh` (rodar com a `TAG` anterior) e validar que `docker-compose.prod.yml` respeita `${TAG}`.
+- [x] T019 [US1] Criar `plantao360/scripts/deploy.sh`: recebe `TAG` (env/arg), roda `docker compose -f docker-compose.prod.yml pull` e `up -d`; ecoa a tag em uso; falha claramente se a tag não existir no registry.
+- [x] T020 [US1] Documentar rollback no cabeçalho do `deploy.sh` (rodar com a `TAG` anterior) e validar que `docker-compose.prod.yml` respeita `${TAG}`.
 
 ---
 

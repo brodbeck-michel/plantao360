@@ -1,9 +1,14 @@
 .git
 .github
 .pytest_cache
+.ruff_cache
 __pycache__
 *.pyc
+# Segredos e artefatos locais — nunca dentro da imagem
 .env
+.env.*
 *.db
+*.sqlite3
 htmlcov/
 .coverage
+.coverage.*
