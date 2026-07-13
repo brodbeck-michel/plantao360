@@ -49,6 +49,13 @@ def test_create_shift(mock_repo_cls, mock_ed_cls, service):
         shift_date=date(2025, 1, 15),
         shift_type="T1",
     )
+    # O serviço valida a data dentro da competência do período. A competência do mês M
+    # vai do dia 26 de M ao dia 25 de M+1; logo 15/01/2025 pertence à competência de
+    # dez/2024 (26/12/2024 a 25/01/2025). Mocka o período correspondente.
+    from app.models.period import Period
+    service.uow.session.query.return_value.filter.return_value.first.return_value = Period(
+        id=1, year=2024, month=12
+    )
     result = service.create(dto)
     assert result.is_success
     assert result.data.id == 1

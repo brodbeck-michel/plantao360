@@ -38,12 +38,12 @@ Escopo: **somente** `backend/app/tests/**` e `backend/pyproject.toml`. Nenhuma m
 **Meta**: coleção sem erro; sem asserções de "número mágico".
 **Teste independente**: `pytest --collect-only -q` sem erro.
 
-- [ ] T011 [US3] Deletar `backend/app/tests/unit/test_manifests.py` (importa `manifest_loader` inexistente; quebra a coleção — cerimônia ADR-016).
-- [ ] T012 [P] [US3] Em `backend/app/tests/unit/test_domain_events.py`, remover a asserção de contagem (`test_domain_event_name_count`); se o arquivo só tiver isso, deletá-lo.
-- [ ] T013 [P] [US3] Idem em `backend/app/tests/unit/domain/test_remuneration_events.py` (remover contagem/deletar).
-- [ ] T014 [P] [US3] Idem em `backend/app/tests/unit/domain/test_payroll_events.py`.
-- [ ] T015 [P] [US3] Idem em `backend/app/tests/unit/domain/test_financial_events.py`.
-- [ ] T016 [US3] Revisar `backend/app/tests/unit/domain/test_shift_constants.py`: se for só contagem de valores, remover a asserção frágil; se cobrir comportamento real, manter/ajustar.
+- [x] T011 [US3] Deletar `backend/app/tests/unit/test_manifests.py` (importa `manifest_loader` inexistente; quebra a coleção — cerimônia ADR-016).
+- [x] T012 [P] [US3] Em `backend/app/tests/unit/test_domain_events.py`, remover a asserção de contagem (`test_domain_event_name_count`); se o arquivo só tiver isso, deletá-lo.
+- [x] T013 [P] [US3] Idem em `backend/app/tests/unit/domain/test_remuneration_events.py` (remover contagem/deletar).
+- [x] T014 [P] [US3] Idem em `backend/app/tests/unit/domain/test_payroll_events.py`.
+- [x] T015 [P] [US3] Idem em `backend/app/tests/unit/domain/test_financial_events.py`.
+- [x] T016 [US3] Revisar `backend/app/tests/unit/domain/test_shift_constants.py`: se for só contagem de valores, remover a asserção frágil; se cobrir comportamento real, manter/ajustar.
 
 ---
 
@@ -52,9 +52,9 @@ Escopo: **somente** `backend/app/tests/**` e `backend/pyproject.toml`. Nenhuma m
 **Meta**: testes com valor real voltam ao verde refletindo o schema/validações atuais.
 **Teste independente**: os arquivos abaixo passam.
 
-- [ ] T017 [P] [US4] Em `backend/app/tests/unit/test_doctor_mapper.py`, atualizar a fixture do Doctor para incluir `specialty` e `doctor_type` (exigidos pelo `DoctorResponseDTO` desde as migrations 004/005).
-- [ ] T018 [P] [US4] Em `backend/app/tests/unit/test_settings_factory.py`, atualizar `test_production_settings_defaults` para o hardening atual (fornecer `SECRET_KEY` forte + `ADMIN_PASSWORD` válido, ou asseverar que `ProductionSettings` rejeita segredo fraco).
-- [ ] T019 [P] [US4] Em `backend/app/tests/unit/test_shift_service.py`, alinhar a asserção do teste ao comportamento atual do serviço (inspecionar a falha e corrigir o teste, não o produto).
+- [x] T017 [P] [US4] Em `backend/app/tests/unit/test_doctor_mapper.py`, atualizar a fixture do Doctor para incluir `specialty` e `doctor_type` (exigidos pelo `DoctorResponseDTO` desde as migrations 004/005).
+- [x] T018 [P] [US4] Em `backend/app/tests/unit/test_settings_factory.py`, atualizar `test_production_settings_defaults` para o hardening atual (fornecer `SECRET_KEY` forte + `ADMIN_PASSWORD` válido, ou asseverar que `ProductionSettings` rejeita segredo fraco).
+- [x] T019 [P] [US4] Em `backend/app/tests/unit/test_shift_service.py`, alinhar a asserção do teste ao comportamento atual do serviço (inspecionar a falha e corrigir o teste, não o produto).
 
 ---
 
@@ -62,8 +62,8 @@ Escopo: **somente** `backend/app/tests/**` e `backend/pyproject.toml`. Nenhuma m
 
 **Meta**: a suíte verde não é reprovada por cobertura irreal.
 
-- [ ] T020 [US5] Em `backend/pyproject.toml`, remover `--cov-fail-under=80` do `addopts` (linha ~46), mantendo o relatório de cobertura (`--cov=app --cov-report=term-missing`).
-- [ ] T021 [US5] Medir a cobertura global real com a suíte verde e ajustar `[tool.coverage.report] fail_under` (linha ~56) para um valor honesto ≤ o medido (a elevar no futuro). Registrar o número.
+- [x] T020 [US5] Em `backend/pyproject.toml`, remover `--cov-fail-under=80` do `addopts` (linha ~46), mantendo o relatório de cobertura (`--cov=app --cov-report=term-missing`).
+- [x] T021 [US5] Medir a cobertura global real com a suíte verde e ajustar `[tool.coverage.report] fail_under` (linha ~56) para um valor honesto ≤ o medido (a elevar no futuro). Registrar o número.
 
 ---
 
@@ -72,9 +72,9 @@ Escopo: **somente** `backend/app/tests/**` e `backend/pyproject.toml`. Nenhuma m
 **Meta**: suíte 0 falhas / 0 erros, e prova de que nada de produto mudou.
 **Teste independente**: a suíte completa passa e o `git diff` só mostra testes/config.
 
-- [ ] T022 [US1] Rebuild da imagem e rodar a suíte COMPLETA (sem `--ignore`): `docker run --rm -e ENVIRONMENT=test plantao360-backend-test python -m pytest -p no:cacheprovider -q` → confirmar **0 failed, 0 errors**.
-- [ ] T023 [US1] Provar não-regressão de produto: `git diff --name-only` deve mostrar apenas `backend/app/tests/**` e `backend/pyproject.toml` (nenhum arquivo de `app/api`, `app/services`, `app/domain`, `app/models`).
-- [ ] T024 [US1] Registrar o destino de cada um dos 52 testes que falhavam (consertado / atualizado / removido) e quaisquer `skip` com justificativa, no resumo da implementação.
+- [x] T022 [US1] Rebuild da imagem e rodar a suíte COMPLETA (sem `--ignore`): `docker run --rm -e ENVIRONMENT=test plantao360-backend-test python -m pytest -p no:cacheprovider -q` → confirmar **0 failed, 0 errors**.
+- [x] T023 [US1] Provar não-regressão de produto: `git diff --name-only` deve mostrar apenas `backend/app/tests/**` e `backend/pyproject.toml` (nenhum arquivo de `app/api`, `app/services`, `app/domain`, `app/models`).
+- [x] T024 [US1] Registrar o destino de cada um dos 52 testes que falhavam (consertado / atualizado / removido) e quaisquer `skip` com justificativa, no resumo da implementação.
 
 ---
 

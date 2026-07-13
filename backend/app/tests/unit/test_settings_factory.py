@@ -23,7 +23,12 @@ def test_development_settings_defaults():
 
 
 def test_production_settings_defaults():
-    settings = ProductionSettings.model_validate({"ENVIRONMENT": "production"})
+    settings = ProductionSettings.model_validate({
+        "ENVIRONMENT": "production",
+        # Producao exige segredos fortes (hardening); fornecemos validos.
+        "SECRET_KEY": "test-secret-key-com-32-ou-mais-caracteres-ok",
+        "ADMIN_PASSWORD": "StrongAdminPass123",
+    })
     assert settings.ENVIRONMENT == "production"
     assert settings.LOG_LEVEL == "WARNING"
 

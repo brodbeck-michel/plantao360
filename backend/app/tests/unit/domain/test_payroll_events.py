@@ -34,11 +34,3 @@ class TestPayrollEvents:
         for event in payroll_events:
             assert ".v1" in event, f"Event {event} is not versioned"
 
-    def test_payroll_events_count(self):
-        events = DomainEventName.values()
-        payroll_events = [e for e in events if e.startswith("payroll.")]
-        assert len(payroll_events) == 13
-
-    def test_total_event_count(self):
-        events = DomainEventName.values()
-        assert len(events) == 43

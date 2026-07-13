@@ -22,6 +22,3 @@ class TestRemunerationEvents:
         for event in rem_events:
             assert ".v1" in event
 
-    def test_total_events_count(self):
-        events = DomainEventName.values()
-        assert len(events) == 38

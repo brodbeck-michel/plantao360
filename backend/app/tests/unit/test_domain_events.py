@@ -17,10 +17,6 @@ def test_domain_event_name_values():
     assert "extra.deleted.v1" in values
 
 
-def test_domain_event_name_count():
-    assert len(DomainEventName.values()) == 38
-
-
 def test_domain_event_name_members():
     assert DomainEventName.DOCTOR_CREATED_V1 == "doctor.created.v1"
     assert DomainEventName.SHIFT_DELETED_V1 == "shift.deleted.v1"

@@ -22,6 +22,3 @@ class TestFinancialEvents:
         for event in financial_events:
             assert ".v1" in event, f"Event {event} is not versioned"
 
-    def test_all_events_count(self):
-        events = DomainEventName.values()
-        assert len(events) == 43

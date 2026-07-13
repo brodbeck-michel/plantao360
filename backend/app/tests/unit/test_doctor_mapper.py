@@ -5,7 +5,7 @@ from app.models.doctor import Doctor
 
 def test_mapper_to_response():
     mapper = DoctorMapper()
-    doctor = Doctor(id=1, name="Dr. Map", crm="12345", hour_rate=150.0, active=True)
+    doctor = Doctor(id=1, name="Dr. Map", crm="12345", hour_rate=150.0, active=True, specialty="Clinica Medica", doctor_type="plantonista")
     dto = mapper.to_response(doctor)
     assert dto.id == 1
     assert dto.name == "Dr. Map"
@@ -23,8 +23,8 @@ def test_mapper_to_model():
 def test_mapper_to_response_list():
     mapper = DoctorMapper()
     doctors = [
-        Doctor(id=1, name="Dr. A", crm="11111", hour_rate=100.0, active=True),
-        Doctor(id=2, name="Dr. B", crm="22222", hour_rate=200.0, active=True),
+        Doctor(id=1, name="Dr. A", crm="11111", hour_rate=100.0, active=True, specialty="Clinica Medica", doctor_type="plantonista"),
+        Doctor(id=2, name="Dr. B", crm="22222", hour_rate=200.0, active=True, specialty="Clinica Medica", doctor_type="plantonista"),
     ]
     dtos = mapper.to_response_list(doctors)
     assert len(dtos) == 2
@@ -34,7 +34,7 @@ def test_mapper_to_response_list():
 
 def test_mapper_update_model():
     mapper = DoctorMapper()
-    doctor = Doctor(id=1, name="Dr. Old", crm="12345", hour_rate=100.0, active=True)
+    doctor = Doctor(id=1, name="Dr. Old", crm="12345", hour_rate=100.0, active=True, specialty="Clinica Medica", doctor_type="plantonista")
     dto = DoctorCreateDTO(name="Dr. New", crm="99999", hour_rate=200.0)
     updated = mapper.update_model(doctor, dto)
     assert updated.name == "Dr. New"
@@ -44,7 +44,7 @@ def test_mapper_update_model():
 
 def test_mapper_to_summary():
     mapper = DoctorMapper()
-    doctor = Doctor(id=1, name="Dr. Summary", crm="12345", hour_rate=150.0, active=True)
+    doctor = Doctor(id=1, name="Dr. Summary", crm="12345", hour_rate=150.0, active=True, specialty="Clinica Medica", doctor_type="plantonista")
     summary = mapper.to_summary(doctor)
     assert summary["id"] == 1
     assert summary["name"] == "Dr. Summary"

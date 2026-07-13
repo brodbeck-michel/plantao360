@@ -9,7 +9,6 @@ def test_shift_status_values():
     assert ShiftStatus.IN_PROGRESS == "in_progress"
     assert ShiftStatus.COMPLETED == "completed"
     assert ShiftStatus.CANCELLED == "cancelled"
-    assert set(ShiftStatus.values()) == {"scheduled", "in_progress", "completed", "cancelled"}
 
 
 def test_shift_type_values():
@@ -18,4 +17,3 @@ def test_shift_type_values():
     assert ShiftType.T3 == "T3"
     assert ShiftType.R1 == "R1"
     assert ShiftType.R2 == "R2"
-    assert set(ShiftType.values()) == {"T1", "T2", "T3", "R1", "R2"}
