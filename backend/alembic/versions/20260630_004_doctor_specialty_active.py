@@ -18,11 +18,11 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def column_exists(table_name: str, column_name: str) -> bool:
+    # Usa o inspector do SQLAlchemy (portável) em vez de PRAGMA (só SQLite),
+    # para a migration funcionar tanto em SQLite (dev) quanto em Postgres (prod).
     bind = op.get_bind()
-    result = bind.execute(
-        sa.text(f"PRAGMA table_info({table_name})")
-    )
-    return any(row[1] == column_name for row in result)
+    inspector = sa.inspect(bind)
+    return any(col["name"] == column_name for col in inspector.get_columns(table_name))
 
 
 def upgrade() -> None:

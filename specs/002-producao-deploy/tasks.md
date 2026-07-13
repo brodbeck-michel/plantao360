@@ -44,8 +44,8 @@ distintos, sem dependência pendente). Rótulos `[US#]` mapeiam às histórias d
 
 - [x] T011 [US3] Remover a exclusão `backend/alembic/versions/*.py` de `plantao360/.gitignore` (manter o `!.gitkeep`).
 - [x] T012 [US3] `git add -f` das migrations existentes em `backend/alembic/versions/*.py` e versioná-las.
-- [~] T013 (PENDENTE: exige Postgres real; Docker indisponivel nesta maquina) [US3] **Validar migração do zero em Postgres**: subir só o serviço `db`, rodar `alembic upgrade head` a partir de um banco vazio e confirmar schema completo sem erro.
-- [~] T014 (PENDENTE: so apos T013) [US3] Corrigir incompatibilidades SQLite→Postgres encontradas em T013 (ex.: `String` sem length, defaults, `Boolean`, `autoincrement`) nas migrations afetadas em `backend/alembic/versions/`. (Só se T013 acusar erro.)
+- [x] T013 [US3] **Validar migração do zero em Postgres**: VALIDADO 2026-07-13 — 8 migrations aplicaram limpo em postgres:16 (via imagem real).
+- [x] T014 [US3] Corrigir incompatibilidades SQLite→Postgres: CORRIGIDO — migration 004 usava `PRAGMA table_info` (só SQLite); trocado por inspector do SQLAlchemy (portável).
 
 ---
 
@@ -94,7 +94,7 @@ distintos, sem dependência pendente). Rótulos `[US#]` mapeiam às histórias d
 
 - [x] T027 Escrever/atualizar o guia de deploy no `README.md` (ou `docs/deploy.md`): pré-requisitos do servidor, `docker login ghcr.io`, criação do `.env.production`, `deploy.sh`, rollback, backup (FR-011).
 - [x] T028 Verificar se os gates de CI existentes (`.github/workflows/architecture.yml`, `release-readiness.yml`) não bloqueiam o novo `release-images.yml`; se bloquearem indevidamente, relaxar o gate (constituição supera os ADRs de freeze).
-- [~] T029 (PENDENTE: exige Docker/servidor — validar apos reiniciar Docker) Executar o checklist de validação do [quickstart.md](./quickstart.md) (SC-001 a SC-008) num ambiente de teste e registrar o resultado.
+- [x] T029 Executar checklist do quickstart: VALIDADO 2026-07-13 — stack prod local (db→backend→frontend healthy), migrations no boot, seed skipped em produção, /health ok, backup gerado (8 tabelas).
 - [x] T030 Remover artefatos obsoletos de SQLite em produção (referências ao volume `plantao360_prod_data` e ao caminho `/app/data/*.db` no compose/env de produção) após confirmar que Postgres está estável.
 
 ---
