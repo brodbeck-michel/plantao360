@@ -1,10 +1,5 @@
 """Query Services — Read-only services for the query domain."""
 
-from app.domain.query.doctor_analytics_query import DoctorAnalyticsQuery
-from app.domain.query.coverage_analytics_query import CoverageAnalyticsQuery
-from app.domain.query.financial_analytics_query import FinancialAnalyticsQuery
-from app.domain.query.payroll_analytics_query import PayrollAnalyticsQuery
-from app.domain.query.timeline_query import TimelineQuery
 
 from app.domain.read_models.doctor_summary import DoctorSummary
 from app.domain.read_models.coverage_summary import CoverageSummary
@@ -82,6 +77,165 @@ class InstitutionTimeline:
             "date_range": self.date_range,
             "event_types": self.event_types,
             "generated_at": self.generated_at.isoformat() if self.generated_at else None,
+        }
+
+
+# Query objects — antes em domain/query (consumidores: este service + rotas de API que agora
+# importam daqui). Inlinados no colapso da domain/ (spec 005, Grupo D).
+@dataclass(frozen=True)
+class DoctorAnalyticsQuery:
+    """Represents a business question about doctors."""
+    doctor_id: int | None = None
+    active_only: bool = True
+    period_id: int | None = None
+    year_month: str | None = None
+    include_totals: bool = True
+    include_remuneration: bool = False
+    include_shifts: bool = True
+    sort_by: str = "name"
+    sort_direction: str = "asc"
+
+    def to_dict(self) -> dict:
+        return {
+            "doctor_id": self.doctor_id,
+            "active_only": self.active_only,
+            "period_id": self.period_id,
+            "year_month": self.year_month,
+            "include_totals": self.include_totals,
+            "include_remuneration": self.include_remuneration,
+            "include_shifts": self.include_shifts,
+            "sort_by": self.sort_by,
+            "sort_direction": self.sort_direction,
+        }
+
+
+@dataclass(frozen=True)
+class CoverageAnalyticsQuery:
+    """Represents a business question about coverage."""
+    period_id: int | None = None
+    year_month: str | None = None
+    shift_type: str | None = None
+    include_inconsistencies: bool = True
+    include_extras: bool = True
+    include_uncovered: bool = False
+    doctor_id: int | None = None
+    sort_by: str = "shift_date"
+    sort_direction: str = "asc"
+
+    def to_dict(self) -> dict:
+        return {
+            "period_id": self.period_id,
+            "year_month": self.year_month,
+            "shift_type": self.shift_type,
+            "include_inconsistencies": self.include_inconsistencies,
+            "include_extras": self.include_extras,
+            "include_uncovered": self.include_uncovered,
+            "doctor_id": self.doctor_id,
+            "sort_by": self.sort_by,
+            "sort_direction": self.sort_direction,
+        }
+
+
+@dataclass(frozen=True)
+class FinancialAnalyticsQuery:
+    """Represents a business question about financial data."""
+    period_id: int | None = None
+    year_month: str | None = None
+    doctor_id: int | None = None
+    fact_type: str | None = None
+    include_rules: bool = True
+    include_explanations: bool = False
+    include_version_comparison: bool = False
+    compare_versions: list[int] = field(default_factory=list)
+    sort_by: str = "total_value"
+    sort_direction: str = "desc"
+
+    def to_dict(self) -> dict:
+        return {
+            "period_id": self.period_id,
+            "year_month": self.year_month,
+            "doctor_id": self.doctor_id,
+            "fact_type": self.fact_type,
+            "include_rules": self.include_rules,
+            "include_explanations": self.include_explanations,
+            "include_version_comparison": self.include_version_comparison,
+            "compare_versions": self.compare_versions,
+            "sort_by": self.sort_by,
+            "sort_direction": self.sort_direction,
+        }
+
+
+@dataclass(frozen=True)
+class PayrollAnalyticsQuery:
+    """Represents a business question about payroll competencies."""
+    payroll_id: int | None = None
+    period_id: int | None = None
+    year_month: str | None = None
+    status: str | None = None
+    include_audit: bool = True
+    include_versions: bool = False
+    include_seal: bool = False
+    include_checklist: bool = False
+    include_approval: bool = False
+    include_timeline: bool = False
+    sort_by: str = "year_month"
+    sort_direction: str = "desc"
+
+    def to_dict(self) -> dict:
+        return {
+            "payroll_id": self.payroll_id,
+            "period_id": self.period_id,
+            "year_month": self.year_month,
+            "status": self.status,
+            "include_audit": self.include_audit,
+            "include_versions": self.include_versions,
+            "include_seal": self.include_seal,
+            "include_checklist": self.include_checklist,
+            "include_approval": self.include_approval,
+            "include_timeline": self.include_timeline,
+            "sort_by": self.sort_by,
+            "sort_direction": self.sort_direction,
+        }
+
+
+@dataclass(frozen=True)
+class TimelineQuery:
+    """Represents a business question about the timeline of an entity."""
+    entity_type: str = ""
+    entity_id: int | None = None
+    start_date: str | None = None
+    end_date: str | None = None
+    from_date: str | None = None
+    to_date: str | None = None
+    event_type: str | None = None
+    include_events: bool = True
+    include_status_changes: bool = True
+    include_audit: bool = False
+    include_version_changes: bool = False
+    event_types: list[str] = field(default_factory=list)
+    limit: int = 50
+    offset: int = 0
+    sort_by: str = "timestamp"
+    sort_direction: str = "asc"
+
+    def to_dict(self) -> dict:
+        return {
+            "entity_type": self.entity_type,
+            "entity_id": self.entity_id,
+            "start_date": self.start_date,
+            "end_date": self.end_date,
+            "from_date": self.from_date,
+            "to_date": self.to_date,
+            "event_type": self.event_type,
+            "include_events": self.include_events,
+            "include_status_changes": self.include_status_changes,
+            "include_audit": self.include_audit,
+            "include_version_changes": self.include_version_changes,
+            "event_types": self.event_types,
+            "limit": self.limit,
+            "offset": self.offset,
+            "sort_by": self.sort_by,
+            "sort_direction": self.sort_direction,
         }
 
 

@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.database.session import get_db
 from app.services.dashboard_service import DashboardService
-from app.domain.query.dashboard_query import DashboardQuery
+from app.services.dashboard_service import DashboardQuery
 from app.common.api_response import ApiResponse
 from app.core.security.dependencies import get_current_user
 

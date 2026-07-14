@@ -11,11 +11,13 @@ from app.domain.read_models.coverage_summary import CoverageSummary
 from app.domain.read_models.financial_summary import FinancialSummary
 from app.domain.read_models.payroll_summary import PayrollSummary
 
-from app.domain.query.doctor_analytics_query import DoctorAnalyticsQuery
-from app.domain.query.coverage_analytics_query import CoverageAnalyticsQuery
-from app.domain.query.financial_analytics_query import FinancialAnalyticsQuery
-from app.domain.query.payroll_analytics_query import PayrollAnalyticsQuery
-from app.domain.query.timeline_query import TimelineQuery
+from app.services.query_service import (
+    DoctorAnalyticsQuery,
+    CoverageAnalyticsQuery,
+    FinancialAnalyticsQuery,
+    PayrollAnalyticsQuery,
+    TimelineQuery,
+)
 
 from app.services.query_service import DomainExplanation, ExplanationStep, ExplanationContext
 

@@ -4,12 +4,14 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.database.session import get_db
-from app.services.query_service import QueryService
-from app.domain.query.doctor_analytics_query import DoctorAnalyticsQuery
-from app.domain.query.coverage_analytics_query import CoverageAnalyticsQuery
-from app.domain.query.financial_analytics_query import FinancialAnalyticsQuery
-from app.domain.query.payroll_analytics_query import PayrollAnalyticsQuery
-from app.domain.query.timeline_query import TimelineQuery
+from app.services.query_service import (
+    QueryService,
+    DoctorAnalyticsQuery,
+    CoverageAnalyticsQuery,
+    FinancialAnalyticsQuery,
+    PayrollAnalyticsQuery,
+    TimelineQuery,
+)
 from app.common.api_response import ApiResponse
 
 router = APIRouter(prefix="/query", tags=["Query Domain"])
