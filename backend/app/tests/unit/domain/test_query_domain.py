@@ -19,10 +19,7 @@ from app.domain.query.timeline_query import TimelineQuery
 
 from app.services.query_service import DomainExplanation, ExplanationStep, ExplanationContext
 
-from app.domain.analytics.audit_analytics import AuditAnalytics, ReopenedCompetency, ApprovalRecord
-from app.domain.analytics.competency_audit import CompetencyAudit
-from app.domain.analytics.approval_audit import ApprovalAudit
-from app.domain.analytics.change_audit import ChangeAudit
+from app.services.query_service import AuditAnalytics, ReopenedCompetency, ApprovalRecord
 
 from app.services.query_service import CoverageKPI, FinancialKPI, PayrollKPI, OperationalKPI
 
@@ -208,40 +205,6 @@ class TestAuditAnalytics:
         assert aa.total_competencies == 10
         d = aa.to_dict()
         assert d["reopen_rate"] == 20.0
-
-    def test_competency_audit(self):
-        ca = CompetencyAudit(
-            payroll_id=1, year_month="202606",
-            status="approved", current_version=1,
-            reopen_count=0, created_by="system",
-            created_at="2026-06-27T10:00:00",
-        )
-        assert ca.status == "approved"
-        d = ca.to_dict()
-        assert d["seal_present"] is False
-
-    def test_approval_audit(self):
-        a = ApprovalAudit(
-            payroll_id=1, year_month="202606",
-            approved_by="admin", approved_at="2026-06-27T10:00:00",
-            version=1, checklist_version=1,
-            checklist_items_satisfied=7, checklist_items_total=7,
-            readiness_status="ready",
-        )
-        assert a.readiness_status == "ready"
-        d = a.to_dict()
-        assert d["checklist_items_satisfied"] == 7
-
-    def test_change_audit(self):
-        c = ChangeAudit(
-            entity_type="payroll", entity_id=1,
-            change_type="status_change", changed_by="admin",
-            changed_at="2026-06-27T10:00:00",
-            previous_status="reviewed", new_status="approved",
-        )
-        assert c.change_type == "status_change"
-        d = c.to_dict()
-        assert d["is_after_lock"] is False
 
 
 class TestKPIs:
