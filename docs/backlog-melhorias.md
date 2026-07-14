@@ -43,25 +43,21 @@ retrabalho.
 - **Correção**: no Nginx, servir `index.html` com `Cache-Control: no-cache` (os assets com hash
   podem ser `immutable`). **Escopo**: `docker/nginx/nginx.conf`. Relevante à Fase 0 (deploy).
 
-## B-06 · Relatório para pagamento (NÃO é cálculo de folha) — prioridade a confirmar
+## B-06 · ~~Cálculo/relatório de folha~~ — ✅ NÃO É GAP (esclarecido pelo stakeholder 2026-07-14)
 
-> **⚠️ CORREÇÃO DE ESCOPO (2026-07-14, direto do stakeholder):** esta aplicação **NÃO calcula a
-> folha**. O cálculo/pagamento é feito em **outro ERP**. Aqui o papel é **gestão** dos plantões e,
-> para o pagamento, **gerar um relatório** (horas/plantões consolidados por médico na competência)
-> que o financeiro/ERP consome. **NÃO implementar motor de cálculo `duração × hour_rate` aqui** —
-> seria construir o que o produto não quer (foi por isso que `domain/remuneration` estava morto).
+> **ESCOPO CORRETO:** esta aplicação é de **GESTÃO** de plantões. A **folha oficial** (com
+> honorários, impostos etc.) é feita em **outro ERP** — **não** é papel desta app calcular isso.
+> O que a app precisa fazer para o pagamento **já existe e está em uso**: a **aba de Relatórios**
+> gera um relatório com **valores e horas por médico** em **PDF/Excel**, que é enviado ao financeiro
+> para realizar o pagamento e os demais honorários.
 
-- **Fato**: o sistema já consolida *quantas horas* cada médico fez (`financial_fact`/
-  `financial_snapshot` guardam duração). O `payroll_service.export` hoje é só uma **transição de
-  status** (`→EXPORTED` + evento), não gera arquivo.
-- **A verificar com o produto**: como o relatório para pagamento sai hoje? Se as telas de gestão já
-  permitem ver/imprimir/exportar as horas por médico da competência, **não há gap** (B-06 vira só um
-  "nice-to-have": botão de exportar CSV/XLSX). Se hoje é manual/inexistente, o item real é **gerar
-  esse relatório** (consolidado que já existe → CSV/XLSX/PDF), **não** um cálculo de valores.
-- **Backend/leve**, sem regra de negócio nova de cálculo.
-
-*(Nota: a antiga fórmula `duração × hour_rate × multiplier` do motor morto foi removida deste item —
-não se aplica: quem calcula valor é o ERP, não esta aplicação.)*
+- **Conclusão**: **não há gap funcional.** O antigo B-06 ("implementar cálculo de folha") nasceu de
+  uma leitura errada da spec 001 — **descartado**. Os "valores" no relatório são apresentação
+  (horas × valor-hora), não a folha oficial.
+- **Por isso** `domain/remuneration` (motor `duração × hour_rate`) estava morto e foi removido sem
+  perda — a app nunca precisou calcular folha.
+- **Nice-to-have futuro (opcional, baixa prioridade)**: se algum dado do relatório ainda for montado
+  manualmente, dá para acrescentar; mas o fluxo principal (PDF/Excel → financeiro) funciona.
 
 ## B-07 · Cluster payroll ainda em `domain/` (dívida de simplificação) — prioridade MÉDIA
 
