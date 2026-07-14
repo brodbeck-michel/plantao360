@@ -49,9 +49,16 @@ Papel do assistente: **arquiteto de desenvolvimento**. Trabalho orientado a spec
 - **Fase 2 passo 1 — Baseline de testes: CONCLUÍDA** (spec 003). Suíte de **692✓/52✗/1-erro → 738
   passed / 0 failed / 0 errors**. Fix de causa única: `backend/app/tests/integration/_auth.py`
   (override de `get_current_user` por ADMIN falso). Gate de cobertura 80%→65 (real ~69%).
-- **Fase 2 passo 2 — Colapso da `domain/`: EM ANDAMENTO** (spec 004). Levantamento feito
-  (`docs/levantamento-domain.md`). spec + plan **prontos**. **PRÓXIMO: `/speckit-tasks` da spec
-  004, depois `/speckit-implement`.**
+- **Fase 2 passo 2 — Colapso da `domain/`: EM ANDAMENTO (Grupos A+B parciais concluídos)** (spec
+  004). `tasks.md` gerado e executado. **Grupo A (deletar)**: 9 módulos removidos por inteiro;
+  `value_objects` e `remuneration` reduzidos só ao que é vivo; `base` adiado. **Grupo B (inline)**:
+  6 módulos colapsados (`timeline`, `policies`, `projections`, `explainability`, `kpi`, `analytics`).
+  Suíte **738 → 738 → 638 passed / 0 failed** (queda só de testes de módulo morto); `domain/`
+  **88 → 53** arquivos; 0 import de produto quebrado; escopo só backend interno.
+  **Adiado ao Grupo D**: cluster `coverage → financial → payroll` (acoplado a `state_machines`
+  Grupo D e ao agregado `payroll_competency`; inlinar forçaria inversão domain→service persistente)
+  + `base` + `value_objects/shift_time_range` + as data classes de `remuneration` (todas ainda
+  consumidas por `rules`/`state_machines`/`payroll`). Detalhe em `specs/004-colapso-domain/tasks.md`.
 
 ## Levantamento da `domain/` (o mapa do colapso) — `docs/levantamento-domain.md`
 
@@ -116,6 +123,13 @@ e075a70+212bb8b levantamento domain → 872224c spec004 → 3af57e6 plan004.
 
 ## PRÓXIMO PASSO IMEDIATO
 
-Rodar **`/speckit-tasks`** da spec 004 (colapso domain) → gerar `tasks.md` com 1 tarefa por
-módulo (cada uma um passo do loop de segurança). Depois **`/speckit-implement`** começando pelo
-**Grupo A** (deletar peso morto), rodando a suíte verde no Docker a cada passo.
+Grupos A+B (parte limpa) da spec 004 **concluídos** (suíte 638 verde; `domain/` 88→53). Falta:
+
+1. **Validar SC-005 no navegador** (subir o app dev e percorrer escala/extras/cobertura/dashboard/
+   usuários) — a suíte + testes de API já indicam paridade, falta a conferência manual.
+2. **Nova feature "Grupo D" (spec 005)** que colapsa o cluster acoplado de uma vez:
+   `state_machines` + `read_models`/`query`/`rules` + a camada `use_cases/` + o cluster adiado do
+   Grupo B (`coverage`, `financial`, `payroll_competency`) + `base` + `value_objects/shift_time_range`
+   + as data classes de `remuneration`. Só aí `domain/` chega à meta de ~30–40 (hoje 53). É o passo
+   que exige análise de comportamento (transições/regras), por isso merece a própria spec (D7).
+3. **B-06** (gap de remuneração): a fórmula útil já foi resgatada para `docs/backlog-melhorias.md`.

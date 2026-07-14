@@ -106,31 +106,30 @@ correspondente é idêntica; a suíte roda verde **entre** cada passo (nunca big
 > consumidores). Cada tarefa segue o loop de segurança; a lógica movida deve ser equivalente ao
 > comportamento anterior.
 
-- [ ] T015 [US2] Inlinar `backend/app/domain/timeline/` (1 consumidor) em
-  `backend/app/services/query_service.py`; adaptar teste; deletar o módulo + reexports.
-- [ ] T016 [US2] Inlinar `backend/app/domain/coverage/` (1 consumidor) em
-  `backend/app/services/coverage_service.py`; adaptar testes; deletar o módulo + reexports.
-- [ ] T017 [US2] Inlinar `backend/app/domain/financial/` (1 consumidor) em
-  `backend/app/services/coverage_service.py`; adaptar testes; deletar o módulo + reexports.
-- [ ] T018 [US2] Inlinar `backend/app/domain/policies/` (2 arqs, 1 consumidor) em
-  `backend/app/use_cases/periods` (a camada `use_cases/` fica — Grupo D; só o `policies` entra
-  agora); adaptar testes; deletar o módulo + reexports.
-- [ ] T019 [US2] Inlinar `backend/app/domain/projections/` (5 arqs, 1 consumidor) em
-  `backend/app/services/dashboard_service.py`; adaptar testes; deletar o módulo + reexports.
-- [ ] T020 [US2] Inlinar `backend/app/domain/explainability/` (3 arqs, 1 consumidor) em
-  `backend/app/services/query_service.py`; adaptar testes; deletar o módulo + reexports.
-- [ ] T021 [US2] Inlinar `backend/app/domain/kpi/` (4 arqs, 1 consumidor) em
-  `backend/app/services/query_service.py`; adaptar testes; deletar o módulo + reexports.
-- [ ] T022 [US2] Inlinar `backend/app/domain/analytics/` (4 arqs, 1 consumidor) em
-  `backend/app/services/query_service.py`; adaptar testes; deletar o módulo + reexports.
-- [ ] T023 [US2] Inlinar `backend/app/domain/payroll/` (2 arqs, **2 consumidores**: `payroll_service`
-  + `payroll_governance_validator`) (D6): embutir a parte de cada um; se a lógica for genuinamente
-  compartilhada, mantê-la em **um** lugar (o `payroll_service`) e o validator passa a chamá-lo —
-  sem recriar módulo `domain/payroll`. Adaptar testes; deletar o módulo + reexports.
+- [X] T015 [US2] `timeline` → `query_service` (2 dataclasses embutidas). Suíte 652.
+- [~] T016 [US2] `coverage` → **ADIADO** ao Grupo D (ver nota abaixo).
+- [~] T017 [US2] `financial` → **ADIADO** ao Grupo D (ver nota abaixo).
+- [X] T018 [US2] `policies` → `use_cases/periods/base_period_use_case` (PeriodPolicy inlinada;
+  coverage_policy morto removido). Suíte 638.
+- [X] T019 [US2] `projections` → `dashboard_service` (só DashboardProjection era vivo; 4 mortos
+  removidos). Suíte 648.
+- [X] T020 [US2] `explainability` → `query_service` (3 dataclasses). Suíte 648.
+- [X] T021 [US2] `kpi` → `query_service` (4 dataclasses). Suíte 648.
+- [X] T022 [US2] `analytics` → `query_service` (audit_analytics vivo; 3 audits mortos removidos). Suíte 645.
+- [~] T023 [US2] `payroll` → **ADIADO** ao Grupo D (ver nota abaixo).
 
-**Checkpoint**: Grupo B colapsado. Suíte verde; `rota → service → model` sem camada de consumidor
-único. Grupo C (`constants`/`errors`/`events`) e Grupo D (`read_models`/`query`/`rules`/
-`state_machines` + `use_cases/`) permanecem intactos (fora de escopo, FR-008).
+**⚠️ Cluster adiado (T016/T017/T023)**: `coverage → financial → payroll_competency` formam um
+cluster acoplado. `financial_snapshot_builder` importa DTOs de `coverage`; suas DTOs
+(`FinancialSnapshotData`) são usadas por `domain/payroll/payroll_competency` (agregado vivo via
+`payroll_service`), que por sua vez depende de `state_machines` (**Grupo D, fora de escopo**) e de
+`base`. Inlinar `financial` em `coverage_service` forçaria `payroll_competency` (domain) a importar
+de um service — inversão domain→service que só se resolve colapsando o payroll, o que exige o
+Grupo D. Para não trocar a indireção original por uma inversão pior e persistente, o cluster inteiro
+(coverage + financial + payroll + base + state_machines) colapsa junto na **feature do Grupo D**.
+
+**Checkpoint US2 ✅**: 6 dos 9 módulos do Grupo B colapsados (`timeline`, `policies`, `projections`,
+`explainability`, `kpi`, `analytics`). Cluster `coverage`/`financial`/`payroll` adiado ao Grupo D.
+Suíte **638 passed / 0 failed**; `domain/` **88 → 53** arquivos.
 
 ---
 
@@ -141,23 +140,21 @@ de API de antes.
 
 **Independent Test**: os checks abaixo passam todos.
 
-- [ ] T024 [US3] SC-001 — rodar a suíte completa no Docker: **0 failed / 0 errors** (≥ baseline
-  útil; total menor só pelos testes de módulo morto removidos — explicar a diferença).
-- [ ] T025 [US3] SC-002 — nenhum import de produto para módulo removido:
-  `grep -rE "app\.domain\.(entities|services|reports|calendar|metrics|snapshots|transitions|contracts|overlap|value_objects|remuneration|base|timeline|policies|coverage|financial|projections|analytics|explainability|kpi|payroll)" backend/app --include=*.py | grep -v /tests/`
-  → **sem resultado**.
-- [ ] T026 [US3] SC-003 — contratos idênticos: `pytest app/tests/integration -q` (test_*_api) verdes.
-- [ ] T027 [US3] SC-004 — contar arquivos: `find backend/app/domain -name '*.py' -not -name '__init__.py' | wc -l`
-  → **~30–40** (de ~118).
-- [ ] T028 [US3] SC-005 — subir o app dev (`docker compose -f docker-compose.yml up -d --build`) e
-  percorrer escala/extras/cobertura/dashboard/usuários → comportamento idêntico (usar cache-buster
-  `?cb=x` no navegador; ver B-05).
-- [ ] T029 [US3] Prova de escopo: `git diff --name-only <baseline>..HEAD` só toca
-  `backend/app/{domain,services,use_cases}/`, `backend/app/tests/` e `specs/` — **nenhum** arquivo
-  de `models`, `api/routes`, `schemas`, migrations ou `frontend/`.
+- [X] T024 [US3] SC-001 — suíte completa: **638 passed / 0 failed / 0 errors**. Total < baseline
+  (738) só pelos testes de módulo morto removidos (D3); zero falhas.
+- [X] T025 [US3] SC-002 — **0 import de produto** para módulo removido (A + B). Grep sem resultado.
+- [X] T026 [US3] SC-003 — `pytest app/tests/integration`: **93 passed / 0 failed** (contratos
+  idênticos; o aviso de gate de cobertura no subconjunto não é falha de teste).
+- [~] T027 [US3] SC-004 — `domain/` **88 → 53** arquivos. Ainda acima da meta 30–40 porque o
+  cluster coverage/financial/payroll + Grupo D permanecem; a meta será atingida na feature do Grupo D.
+- [ ] T028 [US3] SC-005 — subir o app dev e percorrer os fluxos (pendente de validação manual no
+  navegador; suíte + API verdes já indicam paridade).
+- [X] T029 [US3] Prova de escopo: diff da sessão só toca
+  `backend/app/{domain,services,use_cases}/`, `backend/app/tests/` e `docs/`/`specs/` — nenhum
+  `models`/`api/routes`/`schemas`/migration/`frontend`.
 
-**Checkpoint**: paridade comprovada pelos três checks (comportamento + imports + contrato) e pela
-prova de escopo.
+**Checkpoint US3 ✅ (parcial)**: paridade comprovada por suíte + API + imports + escopo. SC-004 fica
+parcial (53, não 30–40) pelo cluster adiado; SC-005 (validação manual no navegador) pendente.
 
 ---
 
