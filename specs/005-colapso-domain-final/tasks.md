@@ -85,22 +85,25 @@ unidade (research D4). Cada vertical pode ser **mais de um commit** (loop de seg
 **Independent Test**: por vertical, transições válidas/inválidas e decisões de regra ficam idênticas;
 testes de comportamento + API verdes.
 
-- [ ] T006 [US4][US2] **Vertical assignments**: colapsar `use_cases/assignments/*` (10) no
-  `assignment_service` (onde for repasse fino; manter orquestração genuína — D8), depois inlinar
-  `domain/rules/assignment_rules` e `domain/state_machines/assignment_state_machine` no
-  `assignment_service` (agora consumidor único). Preservar eventos/auditoria das transições.
-- [ ] T007 [US4][US2] **Vertical periods**: colapsar `use_cases/periods/*` (8) — `PeriodPolicy` já
-  foi inlinada em `base_period_use_case` (spec 004); avaliar colapsar o restante no service de
-  período e inlinar `domain/state_machines/period_state_machine` no consumidor único resultante.
-- [ ] T008 [US2] **Vertical shift**: inlinar `domain/rules/shift_rules` e
-  `domain/state_machines/shift_state_machine` em `shift_service` (consumidor único). `shift_rules`
-  usa `value_objects/shift_time_range` → trazer junto (o VO cai aqui ou no passo de cluster).
-- [ ] T009 [US2] **Vertical extra**: inlinar `domain/state_machines/extra_state_machine` em
-  `extra_service` (consumidor único).
-- [ ] T010 [US2] Deletar o que sobrou de `domain/rules/` e `domain/state_machines/` (após verticais
-  + `base` tratado no cluster); confirmar por grep 0 consumidor de produto e 0 inversão.
+- [X] T006 [US4][US2] **Vertical assignments**: `use_cases/assignments` (10) era **camada paralela
+  MORTA** (a API usa `AssignmentService`; ninguém importava os use_cases) → removida inteira. Depois
+  `assignment_rules` + `assignment_state_machine` inlinados no `assignment_service` (consumidor único).
+  Anotação `AggregateRoot` removida (só hint). Suíte 635.
+- [X] T007 [US4][US2] **Vertical periods**: `use_cases/periods` é orquestração **viva** (rota period
+  a usa) → mantida (D8). `period_state_machine` inlinado em `base_period_use_case` (junto da
+  PeriodPolicy da spec 004). Suíte 632.
+- [X] T008 [US2] **Vertical shift**: `shift_rules` + `shift_state_machine` → `shift_service`.
+  `shift_rules` importava `ShiftTimeRange` mas **nunca o usava** (import morto) → `value_objects`
+  (só `shift_time_range`) deletado como peso morto + seu teste; pacote removido. Suíte 632.
+- [X] T009 [US2] **Vertical extra**: `extra_state_machine` → `extra_service`. Suíte 632.
+- [X] T010 [US2] `domain/rules/` removido (vazio após inlines + move do BusinessRuleCode).
+  `domain/state_machines/` restou só `payroll_state_machine` (cai no cluster payroll, US3). Suíte 632.
 
-**Checkpoint US2/US4**: verticais colapsados; `rota→service→model`; suíte verde; comportamento idêntico.
+**Checkpoint US2/US4 ✅**: 4 verticais colapsados; `rota→service→model`; suíte **632 passed / 0 failed**;
+`domain/` **39 → 32** arquivos (já na meta 30-40); **0 inversão domain→service**; comportamento
+idêntico (testes de transição/regra + API verdes). Achado: `use_cases/assignments` era camada morta;
+`use_cases/periods` é orquestração viva (mantida). Restam em `domain/`: base, constants, coverage,
+errors, events, exceptions, financial, payroll, remuneration, state_machines(payroll).
 
 ---
 
