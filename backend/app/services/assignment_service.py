@@ -17,12 +17,94 @@ from app.domain.events.event_names import DomainEventName
 from app.domain.errors.assignment_errors import AssignmentErrorCode
 from app.domain.constants.assignment_status import AssignmentStatus
 from app.domain.constants.shift_status import ShiftStatus
-from app.domain.state_machines.assignment_state_machine import AssignmentStateMachine
-from app.domain.rules.assignment_rules import AssignmentRules
 from app.core.logging import get_logger
 
 logger = get_logger("service.assignment")
 event_dispatcher = EventDispatcher()
+
+
+# AssignmentRules — antes em domain/rules/assignment_rules (consumidor único: este service).
+# Inlinada no colapso da domain/ (spec 005, Grupo D). Regras de transição preservadas.
+class AssignmentRules:
+    def __init__(self, assignment) -> None:
+        self._assignment = assignment
+
+    def validate_can_confirm(self) -> list[str]:
+        errors: list[str] = []
+        if self._assignment.status != AssignmentStatus.PLANNED:
+            errors.append(f"Cannot confirm assignment in status '{self._assignment.status}'")
+        return errors
+
+    def validate_can_start(self) -> list[str]:
+        errors: list[str] = []
+        if self._assignment.status != AssignmentStatus.CONFIRMED:
+            errors.append(f"Cannot start assignment in status '{self._assignment.status}'")
+        return errors
+
+    def validate_can_complete(self) -> list[str]:
+        errors: list[str] = []
+        if self._assignment.status != AssignmentStatus.STARTED:
+            errors.append(f"Cannot complete assignment in status '{self._assignment.status}'")
+        return errors
+
+    def validate_can_cancel(self) -> list[str]:
+        errors: list[str] = []
+        if self._assignment.status not in (AssignmentStatus.PLANNED, AssignmentStatus.CONFIRMED):
+            errors.append(f"Cannot cancel assignment in status '{self._assignment.status}'")
+        return errors
+
+    def validate_can_change_doctor(self) -> list[str]:
+        errors: list[str] = []
+        if self._assignment.status not in (AssignmentStatus.PLANNED, AssignmentStatus.CONFIRMED):
+            errors.append(f"Cannot change doctor in status '{self._assignment.status}'")
+        return errors
+
+    def validate_can_change_time(self) -> list[str]:
+        errors: list[str] = []
+        if self._assignment.status not in (AssignmentStatus.PLANNED, AssignmentStatus.CONFIRMED):
+            errors.append(f"Cannot change time in status '{self._assignment.status}'")
+        return errors
+
+    def validate_time_range(self) -> list[str]:
+        errors: list[str] = []
+        if self._assignment.start_time and self._assignment.end_time:
+            if self._assignment.end_time <= self._assignment.start_time:
+                errors.append("end_time must be after start_time")
+        return errors
+
+
+# AssignmentStateMachine — antes em domain/state_machines (consumidor único: este service).
+# Inlinada no colapso da domain/ (spec 005, Grupo D). Transições e efeitos preservados.
+class AssignmentStateMachine:
+    def __init__(self, aggregate) -> None:
+        self._aggregate = aggregate
+
+    def confirm(self) -> None:
+        self._transition(AssignmentStatus.PLANNED, AssignmentStatus.CONFIRMED)
+
+    def start(self) -> None:
+        self._transition(AssignmentStatus.CONFIRMED, AssignmentStatus.STARTED)
+
+    def complete(self) -> None:
+        self._transition(AssignmentStatus.STARTED, AssignmentStatus.COMPLETED)
+
+    def cancel(self) -> None:
+        current = self._aggregate.status
+        allowed = {AssignmentStatus.PLANNED, AssignmentStatus.CONFIRMED}
+        if current not in allowed:
+            raise ValueError(f"Cannot cancel assignment in status '{current}'")
+        self._transition(current, AssignmentStatus.CANCELLED)
+
+    def _transition(self, from_status: str, to_status: str) -> None:
+        current = self._aggregate.status
+        if current != from_status:
+            raise ValueError(
+                f"Cannot transition from '{current}' to '{to_status}': "
+                f"expected '{from_status}'"
+            )
+        self._aggregate.before_transition(current, to_status)
+        self._aggregate.status = to_status
+        self._aggregate.after_transition(current, to_status)
 
 
 class AssignmentService:

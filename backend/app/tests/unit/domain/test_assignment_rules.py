@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import MagicMock
-from app.domain.rules.assignment_rules import AssignmentRules
+from app.services.assignment_service import AssignmentRules
 from app.domain.constants.assignment_status import AssignmentStatus
 
 

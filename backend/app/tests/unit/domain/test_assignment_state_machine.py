@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import MagicMock
-from app.domain.state_machines.assignment_state_machine import AssignmentStateMachine
+from app.services.assignment_service import AssignmentStateMachine
 from app.domain.constants.assignment_status import AssignmentStatus
 
 
