@@ -24,10 +24,7 @@ from app.domain.analytics.competency_audit import CompetencyAudit
 from app.domain.analytics.approval_audit import ApprovalAudit
 from app.domain.analytics.change_audit import ChangeAudit
 
-from app.domain.kpi.coverage_kpi import CoverageKPI
-from app.domain.kpi.financial_kpi import FinancialKPI
-from app.domain.kpi.payroll_kpi import PayrollKPI
-from app.domain.kpi.operational_kpi import OperationalKPI
+from app.services.query_service import CoverageKPI, FinancialKPI, PayrollKPI, OperationalKPI
 
 from app.services.query_service import InstitutionTimeline, TimelineEvent
 

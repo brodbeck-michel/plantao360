@@ -12,10 +12,6 @@ from app.domain.read_models.financial_summary import FinancialSummary
 from app.domain.read_models.payroll_summary import PayrollSummary
 
 from app.domain.analytics.audit_analytics import AuditAnalytics
-from app.domain.kpi.coverage_kpi import CoverageKPI
-from app.domain.kpi.financial_kpi import FinancialKPI
-from app.domain.kpi.payroll_kpi import PayrollKPI
-from app.domain.kpi.operational_kpi import OperationalKPI
 
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -182,6 +178,272 @@ class DomainExplanation:
             "total_steps": self.total_steps,
             "generated_at": self.generated_at.isoformat() if self.generated_at else None,
             "generated_by": self.generated_by,
+        }
+
+
+# KPI value objects — antes em domain/kpi (consumidor único: este service).
+# Inlinados aqui no colapso da domain/ (spec 004, Grupo B).
+@dataclass(frozen=True)
+class CoverageKPI:
+    """Coverage Key Performance Indicator."""
+    period_id: int
+    year_month: str
+    coverage_rate: float = 0.0
+    total_shifts: int = 0
+    covered_shifts: int = 0
+    uncovered_shifts: int = 0
+    coverage_by_type: dict[str, float] = field(default_factory=dict)
+    coverage_by_day: list[dict] = field(default_factory=list)
+    trend: str = "stable"
+    previous_period_rate: float | None = None
+    generated_at: datetime | None = None
+
+    @property
+    def definition(self) -> str:
+        return "Percentual de plantões com ao menos um médico atribuído"
+
+    @property
+    def formula(self) -> str:
+        return "covered_shifts / total_shifts * 100"
+
+    @property
+    def evidence(self) -> list[str]:
+        return [
+            f"Total de plantões: {self.total_shifts}",
+            f"Plantões cobertos: {self.covered_shifts}",
+            f"Plantões descobertos: {self.uncovered_shifts}",
+        ]
+
+    @property
+    def explanation(self) -> str:
+        if self.coverage_rate >= 90:
+            return "Cobertura adequada. A maioria dos plantões possui médicos atribuídos."
+        elif self.coverage_rate >= 70:
+            return "Cobertura parcial. Alguns plantões precisam de atenção."
+        else:
+            return "Cobertura insuficiente. Ação urgente necessária para evitar descobertos."
+
+    def to_dict(self) -> dict:
+        return {
+            "period_id": self.period_id,
+            "year_month": self.year_month,
+            "coverage_rate": self.coverage_rate,
+            "total_shifts": self.total_shifts,
+            "covered_shifts": self.covered_shifts,
+            "uncovered_shifts": self.uncovered_shifts,
+            "coverage_by_type": self.coverage_by_type,
+            "coverage_by_day": self.coverage_by_day,
+            "trend": self.trend,
+            "previous_period_rate": self.previous_period_rate,
+            "definition": self.definition,
+            "formula": self.formula,
+            "evidence": self.evidence,
+            "explanation": self.explanation,
+            "generated_at": self.generated_at.isoformat() if self.generated_at else None,
+        }
+
+
+@dataclass(frozen=True)
+class FinancialKPI:
+    """Financial Key Performance Indicator."""
+    period_id: int
+    year_month: str
+    total_remuneration: float = 0.0
+    cost_per_shift: float = 0.0
+    cost_per_doctor: float = 0.0
+    cost_per_hour: float = 0.0
+    total_hours: float = 0.0
+    total_shifts: int = 0
+    total_doctors: int = 0
+    cost_by_type: dict[str, float] = field(default_factory=dict)
+    cost_by_doctor: list[dict] = field(default_factory=list)
+    trend: str = "stable"
+    previous_period_total: float | None = None
+    generated_at: datetime | None = None
+
+    @property
+    def definition(self) -> str:
+        return "Indicadores financeiros consolidados do período"
+
+    @property
+    def formula(self) -> str:
+        return "cost_per_shift = total_remuneration / total_shifts"
+
+    @property
+    def evidence(self) -> list[str]:
+        return [
+            f"Total de remunerações: R$ {self.total_remuneration:.2f}",
+            f"Total de plantões: {self.total_shifts}",
+            f"Total de horas: {self.total_hours:.1f}",
+            f"Total de médicos: {self.total_doctors}",
+        ]
+
+    @property
+    def explanation(self) -> str:
+        if self.previous_period_total and self.total_remuneration > self.previous_period_total:
+            pct = ((self.total_remuneration - self.previous_period_total) / self.previous_period_total) * 100
+            return f"Custo aumentou {pct:.1f}% em relação ao período anterior."
+        elif self.previous_period_total and self.total_remuneration < self.previous_period_total:
+            pct = ((self.previous_period_total - self.total_remuneration) / self.previous_period_total) * 100
+            return f"Custo diminuiu {pct:.1f}% em relação ao período anterior."
+        return "Custo dentro do esperado para o período."
+
+    def to_dict(self) -> dict:
+        return {
+            "period_id": self.period_id,
+            "year_month": self.year_month,
+            "total_remuneration": self.total_remuneration,
+            "cost_per_shift": self.cost_per_shift,
+            "cost_per_doctor": self.cost_per_doctor,
+            "cost_per_hour": self.cost_per_hour,
+            "total_hours": self.total_hours,
+            "total_shifts": self.total_shifts,
+            "total_doctors": self.total_doctors,
+            "cost_by_type": self.cost_by_type,
+            "cost_by_doctor": self.cost_by_doctor,
+            "trend": self.trend,
+            "previous_period_total": self.previous_period_total,
+            "definition": self.definition,
+            "formula": self.formula,
+            "evidence": self.evidence,
+            "explanation": self.explanation,
+            "generated_at": self.generated_at.isoformat() if self.generated_at else None,
+        }
+
+
+@dataclass(frozen=True)
+class PayrollKPI:
+    """Payroll Key Performance Indicator."""
+    period_id: int
+    year_month: str
+    total_competencies: int = 0
+    approved_competencies: int = 0
+    pending_competencies: int = 0
+    reopened_competencies: int = 0
+    average_time_to_close_days: float = 0.0
+    average_time_to_approve_days: float = 0.0
+    reopen_rate: float = 0.0
+    approval_rate: float = 0.0
+    total_versions: int = 0
+    average_versions_per_competency: float = 0.0
+    trend: str = "stable"
+    generated_at: datetime | None = None
+
+    @property
+    def definition(self) -> str:
+        return "Indicadores de desempenho do processo de folha de pagamento"
+
+    @property
+    def formula(self) -> str:
+        return "reopen_rate = reopened_competencies / total_competencies * 100"
+
+    @property
+    def evidence(self) -> list[str]:
+        return [
+            f"Total de competências: {self.total_competencies}",
+            f"Aprovadas: {self.approved_competencies}",
+            f"Pendentes: {self.pending_competencies}",
+            f"Reabertas: {self.reopened_competencies}",
+        ]
+
+    @property
+    def explanation(self) -> str:
+        if self.reopen_rate > 20:
+            return "Taxa de reabertura alta. Processo de validação pode precisar de melhoria."
+        elif self.reopen_rate > 10:
+            return "Taxa de reabertura moderada. Monitorar tendências."
+        return "Taxa de reabertura dentro do esperado."
+
+    def to_dict(self) -> dict:
+        return {
+            "period_id": self.period_id,
+            "year_month": self.year_month,
+            "total_competencies": self.total_competencies,
+            "approved_competencies": self.approved_competencies,
+            "pending_competencies": self.pending_competencies,
+            "reopened_competencies": self.reopened_competencies,
+            "average_time_to_close_days": self.average_time_to_close_days,
+            "average_time_to_approve_days": self.average_time_to_approve_days,
+            "reopen_rate": self.reopen_rate,
+            "approval_rate": self.approval_rate,
+            "total_versions": self.total_versions,
+            "average_versions_per_competency": self.average_versions_per_competency,
+            "trend": self.trend,
+            "definition": self.definition,
+            "formula": self.formula,
+            "evidence": self.evidence,
+            "explanation": self.explanation,
+            "generated_at": self.generated_at.isoformat() if self.generated_at else None,
+        }
+
+
+@dataclass(frozen=True)
+class OperationalKPI:
+    """Operational Key Performance Indicator."""
+    period_id: int
+    year_month: str
+    total_shifts: int = 0
+    total_doctors: int = 0
+    total_hours: float = 0.0
+    total_extras: int = 0
+    extras_approved: int = 0
+    extras_rejected: int = 0
+    extras_pending: int = 0
+    extra_approval_rate: float = 0.0
+    doctors_per_shift: float = 0.0
+    hours_per_doctor: float = 0.0
+    average_assignment_duration: float = 0.0
+    utilization_rate: float = 0.0
+    trend: str = "stable"
+    generated_at: datetime | None = None
+
+    @property
+    def definition(self) -> str:
+        return "Indicadores de desempenho operacional da instituição"
+
+    @property
+    def formula(self) -> str:
+        return "doctors_per_shift = total_doctors / total_shifts"
+
+    @property
+    def evidence(self) -> list[str]:
+        return [
+            f"Total de plantões: {self.total_shifts}",
+            f"Total de médicos: {self.total_doctors}",
+            f"Total de horas: {self.total_hours:.1f}",
+            f"Total de extras: {self.total_extras}",
+        ]
+
+    @property
+    def explanation(self) -> str:
+        if self.extra_approval_rate > 80:
+            return "Taxa de aprovação de extras alta. Processo de solicitação bem definido."
+        elif self.extra_approval_rate > 50:
+            return "Taxa de aprovação de extras moderada. Revisar critérios de aprovação."
+        return "Taxa de aprovação de extras baixa. Verificar processos de solicitação."
+
+    def to_dict(self) -> dict:
+        return {
+            "period_id": self.period_id,
+            "year_month": self.year_month,
+            "total_shifts": self.total_shifts,
+            "total_doctors": self.total_doctors,
+            "total_hours": self.total_hours,
+            "total_extras": self.total_extras,
+            "extras_approved": self.extras_approved,
+            "extras_rejected": self.extras_rejected,
+            "extras_pending": self.extras_pending,
+            "extra_approval_rate": self.extra_approval_rate,
+            "doctors_per_shift": self.doctors_per_shift,
+            "hours_per_doctor": self.hours_per_doctor,
+            "average_assignment_duration": self.average_assignment_duration,
+            "utilization_rate": self.utilization_rate,
+            "trend": self.trend,
+            "definition": self.definition,
+            "formula": self.formula,
+            "evidence": self.evidence,
+            "explanation": self.explanation,
+            "generated_at": self.generated_at.isoformat() if self.generated_at else None,
         }
 
 
