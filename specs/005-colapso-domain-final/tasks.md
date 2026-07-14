@@ -36,9 +36,8 @@ Suíte: `docker build -t plantao360-backend-test ./backend && docker run --rm -e
 
 ## Phase 1: Setup (baseline)
 
-- [ ] T001 Rebuild da imagem de teste e rodar a suíte para confirmar o baseline verde (**638 passed
-  / 0 failed / 0 errors**), registrando o número de `passed`.
-- [ ] T002 Registrar a contagem inicial da `domain/`: `find backend/app/domain -name '*.py' -not -name '__init__.py' | wc -l` (esperado ~53).
+- [X] T001 Baseline verde confirmado: **638 passed / 0 failed / 0 errors**.
+- [X] T002 Contagem inicial da `domain/`: **53** arquivos.
 
 **Checkpoint**: baseline verde e contagem registrados.
 
@@ -48,12 +47,11 @@ Suíte: `docker build -t plantao360-backend-test ./backend && docker run --rm -e
 
 **⚠️ CRÍTICO**: precede a remoção de `rules` (Phase 4).
 
-- [ ] T003 Mover `BusinessRuleCode` de `backend/app/domain/rules/business_rules.py` para a fundação
-  (`domain/errors` ou `domain/constants`) e apontar os consumidores (`domain/errors/error_catalog.py`
-  e quaisquer outros) para o novo lar. A fundação `errors` (Grupo C) não pode depender de `rules`,
-  que será removido. Suíte verde + commit. (research D5)
+- [X] T003 `BusinessRuleCode` movido para `domain/constants/business_rule_code.py` (padrão dos
+  enums); `error_catalog` e testes apontam para o novo lar; `rules/__init__` esvaziado;
+  `business_rules.py` deletado. Suíte 638. `errors` não depende mais de `rules`.
 
-**Checkpoint**: `errors` não depende mais de `rules`.
+**Checkpoint**: `errors` não depende mais de `rules`. ✅
 
 ---
 
@@ -65,16 +63,16 @@ de `domain/`; peso morto sai. Padrão de data classes (validado na spec 004), me
 **Independent Test**: após mover, a suíte segue verde e os endpoints de dashboard/consulta retornam
 o mesmo resultado.
 
-- [ ] T004 [US1] Inlinar os objetos `backend/app/domain/query/` (6: dashboard_query,
-  doctor/coverage/financial/payroll_analytics_query, timeline_query) em `query_service`/
-  `dashboard_service`; **ajustar as rotas** `api/routes/query.py` e `api/routes/dashboard.py` para
-  importarem do service (api→service); adaptar testes; deletar o módulo + reexports.
-- [ ] T005 [US1] Inlinar os `backend/app/domain/read_models/` (8 summaries) em `query_service`/
-  `dashboard_service`; **remover os summaries mortos** (sem consumidor de produto — candidatos:
-  assignment_summary, period_summary, shift_summary; confirmar por grep) com seus testes (D3);
-  adaptar testes dos vivos; deletar o módulo + reexports.
+- [X] T004 [US1] `query` (6): DashboardQuery → dashboard_service; as outras 5 → query_service;
+  rotas `api/routes/query.py`+`dashboard.py` importam do service (api→service). Módulo deletado. Suíte 638.
+- [X] T005 [US1] `read_models` (8): dashboard_summary (7 classes) → dashboard_service;
+  doctor/coverage/financial/payroll_summary → query_service; period/shift/assignment_summary mortos
+  removidos com seus testes (D3). Módulo deletado. Suíte 635.
 
-**Checkpoint US1**: `read_models`/`query` fora de `domain/`; suíte verde; contratos idênticos.
+**Checkpoint US1 ✅**: `read_models`/`query` fora de `domain/`; suíte **635 passed / 0 failed**;
+`domain/` **53 → 39** arquivos; 0 import quebrado; **0 inversão domain→service**; contratos idênticos
+(rotas de API importam os query objects do service). Restam em `domain/`: base, constants, coverage,
+errors, events, exceptions, financial, payroll, remuneration, rules, state_machines, value_objects.
 
 ---
 
