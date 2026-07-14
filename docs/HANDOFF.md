@@ -123,13 +123,22 @@ e075a70+212bb8b levantamento domain → 872224c spec004 → 3af57e6 plan004.
 
 ## PRÓXIMO PASSO IMEDIATO
 
-Grupos A+B (parte limpa) da spec 004 **concluídos e validados** (suíte 638 verde; 93 testes de API
-verdes; `domain/` 88→53; **SC-005 validado no navegador em 2026-07-14** — dashboard/períodos/escala/
-extras/cobertura/usuários todos OK). Falta:
+**Fase 2 dá-se por SUFICIENTE (meta de tamanho atingida).** spec 004 (Grupos A+B) + spec 005
+(Grupo D, US1+US2) reduziram `domain/` de **118 → 32** arquivos (meta era 30–40). Suíte **632 verde**;
+93 testes de API verdes; 0 inversão domain→service; SC-005 (spec 004) validado no navegador.
 
-1. **Nova feature "Grupo D" (spec 005)** que colapsa o cluster acoplado de uma vez:
-   `state_machines` + `read_models`/`query`/`rules` + a camada `use_cases/` + o cluster adiado do
-   Grupo B (`coverage`, `financial`, `payroll_competency`) + `base` + `value_objects/shift_time_range`
-   + as data classes de `remuneration`. Só aí `domain/` chega à meta de ~30–40 (hoje 53). É o passo
-   que exige análise de comportamento (transições/regras), por isso merece a própria spec (D7).
-2. **B-06** (gap de remuneração): a fórmula útil já foi resgatada para `docs/backlog-melhorias.md`.
+**spec 005 — o que foi feito (US1+US2)**: `read_models`/`query` → services; `rules`/`state_machines`
+inlinados por vertical (assignments/shift/extra/periods); `use_cases/assignments` (morto) removido;
+`use_cases/periods` (orquestração viva) mantido; `value_objects`/`rules` removidos; `BusinessRuleCode`
+→ `constants`.
+
+**spec 005 — US3 ADIADA (dívida B-07)**: o cluster `payroll_competency` (agregado 717 linhas) +
+`governance` + `coverage`/`financial`/`remuneration`/`base`/`payroll_state_machine` ficou em `domain/`.
+Decisão do usuário: a meta de tamanho já foi atingida; colapsar o agregado mecanicamente só
+relocaria ~1000 linhas (não reduz). Fazer via análise do fluxo real de folha — casa com B-06.
+
+**Próximos passos possíveis:**
+1. **B-06 + B-07 juntos** (recomendado): implementar o cálculo de folha (B-06) e, no mesmo fluxo,
+   reduzir/colapsar o cluster payroll (B-07) — mesmo código, uma feature só.
+2. **Backlog frontend**: B-02/B-03/B-04/B-05.
+3. **Fase 3**: limpeza de docs/ADRs antigos + gates de CI legados + migrations rodando 2×.

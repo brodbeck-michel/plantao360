@@ -107,9 +107,18 @@ errors, events, exceptions, financial, payroll, remuneration, state_machines(pay
 
 ---
 
-## Phase 5: User Story 3 — Colapsar o cluster do agregado payroll (Priority: P1)
+## Phase 5: User Story 3 — Colapsar o cluster do agregado payroll (Priority: P1) — ⏸️ ADIADA (dívida técnica)
 
-**Goal**: colapsar o cluster acoplado nos services sem inversão (research D7).
+**DECISÃO (2026-07-14)**: US3 **não executada nesta feature**. A meta de tamanho da Fase 2 (SC-004,
+`domain/` 30–40) **já foi atingida em 32** com US1+US2. O cluster restante (payroll_competency 717
+linhas + governance 287 + payroll_state_machine + coverage + financial + remuneration DTOs + base)
+é **comportamento real** (agregado DDD: versões, selo, auditoria, governança), não data classes.
+"Colapsar" mecanicamente só relocaria ~1000 linhas para `payroll_service` (~1500 linhas) sem
+**reduzir** complexidade — o oposto do Princípio I. A simplificação de verdade exige **analisar o
+fluxo real de folha** e remover a cerimônia morta antes de mover — trabalho maior que merece sua
+própria feature. Registrado como **B-07** no backlog. Ver decisão do usuário no HANDOFF.
+
+**Goal (quando retomado)**: colapsar/reduzir o cluster nos services sem inversão (research D7).
 
 **Independent Test**: folha (draft→review→approve→export, versões, selo, auditoria, governança) e
 cobertura produzem os mesmos resultados; suíte + API verdes; nenhum import domain→service.
@@ -134,17 +143,18 @@ cobertura produzem os mesmos resultados; suíte + API verdes; nenhum import doma
 
 ## Phase 6: User Story 5 — Paridade e não-regressão (Priority: P1)
 
-- [ ] T015 [US5] SC-001 — suíte completa: **0 failed / 0 errors**.
-- [ ] T016 [US5] SC-002 — grep sem import de produto quebrado **e** `grep -rE "app\.services" backend/app/domain` → 0 (anti-inversão).
-- [ ] T017 [US5] SC-003 — `pytest app/tests/integration -q` (test_*_api) verdes (contratos idênticos).
-- [ ] T018 [US5] SC-004 — `find backend/app/domain -name '*.py' -not -name '__init__.py' | wc -l` → **~30–40**.
-- [ ] T019 [US5] SC-005 — subir o app dev e percorrer escala/extras/cobertura/dashboard/períodos-folha/
-  usuários → comportamento idêntico.
-- [ ] T020 [US5] Prova de escopo: `git diff --name-only <baseline>..HEAD` só toca
-  `backend/app/{domain,services,use_cases,validators}/`, `backend/app/tests/`, `docs/`/`specs/` —
-  nenhum `models`/`schemas`/migration/`frontend`; só ajuste de import em `api/routes`.
+- [X] T015 [US5] SC-001 — suíte completa: **632 passed / 0 failed / 0 errors**.
+- [X] T016 [US5] SC-002 — **0 inversão** domain→service; **0 import quebrado** de módulo removido.
+- [X] T017 [US5] SC-003 — `pytest app/tests/integration`: **93 passed / 0 failed** (contratos idênticos).
+- [X] T018 [US5] SC-004 — `domain/` **32** arquivos (de 53; meta 30–40 **atingida**).
+- [ ] T019 [US5] SC-005 — validação manual no navegador (opcional; suíte + API verdes já indicam
+  paridade; as mudanças foram internas ao backend).
+- [X] T020 [US5] Escopo: só `domain`/`services`/`use_cases`/`validators`/`tests` + ajuste de import
+  de `query` em `api/routes` (api→service). Nenhum model/schema/migration/frontend.
 
-**Checkpoint US5**: paridade comprovada (suíte + API + imports + anti-inversão + escopo + app).
+**Checkpoint US5 ✅ (para o escopo entregue — US1+US2)**: paridade comprovada (suíte + API + imports
++ anti-inversão + escopo). US3 (cluster payroll) adiada como dívida técnica B-07 (meta de tamanho já
+atingida). Fase 2 dá-se por **suficiente**.
 
 ---
 

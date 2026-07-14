@@ -76,6 +76,25 @@ multiplicador da regra aplicável (ex.: plantão noturno). A explicação passo-
 (minutos→horas, ×valor-hora, ×multiplicador, valor final) também estava embutida ali — útil para
 uma futura tela de "como este valor foi calculado".
 
+## B-07 · Cluster payroll ainda em `domain/` (dívida de simplificação) — prioridade MÉDIA
+
+- Descoberto ao fechar a spec 005 (colapso final da `domain/`). A meta de tamanho da Fase 2 foi
+  atingida (`domain/` 118→32; meta 30–40), mas **restou um cluster acoplado** em `domain/`:
+  `payroll_competency.py` (agregado DDD de **717 linhas**: versões, selo imutável, auditoria,
+  governança/checklist), `governance.py` (287), `payroll_state_machine.py`, `coverage`, `financial`,
+  as data classes de `remuneration` e `base` (AggregateRoot).
+- **Por que ficou**: diferente do resto (data classes/regras pequenas), é **comportamento real**.
+  Colapsar mecanicamente só relocaria ~1000 linhas para `payroll_service` (~1500 linhas) — relocaliza,
+  não **reduz** (o oposto do Princípio I). A simplificação de verdade exige **analisar o fluxo real
+  de folha** (o que a API/usuário usa) e remover a cerimônia morta — como fizemos com
+  `use_cases/assignments`, read models e os motores mortos — **antes** de mover.
+- **Ação (feature própria)**: mapear o uso real do agregado payroll; remover selo/versão/governança/
+  auditoria que não forem usados; então colapsar o núcleo restante em `coverage_service`/
+  `payroll_service` sem inversão, com `base` por último. Casa naturalmente com **B-06** (implementar
+  o cálculo de folha), já que ambos mexem no mesmo fluxo.
+- **Escopo**: `domain/{payroll,coverage,financial,remuneration,base,state_machines}` + services.
+  Paridade garantida pela suíte (632) + testes de API (93).
+
 ---
 
 ## Nota de timing (recomendação do arquiteto)
