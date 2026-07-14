@@ -1,5 +1,5 @@
 import pytest
-from app.domain.policies.period_policy import PeriodPolicy
+from app.use_cases.periods.base_period_use_case import PeriodPolicy
 from app.domain.constants.period_status import PeriodStatus
 
 
