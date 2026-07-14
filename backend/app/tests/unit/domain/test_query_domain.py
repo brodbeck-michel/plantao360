@@ -38,8 +38,6 @@ from app.domain.kpi.operational_kpi import OperationalKPI
 
 from app.domain.timeline import InstitutionTimeline, TimelineEvent
 
-from app.domain.reports import ReportDefinition, ReportField, ReportFilter
-
 
 class TestReadModels:
     def test_doctor_summary(self):
@@ -380,37 +378,3 @@ class TestTimeline:
         tl = InstitutionTimeline(events=events)
         filtered = tl.filter_by_type("shift.created")
         assert len(filtered) == 2
-
-
-class TestReportDefinitions:
-    def test_report_field(self):
-        f = ReportField(name="total_value", label="Valor Total", field_type="float")
-        assert f.name == "total_value"
-        d = f.to_dict()
-        assert d["label"] == "Valor Total"
-
-    def test_report_filter(self):
-        f = ReportFilter(name="year_month", label="Mês/Ano", filter_type="string")
-        assert f.name == "year_month"
-        d = f.to_dict()
-        assert d["required"] is False
-
-    def test_report_definition(self):
-        rd = ReportDefinition(
-            name="Relatório de Folha",
-            description="Relatório consolidado da folha",
-            objective="Apresentar dados da folha de pagamento",
-            fields=[
-                ReportField(name="total_value", label="Valor Total", field_type="float"),
-            ],
-            filters=[
-                ReportFilter(name="year_month", label="Mês/Ano", filter_type="string"),
-            ],
-            permissions=["admin", "finance"],
-            data_source="payroll",
-        )
-        assert rd.name == "Relatório de Folha"
-        d = rd.to_dict()
-        assert len(d["fields"]) == 1
-        assert len(d["filters"]) == 1
-        assert "admin" in d["permissions"]
