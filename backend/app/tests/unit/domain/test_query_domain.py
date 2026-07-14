@@ -17,9 +17,7 @@ from app.domain.query.financial_analytics_query import FinancialAnalyticsQuery
 from app.domain.query.payroll_analytics_query import PayrollAnalyticsQuery
 from app.domain.query.timeline_query import TimelineQuery
 
-from app.domain.explainability.domain_explanation import DomainExplanation
-from app.domain.explainability.explanation_step import ExplanationStep
-from app.domain.explainability.explanation_context import ExplanationContext
+from app.services.query_service import DomainExplanation, ExplanationStep, ExplanationContext
 
 from app.domain.analytics.audit_analytics import AuditAnalytics, ReopenedCompetency, ApprovalRecord
 from app.domain.analytics.competency_audit import CompetencyAudit
