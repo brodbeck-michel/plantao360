@@ -37,11 +37,8 @@ Comando da suíte:
 
 **Purpose**: fixar a rede de segurança antes de mexer em qualquer coisa.
 
-- [ ] T001 Rebuild da imagem de teste e rodar a suíte completa para confirmar o baseline verde
-  (esperado ~738 passed / 0 failed / 0 errors), registrando o número exato de `passed` como
-  referência: `docker build -t plantao360-backend-test ./backend && docker run --rm -e ENVIRONMENT=test plantao360-backend-test python -m pytest -p no:cacheprovider -q`
-- [ ] T002 Registrar a contagem inicial de arquivos da `domain/` (linha de base para SC-004):
-  `find backend/app/domain -name '*.py' -not -name '__init__.py' | wc -l` (esperado ~118).
+- [X] T001 Baseline verde confirmado: **738 passed / 0 failed / 0 errors** (coverage 68.54%).
+- [X] T002 Contagem inicial da `domain/`: **88** arquivos `.py` (sem `__init__`).
 
 **Checkpoint**: baseline verde e contagem inicial registrados — o colapso pode começar.
 
@@ -66,29 +63,33 @@ percorrer escala/extras/folha/dashboard mostra comportamento idêntico.
 > Ordem: dos vazios/menores para os maiores; **`base` por ÚLTIMO** (D4 — tem 4 usos internos de
 > domain; só cai depois que tudo que o importa já saiu). Cada tarefa segue o loop de segurança.
 
-- [ ] T003 [US1] Deletar `backend/app/domain/entities/` (módulo vazio, prod=0) + limpar reexports.
-- [ ] T004 [US1] Deletar `backend/app/domain/services/` (vazio; confunde com `app/services`) + reexports.
-- [ ] T005 [US1] Deletar `backend/app/domain/reports/` (vazio, prod=0) + seu teste, se houver.
-- [ ] T006 [US1] Deletar `backend/app/domain/calendar/` (prod=0) + seu teste (1) em `backend/app/tests/`.
-- [ ] T007 [US1] Deletar `backend/app/domain/metrics/` (prod=0) + seu teste (1).
-- [ ] T008 [US1] Deletar `backend/app/domain/snapshots/` (prod=0) + seu teste (1).
-- [ ] T009 [US1] Deletar `backend/app/domain/transitions/` (prod=0) + seu teste (1).
-- [ ] T010 [US1] Deletar `backend/app/domain/contracts/` (prod=0) + seus testes (2).
-- [ ] T011 [US1] Deletar `backend/app/domain/overlap/` (prod=0) + seus testes (3). ⚠️ Confirmar
-  antes que a detecção de sobreposição real vive inline em `assignment_service.create()` (trata
-  plantão que passa da meia-noite) — `domain/overlap` é duplicata morta, seguro deletar.
-- [ ] T012 [US1] Deletar `backend/app/domain/value_objects/` (prod=0, 6 arqs) + seus testes (5).
-- [ ] T013 [US1] 🔴 **Antes de deletar**: copiar a fórmula útil `hour_rate × duração = R$` de
-  `backend/app/domain/remuneration/remuneration_calculator.py` para o rascunho de B-06 em
-  `docs/backlog-melhorias.md` (para não reinventar). **Depois** deletar
-  `backend/app/domain/remuneration/` (prod=0, 6 arqs) + seus testes (~14 refs). Deletar o motor
-  morto **não** implementa a folha — o gap B-06 permanece registrado (feature separada).
-- [ ] T014 [US1] **(ÚLTIMO do grupo)** Confirmar por `grep -rE "app\.domain\.base" backend/app --include=*.py | grep -v /tests/`
-  que nenhum módulo remanescente importa `base`; então deletar `backend/app/domain/base/`
-  (aggregate_root, prod=0) + seus testes (3).
+- [X] T003 [US1] Deletado `domain/entities/` (vazio). Suíte 738.
+- [X] T004 [US1] Deletado `domain/services/` (vazio). Suíte 738.
+- [X] T005 [US1] Deletado `domain/reports/` + `TestReportDefinitions`. Suíte 735.
+- [X] T006 [US1] Deletado `domain/calendar/` + teste; limpo `base/__init__` (BusinessCalendar). Suíte 722.
+- [X] T007 [US1] Deletado `domain/metrics/` + teste. Suíte 718.
+- [X] T008 [US1] Deletado `domain/snapshots/` + teste. Suíte 713.
+- [X] T009 [US1] Deletado `domain/transitions/` + teste. Suíte 709.
+- [X] T010 [US1] Deletado `domain/contracts/` + 2 testes. Suíte 696.
+- [X] T011 [US1] Deletado `domain/overlap/` + teste (confirmado: overlap real vive inline em
+  `assignment_service.create()`, virada de meia-noite +24h). Suíte 690.
+- [X] T012 [US1] ⚠️ **PARCIAL**: deletados 5 VOs mortos + 4 testes. **`shift_time_range.py` MANTIDO**
+  — usado por `domain/rules/shift_rules` (Grupo D, produto vivo). Cai quando `rules` for tratado. Suíte 675.
+- [X] T013 [US1] ⚠️ **PARCIAL**: deletado só o **motor morto** (`remuneration_calculator`,
+  `remuneration_engine`, `pricing_policy`) + 3 testes; `__init__` limpo; fórmula resgatada em B-06.
+  **MANTIDOS** `remuneration_result`, `remuneration_rule`, `calculation_explanation` — usados por
+  `domain/payroll/payroll_competency` (produto vivo via `payroll_service`). Suíte 652.
+- [~] T014 [US1] **ADIADO**: `base/aggregate_root` (AggregateRoot) ainda é importado por
+  `domain/payroll/payroll_competency` (vivo) e pelos 3 `domain/state_machines/*` (**Grupo D, fora
+  de escopo**). O guard do D4 (grep mostra importadores) impede a remoção agora. `base` cai junto
+  com a feature do Grupo D (state_machines).
 
-**Checkpoint**: Grupo A removido. Suíte verde; `find backend/app/domain -name '*.py'` mostra queda
-substancial de arquivos. US1 entregue de forma independente e testável (MVP).
+**Checkpoint US1 ✅**: Grupo A concluído. **9 módulos totalmente removidos**; `value_objects` e
+`remuneration` reduzidos ao que é vivo; `base` adiado ao Grupo D. Suíte **652 passed / 0 failed**;
+`domain/` **88 → 71** arquivos; **0 import de produto quebrado**; escopo só em
+`domain/services/use_cases/tests/docs/specs`. As 3 exceções têm a mesma raiz: peças de fundação
+ainda consumidas por Grupo D (`rules`, `state_machines`) e pelo agregado `payroll` — coerente com
+D4 e o edge case da spec.
 
 ---
 
