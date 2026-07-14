@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import MagicMock
-from app.domain.rules.shift_rules import ShiftRules
+from app.services.shift_service import ShiftRules
 from app.domain.constants.shift_status import ShiftStatus
 
 

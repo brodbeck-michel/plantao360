@@ -1,4 +1,5 @@
 from typing import Optional
+from datetime import date
 
 from app.database.unit_of_work import UnitOfWork
 from app.repositories.shift_repository import ShiftRepository
@@ -13,8 +14,6 @@ from app.common.api_response import ApiResponse
 from app.events.event_dispatcher import EventDispatcher, Event
 from app.domain.events.event_names import DomainEventName
 from app.domain.errors.shift_errors import ShiftErrorCode
-from app.domain.state_machines.shift_state_machine import ShiftStateMachine
-from app.domain.rules.shift_rules import ShiftRules
 from app.domain.constants.shift_status import ShiftStatus
 from app.domain.constants.competency_dates import get_competency_dates
 from app.services.shift_lifecycle_service import ShiftLifecycleService
@@ -23,6 +22,89 @@ from app.core.logging import get_logger
 logger = get_logger("service.shift")
 
 event_dispatcher = EventDispatcher()
+
+
+# ShiftRules — antes em domain/rules/shift_rules (consumidor único: este service).
+# Inlinada no colapso da domain/ (spec 005, Grupo D). Regras preservadas.
+# (o import morto de ShiftTimeRange, nunca usado, foi descartado — VO deletado como peso morto.)
+class ShiftRules:
+    def __init__(self, shift) -> None:
+        self._shift = shift
+
+    def validate_date_within_period(self, period_start: date, period_end: date) -> list[str]:
+        errors: list[str] = []
+        if self._shift.shift_date < period_start:
+            errors.append("Shift date is before period start")
+        if self._shift.shift_date > period_end:
+            errors.append("Shift date is after period end")
+        return errors
+
+    def validate_can_update(self) -> list[str]:
+        errors: list[str] = []
+        if self._shift.status == ShiftStatus.COMPLETED:
+            errors.append("Cannot update a completed shift")
+        if self._shift.status == ShiftStatus.CANCELLED:
+            errors.append("Cannot update a cancelled shift")
+        return errors
+
+    def validate_can_start(self) -> list[str]:
+        errors: list[str] = []
+        if self._shift.status != ShiftStatus.SCHEDULED:
+            errors.append(f"Cannot start shift in status '{self._shift.status}'")
+        return errors
+
+    def validate_can_complete(self) -> list[str]:
+        errors: list[str] = []
+        if self._shift.status != ShiftStatus.IN_PROGRESS:
+            errors.append(f"Cannot complete shift in status '{self._shift.status}'")
+        return errors
+
+    def validate_can_cancel(self) -> list[str]:
+        errors: list[str] = []
+        if self._shift.status not in (ShiftStatus.DRAFT, ShiftStatus.SCHEDULED, ShiftStatus.IN_PROGRESS):
+            errors.append(f"Cannot cancel shift in status '{self._shift.status}'")
+        return errors
+
+    def validate_time_range(self) -> list[str]:
+        errors: list[str] = []
+        if self._shift.scheduled_start and self._shift.scheduled_end:
+            if self._shift.scheduled_end <= self._shift.scheduled_start:
+                errors.append("scheduled_end must be after scheduled_start")
+        return errors
+
+
+# ShiftStateMachine — antes em domain/state_machines (consumidor único: este service).
+# Inlinada no colapso da domain/ (spec 005, Grupo D). Transições e efeitos preservados.
+class ShiftStateMachine:
+    def __init__(self, aggregate) -> None:
+        self._aggregate = aggregate
+
+    def activate(self) -> None:
+        self._transition(ShiftStatus.DRAFT, ShiftStatus.SCHEDULED)
+
+    def start(self) -> None:
+        self._transition(ShiftStatus.SCHEDULED, ShiftStatus.IN_PROGRESS)
+
+    def complete(self) -> None:
+        self._transition(ShiftStatus.IN_PROGRESS, ShiftStatus.COMPLETED)
+
+    def cancel(self) -> None:
+        current = self._aggregate.status
+        allowed = {ShiftStatus.DRAFT, ShiftStatus.SCHEDULED, ShiftStatus.IN_PROGRESS}
+        if current not in allowed:
+            raise ValueError(f"Cannot cancel shift in status '{current}'")
+        self._transition(current, ShiftStatus.CANCELLED)
+
+    def _transition(self, from_status: str, to_status: str) -> None:
+        current = self._aggregate.status
+        if current != from_status:
+            raise ValueError(
+                f"Cannot transition from '{current}' to '{to_status}': "
+                f"expected '{from_status}'"
+            )
+        self._aggregate.before_transition(current, to_status)
+        self._aggregate.status = to_status
+        self._aggregate.after_transition(current, to_status)
 
 
 class ShiftService:
