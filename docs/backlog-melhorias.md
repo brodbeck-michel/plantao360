@@ -59,6 +59,23 @@ retrabalho.
   deletá-lo.
 - **Backend, requer decisão de produto** sobre a tabela de valores (já esboçada na spec 001).
 
+### Fórmula útil resgatada do motor morto (antes de deletar, spec 004 T013)
+
+O motor `domain/remuneration/remuneration_calculator.py` (prod=0, nunca chamado) foi removido no
+colapso da `domain/`. A fórmula que ele aplicava, resgatada aqui para reaproveitar em B-06:
+
+```
+duration_hours     = duration_minutes / 60.0
+value_before_mult  = hour_rate × duration_hours
+final_value        = value_before_mult × rule.multiplier
+```
+
+Onde: `duration_minutes` vem do `financial_fact`/snapshot; `hour_rate` é o valor-hora do médico
+(tabela de valores por médico/tipo — decisão de produto da spec 001); `rule.multiplier` é o
+multiplicador da regra aplicável (ex.: plantão noturno). A explicação passo-a-passo do cálculo
+(minutos→horas, ×valor-hora, ×multiplicador, valor final) também estava embutida ali — útil para
+uma futura tela de "como este valor foi calculado".
+
 ---
 
 ## Nota de timing (recomendação do arquiteto)

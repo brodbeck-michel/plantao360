@@ -1,12 +1,10 @@
-"""Remuneration domain — Engine, Rules, Policy, Calculator, Result, Explanation."""
+"""Remuneration domain — Rule, Result, Explanation (data classes usadas por payroll).
+
+O motor de cálculo (Calculator/Engine/PricingPolicy) era prod=0 e foi removido no colapso da
+domain/ (spec 004, Grupo A); a fórmula útil ficou registrada em docs/backlog-melhorias.md (B-06).
+"""
 
 from app.domain.remuneration.remuneration_rule import RemunerationRule
-from app.domain.remuneration.pricing_policy import PricingPolicy
-from app.domain.remuneration.remuneration_calculator import (
-    RemunerationCalculator,
-    CalculationInput,
-    CalculationOutput,
-)
 from app.domain.remuneration.remuneration_result import (
     RemunerationResult,
     DoctorRemuneration,
@@ -15,17 +13,11 @@ from app.domain.remuneration.calculation_explanation import (
     CalculationExplanation,
     ExplanationStep,
 )
-from app.domain.remuneration.remuneration_engine import RemunerationEngine
 
 __all__ = [
     "RemunerationRule",
-    "PricingPolicy",
-    "RemunerationCalculator",
-    "CalculationInput",
-    "CalculationOutput",
     "RemunerationResult",
     "DoctorRemuneration",
     "CalculationExplanation",
     "ExplanationStep",
-    "RemunerationEngine",
 ]
