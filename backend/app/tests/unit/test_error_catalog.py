@@ -1,5 +1,5 @@
 from app.domain.errors.error_catalog import ERROR_MESSAGES
-from app.domain.rules.business_rules import BusinessRuleCode
+from app.domain.constants.business_rule_code import BusinessRuleCode
 
 
 def test_error_catalog_has_all_rules():

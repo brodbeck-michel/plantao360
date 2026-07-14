@@ -1,4 +1,4 @@
-from app.domain.rules.business_rules import BusinessRuleCode
+from app.domain.constants.business_rule_code import BusinessRuleCode
 
 ERROR_MESSAGES: dict[BusinessRuleCode, str] = {
     BusinessRuleCode.RN_01_SHIFT_REQUIRES_DOCTOR: (

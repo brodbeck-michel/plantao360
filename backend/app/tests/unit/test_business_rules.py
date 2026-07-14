@@ -1,4 +1,4 @@
-from app.domain.rules.business_rules import BusinessRuleCode
+from app.domain.constants.business_rule_code import BusinessRuleCode
 
 
 def test_business_rule_code_values():
