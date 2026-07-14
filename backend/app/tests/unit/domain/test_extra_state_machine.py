@@ -1,7 +1,7 @@
 """Tests for Extra State Machine."""
 
 import pytest
-from app.domain.state_machines.extra_state_machine import ExtraStateMachine
+from app.services.extra_service import ExtraStateMachine
 from app.domain.constants.extra_status import ExtraStatus
 
 
