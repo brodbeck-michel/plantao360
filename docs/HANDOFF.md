@@ -123,13 +123,13 @@ e075a70+212bb8b levantamento domain → 872224c spec004 → 3af57e6 plan004.
 
 ## PRÓXIMO PASSO IMEDIATO
 
-Grupos A+B (parte limpa) da spec 004 **concluídos** (suíte 638 verde; `domain/` 88→53). Falta:
+Grupos A+B (parte limpa) da spec 004 **concluídos e validados** (suíte 638 verde; 93 testes de API
+verdes; `domain/` 88→53; **SC-005 validado no navegador em 2026-07-14** — dashboard/períodos/escala/
+extras/cobertura/usuários todos OK). Falta:
 
-1. **Validar SC-005 no navegador** (subir o app dev e percorrer escala/extras/cobertura/dashboard/
-   usuários) — a suíte + testes de API já indicam paridade, falta a conferência manual.
-2. **Nova feature "Grupo D" (spec 005)** que colapsa o cluster acoplado de uma vez:
+1. **Nova feature "Grupo D" (spec 005)** que colapsa o cluster acoplado de uma vez:
    `state_machines` + `read_models`/`query`/`rules` + a camada `use_cases/` + o cluster adiado do
    Grupo B (`coverage`, `financial`, `payroll_competency`) + `base` + `value_objects/shift_time_range`
    + as data classes de `remuneration`. Só aí `domain/` chega à meta de ~30–40 (hoje 53). É o passo
    que exige análise de comportamento (transições/regras), por isso merece a própria spec (D7).
-3. **B-06** (gap de remuneração): a fórmula útil já foi resgatada para `docs/backlog-melhorias.md`.
+2. **B-06** (gap de remuneração): a fórmula útil já foi resgatada para `docs/backlog-melhorias.md`.

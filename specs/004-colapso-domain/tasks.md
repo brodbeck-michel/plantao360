@@ -147,14 +147,16 @@ de API de antes.
   idênticos; o aviso de gate de cobertura no subconjunto não é falha de teste).
 - [~] T027 [US3] SC-004 — `domain/` **88 → 53** arquivos. Ainda acima da meta 30–40 porque o
   cluster coverage/financial/payroll + Grupo D permanecem; a meta será atingida na feature do Grupo D.
-- [ ] T028 [US3] SC-005 — subir o app dev e percorrer os fluxos (pendente de validação manual no
-  navegador; suíte + API verdes já indicam paridade).
+- [X] T028 [US3] SC-005 — app dev subiu healthy (`database=connected`, seed dev) e os fluxos
+  (dashboard, períodos/competência, escala, extras, cobertura, usuários) foram percorridos no
+  navegador: **todos funcionando, comportamento idêntico** (validado pelo usuário em 2026-07-14).
 - [X] T029 [US3] Prova de escopo: diff da sessão só toca
   `backend/app/{domain,services,use_cases}/`, `backend/app/tests/` e `docs/`/`specs/` — nenhum
   `models`/`api/routes`/`schemas`/migration/`frontend`.
 
-**Checkpoint US3 ✅ (parcial)**: paridade comprovada por suíte + API + imports + escopo. SC-004 fica
-parcial (53, não 30–40) pelo cluster adiado; SC-005 (validação manual no navegador) pendente.
+**Checkpoint US3 ✅**: paridade comprovada por suíte + API + imports + escopo + validação manual
+(SC-005, todos os fluxos OK no navegador). Único item parcial: SC-004 (53 arqs, não 30–40) pelo
+cluster adiado — atinge a meta na feature do Grupo D.
 
 ---
 
