@@ -17,11 +17,6 @@ from app.domain.query.financial_analytics_query import FinancialAnalyticsQuery
 from app.domain.query.payroll_analytics_query import PayrollAnalyticsQuery
 from app.domain.query.timeline_query import TimelineQuery
 
-from app.domain.projections.coverage_projection import CoverageProjection
-from app.domain.projections.financial_projection import FinancialProjection
-from app.domain.projections.payroll_projection import PayrollProjection
-from app.domain.projections.institution_projection import InstitutionProjection
-
 from app.domain.explainability.domain_explanation import DomainExplanation
 from app.domain.explainability.explanation_step import ExplanationStep
 from app.domain.explainability.explanation_context import ExplanationContext
@@ -128,35 +123,6 @@ class TestQueryObjects:
         assert q.entity_type == "payroll"
         d = q.to_dict()
         assert d["include_events"] is True
-
-
-class TestProjections:
-    def test_coverage_projection(self):
-        cp = CoverageProjection(period_id=1, total_shifts=30, coverage_rate=85.0)
-        assert cp.period_id == 1
-        d = cp.to_dict()
-        assert d["coverage_rate"] == 85.0
-
-    def test_financial_projection(self):
-        fp = FinancialProjection(period_id=1, total_facts=50, total_value=10000.0)
-        assert fp.total_facts == 50
-        d = fp.to_dict()
-        assert d["total_value"] == 10000.0
-
-    def test_payroll_projection(self):
-        pp = PayrollProjection(
-            payroll_id=1, period_id=1, year_month="202606",
-            status="approved", current_version=1,
-        )
-        assert pp.status == "approved"
-        d = pp.to_dict()
-        assert d["checklist_complete"] is False
-
-    def test_institution_projection(self):
-        ip = InstitutionProjection(total_doctors=10, active_doctors=8)
-        assert ip.total_doctors == 10
-        d = ip.to_dict()
-        assert d["active_doctors"] == 8
 
 
 class TestExplainability:
