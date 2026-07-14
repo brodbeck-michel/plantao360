@@ -43,38 +43,25 @@ retrabalho.
 - **Correção**: no Nginx, servir `index.html` com `Cache-Control: no-cache` (os assets com hash
   podem ser `immutable`). **Escopo**: `docker/nginx/nginx.conf`. Relevante à Fase 0 (deploy).
 
-## B-06 · Cálculo de remuneração/folha NÃO está implementado (gap funcional) — prioridade ALTA
+## B-06 · Relatório para pagamento (NÃO é cálculo de folha) — prioridade a confirmar
 
-- Descoberto no levantamento da `domain/` (ver [levantamento-domain.md](levantamento-domain.md)).
-- **Fato**: o sistema consolida *quantas horas* cada médico fez (`financial_fact`/`financial_snapshot`
-  guardam duração), mas **nunca converte em R$**. `Payroll` não tem campo de valor; o
-  `payroll_service` só faz o ciclo de vida (draft→review→approve→export) sem calcular nada. O
-  único `hour_rate × duração` está no motor `domain/remuneration`, que **nunca é chamado**.
-- **Impacto**: a capacidade "calcular valores a pagar + exportar para o financeiro" (spec 001,
-  US5) **não existe de verdade** hoje.
-- **Ação (feature, não simplificação)**: implementar de forma simples — função
-  `duração × hour_rate` (com a tabela de valores por médico/tipo, conforme decidido), campos de
-  valor no `Payroll`/snapshot, e a exportação. Fazer DEPOIS do colapso da `domain/` (para
-  construir sobre a base já enxuta), reaproveitando o que for útil do motor antigo antes de
-  deletá-lo.
-- **Backend, requer decisão de produto** sobre a tabela de valores (já esboçada na spec 001).
+> **⚠️ CORREÇÃO DE ESCOPO (2026-07-14, direto do stakeholder):** esta aplicação **NÃO calcula a
+> folha**. O cálculo/pagamento é feito em **outro ERP**. Aqui o papel é **gestão** dos plantões e,
+> para o pagamento, **gerar um relatório** (horas/plantões consolidados por médico na competência)
+> que o financeiro/ERP consome. **NÃO implementar motor de cálculo `duração × hour_rate` aqui** —
+> seria construir o que o produto não quer (foi por isso que `domain/remuneration` estava morto).
 
-### Fórmula útil resgatada do motor morto (antes de deletar, spec 004 T013)
+- **Fato**: o sistema já consolida *quantas horas* cada médico fez (`financial_fact`/
+  `financial_snapshot` guardam duração). O `payroll_service.export` hoje é só uma **transição de
+  status** (`→EXPORTED` + evento), não gera arquivo.
+- **A verificar com o produto**: como o relatório para pagamento sai hoje? Se as telas de gestão já
+  permitem ver/imprimir/exportar as horas por médico da competência, **não há gap** (B-06 vira só um
+  "nice-to-have": botão de exportar CSV/XLSX). Se hoje é manual/inexistente, o item real é **gerar
+  esse relatório** (consolidado que já existe → CSV/XLSX/PDF), **não** um cálculo de valores.
+- **Backend/leve**, sem regra de negócio nova de cálculo.
 
-O motor `domain/remuneration/remuneration_calculator.py` (prod=0, nunca chamado) foi removido no
-colapso da `domain/`. A fórmula que ele aplicava, resgatada aqui para reaproveitar em B-06:
-
-```
-duration_hours     = duration_minutes / 60.0
-value_before_mult  = hour_rate × duration_hours
-final_value        = value_before_mult × rule.multiplier
-```
-
-Onde: `duration_minutes` vem do `financial_fact`/snapshot; `hour_rate` é o valor-hora do médico
-(tabela de valores por médico/tipo — decisão de produto da spec 001); `rule.multiplier` é o
-multiplicador da regra aplicável (ex.: plantão noturno). A explicação passo-a-passo do cálculo
-(minutos→horas, ×valor-hora, ×multiplicador, valor final) também estava embutida ali — útil para
-uma futura tela de "como este valor foi calculado".
+*(Nota: a antiga fórmula `duração × hour_rate × multiplier` do motor morto foi removida deste item —
+não se aplica: quem calcula valor é o ERP, não esta aplicação.)*
 
 ## B-07 · Cluster payroll ainda em `domain/` (dívida de simplificação) — prioridade MÉDIA
 
@@ -90,8 +77,11 @@ uma futura tela de "como este valor foi calculado".
   `use_cases/assignments`, read models e os motores mortos — **antes** de mover.
 - **Ação (feature própria)**: mapear o uso real do agregado payroll; remover selo/versão/governança/
   auditoria que não forem usados; então colapsar o núcleo restante em `coverage_service`/
-  `payroll_service` sem inversão, com `base` por último. Casa naturalmente com **B-06** (implementar
-  o cálculo de folha), já que ambos mexem no mesmo fluxo.
+  `payroll_service` sem inversão, com `base` por último. **Reforço (correção de escopo B-06):** boa
+  parte dessa cerimônia (selo imutável, versionamento, resultado de remuneração) foi construída para
+  um cenário de "calcular e lacrar a folha oficial" que **não é o papel deste sistema** (o ERP faz a
+  folha). Isso torna o enxugamento ainda mais justificável — muito provavelmente é possível remover,
+  não só relocar. Casa com B-06 (o relatório para pagamento), já que mexem no mesmo fluxo.
 - **Escopo**: `domain/{payroll,coverage,financial,remuneration,base,state_machines}` + services.
   Paridade garantida pela suíte (632) + testes de API (93).
 
