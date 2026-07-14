@@ -3,13 +3,12 @@
 import pytest
 from datetime import datetime
 
-from app.domain.read_models.doctor_summary import DoctorSummary
-from app.domain.read_models.period_summary import PeriodSummary
-from app.domain.read_models.shift_summary import ShiftSummary
-from app.domain.read_models.assignment_summary import AssignmentSummary
-from app.domain.read_models.coverage_summary import CoverageSummary
-from app.domain.read_models.financial_summary import FinancialSummary
-from app.domain.read_models.payroll_summary import PayrollSummary
+from app.services.query_service import (
+    DoctorSummary,
+    CoverageSummary,
+    FinancialSummary,
+    PayrollSummary,
+)
 
 from app.services.query_service import (
     DoctorAnalyticsQuery,
@@ -38,31 +37,6 @@ class TestReadModels:
         assert ds.total_shifts == 10
         d = ds.to_dict()
         assert d["name"] == "Dr. João"
-
-    def test_period_summary(self):
-        ps = PeriodSummary(period_id=1, year=2026, month=6, status="closed")
-        assert ps.year == 2026
-        d = ps.to_dict()
-        assert d["status"] == "closed"
-
-    def test_shift_summary(self):
-        ss = ShiftSummary(
-            shift_id=1, period_id=1, shift_date="2026-06-01",
-            shift_type="T1", status="completed",
-        )
-        assert ss.shift_id == 1
-        d = ss.to_dict()
-        assert d["shift_type"] == "T1"
-
-    def test_assignment_summary(self):
-        a = AssignmentSummary(
-            assignment_id=1, shift_id=1, doctor_id=1,
-            doctor_name="Dr. João", doctor_crm="12345",
-            status="completed",
-        )
-        assert a.assignment_id == 1
-        d = a.to_dict()
-        assert d["doctor_crm"] == "12345"
 
     def test_coverage_summary(self):
         cs = CoverageSummary(period_id=1, total_shifts=30, coverage_rate=85.0)

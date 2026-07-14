@@ -1,10 +1,6 @@
 """Query Services — Read-only services for the query domain."""
 
 
-from app.domain.read_models.doctor_summary import DoctorSummary
-from app.domain.read_models.coverage_summary import CoverageSummary
-from app.domain.read_models.financial_summary import FinancialSummary
-from app.domain.read_models.payroll_summary import PayrollSummary
 
 
 from dataclasses import dataclass, field
@@ -77,6 +73,140 @@ class InstitutionTimeline:
             "date_range": self.date_range,
             "event_types": self.event_types,
             "generated_at": self.generated_at.isoformat() if self.generated_at else None,
+        }
+
+
+# Read models (summaries) — antes em domain/read_models (consumidor único: este service).
+# Inlinados no colapso da domain/ (spec 005, Grupo D).
+@dataclass(frozen=True)
+class DoctorSummary:
+    """Immutable summary of a doctor for query purposes."""
+    doctor_id: int
+    name: str
+    crm: str
+    hour_rate: float
+    active: bool
+    total_shifts: int = 0
+    total_hours: float = 0.0
+    total_extras: int = 0
+    total_remuneration: float = 0.0
+    last_shift_date: datetime | None = None
+    created_at: datetime | None = None
+
+    def to_dict(self) -> dict:
+        return {
+            "doctor_id": self.doctor_id,
+            "name": self.name,
+            "crm": self.crm,
+            "hour_rate": self.hour_rate,
+            "active": self.active,
+            "total_shifts": self.total_shifts,
+            "total_hours": self.total_hours,
+            "total_extras": self.total_extras,
+            "total_remuneration": self.total_remuneration,
+            "last_shift_date": self.last_shift_date.isoformat() if self.last_shift_date else None,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+        }
+
+
+@dataclass(frozen=True)
+class CoverageSummary:
+    """Immutable summary of coverage for query purposes."""
+    period_id: int
+    total_shifts: int = 0
+    total_assignments_completed: int = 0
+    total_assignments_planned: int = 0
+    total_extras_approved: int = 0
+    total_extras_pending: int = 0
+    total_duration_minutes: int = 0
+    coverage_rate: float = 0.0
+    inconsistency_count: int = 0
+    inconsistencies: list[dict] = field(default_factory=list)
+    consolidated_at: datetime | None = None
+
+    def to_dict(self) -> dict:
+        return {
+            "period_id": self.period_id,
+            "total_shifts": self.total_shifts,
+            "total_assignments_completed": self.total_assignments_completed,
+            "total_assignments_planned": self.total_assignments_planned,
+            "total_extras_approved": self.total_extras_approved,
+            "total_extras_pending": self.total_extras_pending,
+            "total_duration_minutes": self.total_duration_minutes,
+            "coverage_rate": self.coverage_rate,
+            "inconsistency_count": self.inconsistency_count,
+            "inconsistencies": self.inconsistencies,
+            "consolidated_at": self.consolidated_at.isoformat() if self.consolidated_at else None,
+        }
+
+
+@dataclass(frozen=True)
+class FinancialSummary:
+    """Immutable summary of financial data for query purposes."""
+    period_id: int
+    total_facts: int = 0
+    total_duration_minutes: int = 0
+    total_value: float = 0.0
+    total_doctors: int = 0
+    facts_by_type: dict[str, int] = field(default_factory=dict)
+    facts_by_status: dict[str, int] = field(default_factory=dict)
+    rules_applied: list[str] = field(default_factory=list)
+    created_at: datetime | None = None
+
+    def to_dict(self) -> dict:
+        return {
+            "period_id": self.period_id,
+            "total_facts": self.total_facts,
+            "total_duration_minutes": self.total_duration_minutes,
+            "total_value": self.total_value,
+            "total_doctors": self.total_doctors,
+            "facts_by_type": self.facts_by_type,
+            "facts_by_status": self.facts_by_status,
+            "rules_applied": self.rules_applied,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+        }
+
+
+@dataclass(frozen=True)
+class PayrollSummary:
+    """Immutable summary of a payroll competency for query purposes."""
+    payroll_id: int
+    period_id: int
+    year_month: str
+    status: str
+    current_version: int
+    total_value: float = 0.0
+    total_doctors: int = 0
+    total_facts: int = 0
+    reopen_count: int = 0
+    reopen_reason: str | None = None
+    created_by: str = ""
+    approved_by: str | None = None
+    approved_at: datetime | None = None
+    locked_by: str | None = None
+    locked_at: datetime | None = None
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+    def to_dict(self) -> dict:
+        return {
+            "payroll_id": self.payroll_id,
+            "period_id": self.period_id,
+            "year_month": self.year_month,
+            "status": self.status,
+            "current_version": self.current_version,
+            "total_value": self.total_value,
+            "total_doctors": self.total_doctors,
+            "total_facts": self.total_facts,
+            "reopen_count": self.reopen_count,
+            "reopen_reason": self.reopen_reason,
+            "created_by": self.created_by,
+            "approved_by": self.approved_by,
+            "approved_at": self.approved_at.isoformat() if self.approved_at else None,
+            "locked_by": self.locked_by,
+            "locked_at": self.locked_at.isoformat() if self.locked_at else None,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }
 
 
