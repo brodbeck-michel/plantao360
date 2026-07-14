@@ -1,5 +1,5 @@
 import pytest
-from app.domain.state_machines.period_state_machine import PeriodStateMachine
+from app.use_cases.periods.base_period_use_case import PeriodStateMachine
 from app.domain.constants.period_status import PeriodStatus
 from app.domain.errors.period_errors import PeriodErrorCode
 

@@ -3,11 +3,41 @@ from app.audit.context import AuditContext
 from app.events.event_dispatcher import EventDispatcher, Event
 from app.domain.events.event_names import DomainEventName
 from app.domain.constants.period_status import PeriodStatus
-from app.domain.state_machines.period_state_machine import PeriodStateMachine
+from app.domain.errors.period_errors import PeriodErrorCode
 from app.common.clock import ClockProvider, SystemClock
 from app.core.logging import get_logger
 
 logger = get_logger("use_case.period")
+
+
+# PeriodStateMachine — antes em domain/state_machines (consumidor único: este use_case).
+# Inlinada no colapso da domain/ (spec 005, Grupo D). Transições e códigos de erro preservados.
+class PeriodStateMachine:
+    _TRANSITIONS: dict[PeriodStatus, set[PeriodStatus]] = {
+        PeriodStatus.DRAFT: {PeriodStatus.CLOSED},
+        PeriodStatus.CLOSED: {PeriodStatus.DRAFT, PeriodStatus.PAID},
+        PeriodStatus.PAID: set(),
+    }
+
+    def can_transition(self, current: PeriodStatus, target: PeriodStatus) -> bool:
+        return target in self._TRANSITIONS.get(current, set())
+
+    def get_allowed_transitions(self, current: PeriodStatus) -> set[PeriodStatus]:
+        return self._TRANSITIONS.get(current, set()).copy()
+
+    def validate_transition(self, current: PeriodStatus, target: PeriodStatus) -> str | None:
+        if self.can_transition(current, target):
+            return None
+        if current == PeriodStatus.CLOSED and target == PeriodStatus.CLOSED:
+            return PeriodErrorCode.PERIOD_ALREADY_CLOSED
+        if current == PeriodStatus.PAID:
+            if target == PeriodStatus.CLOSED:
+                return PeriodErrorCode.PERIOD_IMMUTABLE
+            if target == PeriodStatus.DRAFT:
+                return PeriodErrorCode.PERIOD_CANNOT_BE_REOPENED
+        if current == PeriodStatus.DRAFT and target == PeriodStatus.PAID:
+            return PeriodErrorCode.PERIOD_INVALID_STATUS_TRANSITION
+        return PeriodErrorCode.PERIOD_INVALID_STATUS_TRANSITION
 
 
 # PeriodPolicy — antes em domain/policies (consumidor único: este use_case).

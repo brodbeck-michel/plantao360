@@ -1,3 +1,1 @@
-from app.domain.state_machines.period_state_machine import PeriodStateMachine
-
-__all__ = ["PeriodStateMachine"]
+"""Domain state machines — resta payroll_state_machine (colapsa com o cluster payroll, US3)."""
