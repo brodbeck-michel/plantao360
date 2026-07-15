@@ -1,0 +1,40 @@
+name: CI
+
+# CI enxuto alinhado à Constituição (Princípio III — testar o que importa;
+# Princípio IV — reprodutibilidade via Docker). Substitui os workflows legados
+# (architecture/quality/backend/frontend/release-readiness), que fiscalizavam a
+# arquitetura DDD/freeze já removida e apontavam para caminhos inexistentes.
+#
+# Roda os MESMOS comandos que o time usa localmente (docs/.../quickstart.md):
+# a suíte de testes do backend na imagem Docker e o build de produção do frontend.
+# A publicação de imagens fica em release-images.yml (dispara em tags v*).
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+
+jobs:
+  backend-tests:
+    name: Backend — suíte de testes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build imagem de teste
+        run: docker build -t plantao360-backend-test ./backend
+
+      - name: Pytest (gate de cobertura 65% via pyproject.toml)
+        run: docker run --rm -e ENVIRONMENT=test plantao360-backend-test python -m pytest -p no:cacheprovider -q
+
+  frontend-build:
+    name: Frontend — build de produção
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build da imagem do frontend (tsc/vite via Dockerfile)
+        run: docker build -f frontend/Dockerfile -t plantao360-frontend-ci --build-arg VITE_MVP_MODE=true .
