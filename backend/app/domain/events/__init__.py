@@ -1,3 +1,3 @@
-from app.domain.events.event_collector import EventCollector
+from app.domain.events.event_names import DomainEventName
 
-__all__ = ["EventCollector"]
+__all__ = ["DomainEventName"]

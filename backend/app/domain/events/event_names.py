@@ -31,31 +31,6 @@ class DomainEventName(StrEnum):
     ASSIGNMENT_CANCELLED_V1 = "assignment.cancelled.v1"
     ASSIGNMENT_REMOVED_V1 = "assignment.removed.v1"
 
-    COVERAGE_CONSOLIDATED_V1 = "coverage.consolidated.v1"
-    FINANCIAL_SNAPSHOT_CREATED_V1 = "financial.snapshot.created.v1"
-    FINANCIAL_FACT_GENERATED_V1 = "financial.fact.generated.v1"
-    FINANCIAL_FACT_REVOKED_V1 = "financial.fact.revoked.v1"
-
-    REMUNERATION_CALCULATED_V1 = "remuneration.calculated.v1"
-    REMUNERATION_SIMULATED_V1 = "remuneration.simulated.v1"
-    REMUNERATION_RECALCULATED_V1 = "remuneration.recalculated.v1"
-    REMUNERATION_INVALIDATED_V1 = "remuneration.invalidated.v1"
-
-    PAYROLL_CREATED_V1 = "payroll.created.v1"
-    PAYROLL_CALCULATED_V1 = "payroll.calculated.v1"
-    PAYROLL_REVIEWED_V1 = "payroll.reviewed.v1"
-    PAYROLL_APPROVED_V1 = "payroll.approved.v1"
-    PAYROLL_EXPORTED_V1 = "payroll.exported.v1"
-    PAYROLL_PAID_V1 = "payroll.paid.v1"
-    PAYROLL_ARCHIVED_V1 = "payroll.archived.v1"
-    PAYROLL_REOPENED_V1 = "payroll.reopened.v1"
-
-    PAYROLL_READY_V1 = "payroll.ready.v1"
-    PAYROLL_CHECKLIST_COMPLETED_V1 = "payroll.checklist.completed.v1"
-    PAYROLL_APPROVAL_REQUESTED_V1 = "payroll.approval.requested.v1"
-    PAYROLL_LOCKED_V1 = "payroll.locked.v1"
-    PAYROLL_UNLOCKED_V1 = "payroll.unlocked.v1"
-
     @classmethod
     def values(cls) -> list[str]:
         return [item.value for item in cls]
