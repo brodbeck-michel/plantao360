@@ -48,6 +48,7 @@ export default function UserListPage() {
   const [form, setForm] = useState<FormData>(INITIAL_FORM);
   const [formError, setFormError] = useState<string | null>(null);
   const [newPassword, setNewPassword] = useState('');
+  const [passwordError, setPasswordError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   const loadUsers = async () => {
@@ -82,6 +83,7 @@ export default function UserListPage() {
   const handleOpenPassword = (userId: number) => {
     setPasswordUserId(userId);
     setNewPassword('');
+    setPasswordError(null);
     setPasswordDialogOpen(true);
   };
 
@@ -118,12 +120,18 @@ export default function UserListPage() {
 
   const handlePasswordChange = async () => {
     if (!passwordUserId || !newPassword) return;
+    // Validação no cliente + erro dentro do dialog (mesmo padrão do B-01).
+    if (newPassword.length < 6) {
+      setPasswordError('A senha deve ter ao menos 6 caracteres.');
+      return;
+    }
+    setPasswordError(null);
     setSaving(true);
     try {
       await usersApi.changePassword(passwordUserId, newPassword);
       setPasswordDialogOpen(false);
-    } catch {
-      setError('Erro ao alterar senha');
+    } catch (err) {
+      setPasswordError((err as { message?: string })?.message || 'Erro ao alterar senha.');
     } finally {
       setSaving(false);
     }
@@ -246,13 +254,16 @@ export default function UserListPage() {
 
       <Dialog open={passwordDialogOpen} onClose={() => setPasswordDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>Alterar Senha</DialogTitle>
-        <DialogContent sx={{ pt: '16px !important' }}>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: '16px !important' }}>
+          {passwordError && <Alert severity="error" onClose={() => setPasswordError(null)}>{passwordError}</Alert>}
           <TextField
             label="Nova Senha"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             fullWidth
             type="password"
+            required
+            helperText="Mínimo 6 caracteres"
           />
         </DialogContent>
         <DialogActions>

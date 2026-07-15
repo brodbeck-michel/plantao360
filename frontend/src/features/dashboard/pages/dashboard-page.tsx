@@ -10,7 +10,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box, Grid, Card, CardContent, Typography, Stack, List, ListItem, ListItemAvatar,
-  ListItemText, Avatar, Divider, Tooltip, Skeleton,
+  ListItemText, Avatar, Divider, Tooltip, Skeleton, TextField, MenuItem,
 } from '@mui/material';
 import {
   Refresh as RefreshIcon, EventNote as EventNoteIcon, AccessTime as AccessTimeIcon,
@@ -36,9 +36,27 @@ import { apiClient } from '../../../api/client';
 // API
 // ============================================================
 
-async function fetchDashboard() {
-  const response = await apiClient.get('/query/dashboard');
+async function fetchDashboard(periodId: number | null) {
+  // B-03: sem periodId o backend usa a competência atual (comportamento anterior).
+  const url = periodId ? `/query/dashboard?period_id=${periodId}` : '/query/dashboard';
+  const response = await apiClient.get(url);
   return response.data.data ?? response.data;
+}
+
+interface PeriodOption {
+  id: number;
+  year: number;
+  month: number;
+}
+
+async function fetchPeriods(): Promise<PeriodOption[]> {
+  const response = await apiClient.get('/periods?size=100&sort_by=id&sort_direction=desc');
+  return response.data.data?.items ?? [];
+}
+
+function periodLabel(p: PeriodOption): string {
+  const label = new Date(p.year, p.month - 1, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+  return label.charAt(0).toUpperCase() + label.slice(1);
 }
 
 // ============================================================
@@ -58,6 +76,14 @@ function DashboardPageContent() {
   const isDemoMode = featureFlags.isEnabled('DEMO_MODE');
   const navigate = useNavigate();
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+  // B-03: null = competência automática (mais recente não paga), como antes.
+  const [selectedPeriodId, setSelectedPeriodId] = useState<number | null>(null);
+
+  const { data: periods = [] } = useQuery({
+    queryKey: ['periods', 'dashboard-selector'],
+    queryFn: fetchPeriods,
+    staleTime: 5 * 60 * 1000,
+  });
 
   const {
     data: dashboard,
@@ -66,8 +92,8 @@ function DashboardPageContent() {
     refetch,
     isFetching,
   } = useQuery({
-    queryKey: queryKeys.dashboard.summary,
-    queryFn: fetchDashboard,
+    queryKey: [...queryKeys.dashboard.summary, selectedPeriodId ?? 'auto'],
+    queryFn: () => fetchDashboard(selectedPeriodId),
     refetchInterval: isDemoMode ? false : 30000,
   });
 
@@ -139,7 +165,20 @@ function DashboardPageContent() {
         />
       </ContentTransition>
 
-      <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
+      <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 2 }}>
+        <TextField
+          select
+          size="small"
+          label="Competência"
+          value={selectedPeriodId ?? ''}
+          onChange={(e) => setSelectedPeriodId(e.target.value === '' ? null : Number(e.target.value))}
+          sx={{ minWidth: 200 }}
+        >
+          <MenuItem value="">Atual (automática)</MenuItem>
+          {periods.map((p) => (
+            <MenuItem key={p.id} value={p.id}>{periodLabel(p)}</MenuItem>
+          ))}
+        </TextField>
         <AutoRefreshIndicator lastRefresh={lastRefresh} isRefreshing={isFetching} />
       </Box>
 

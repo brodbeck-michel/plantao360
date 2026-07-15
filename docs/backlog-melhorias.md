@@ -15,25 +15,31 @@ retrabalho.
   `required` + dica "Mínimo 6 caracteres". **Validado no navegador** (senha curta bloqueia com
   mensagem clara; dados válidos criam e atualizam a lista).
 
-## B-02 · Aba Turno: layout sem separação clara entre dia/turno — prioridade MÉDIA
+## B-02 · Aba Turno: layout sem separação clara entre dia/turno — ✅ RESOLVIDO (2026-07-15)
 
 - **Sintoma**: difícil identificar qual dia e qual turno; falta uma linha/separador entre eles.
-- **Tipo**: UI/UX (frontend), baixo risco.
-- **Escopo**: `frontend/src/features/shift` / grade operacional.
+- **Correção**: linha separadora de 2px na primeira linha de cada grupo de data (a partir do
+  segundo grupo) em `ShiftManagementTab.tsx`. **Validado no navegador**: 30 grupos de data,
+  29 com separador (todos menos o primeiro).
 
-## B-03 · Dashboard: permitir escolher a competência (período) — prioridade MÉDIA
+## B-03 · Dashboard: permitir escolher a competência (período) — ✅ RESOLVIDO (2026-07-15)
 
 - **Sintoma**: o dashboard puxa a competência automaticamente; não há como trocar o
   período/mês manualmente.
-- **Tipo**: pequena melhoria de usabilidade (frontend; o backend de dashboard provavelmente já
-  aceita um parâmetro de período — a confirmar).
-- **Escopo**: `frontend/src/features/dashboard` (+ verificar se o endpoint aceita período).
+- **Correção**: o backend **já aceitava** `period_id` (confirmado em `dashboard_service.
+  _get_current_period`); adicionado seletor "Competência" no cabeçalho do dashboard
+  (`dashboard-page.tsx`), com opção "Atual (automática)" = comportamento anterior.
+  **Validado no navegador**: selecionar Maio/2026 recarrega cards e cabeçalho com os dados
+  do período.
 
-## B-04 · Mesmo padrão de erro escondido no dialog "Alterar senha" — prioridade BAIXA
+## B-04 · Mesmo padrão de erro escondido no dialog "Alterar senha" — ✅ RESOLVIDO (2026-07-15)
 
-- Descoberto ao corrigir o B-01: `handlePasswordChange` também usa o `Alert` de página (atrás
-  do modal). Vale aplicar a mesma correção (erro dentro do dialog) por consistência.
-- **Escopo**: `frontend/src/pages/UserListPage.tsx`.
+- Descoberto ao corrigir o B-01: `handlePasswordChange` também usava o `Alert` de página (atrás
+  do modal).
+- **Correção**: mesmo padrão do B-01 em `UserListPage.tsx` — validação no cliente (senha ≥6),
+  erro exibido **dentro** do dialog com a mensagem real do `apiClient`, campo `required` +
+  dica "Mínimo 6 caracteres". **Validado no navegador**: senha curta bloqueia com mensagem
+  clara dentro do dialog.
 
 ## B-05 · Cache do `index.html` após novo deploy (footgun de deploy) — ✅ RESOLVIDO (2026-07-15)
 

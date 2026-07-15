@@ -158,9 +158,15 @@ export function ShiftManagementTab({ period, onShiftCreated, onShiftUpdated, onS
             </TableRow>
           </TableHead>
           <TableBody>
-            {grouped.map(([date, dateShifts]) => (
+            {grouped.map(([date, dateShifts], groupIdx) => (
               dateShifts.map((s, idx) => (
-                <TableRow key={s.id} hover>
+                <TableRow
+                  key={s.id}
+                  hover
+                  // B-02: separador visual entre os dias — linha mais forte na primeira
+                  // linha de cada grupo de data (a partir do segundo grupo).
+                  sx={idx === 0 && groupIdx > 0 ? { '& td': { borderTop: '2px solid #D1D5DB' } } : undefined}
+                >
                   {idx === 0 && (
                     <TableCell
                       rowSpan={dateShifts.length}

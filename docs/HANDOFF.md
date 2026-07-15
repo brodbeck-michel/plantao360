@@ -94,9 +94,9 @@ entre passos. Verificação de paridade tripla: suíte 0 falhas + grep sem impor
 ## Backlog (`docs/backlog-melhorias.md`) — todos frontend, exceto B-07
 
 - **B-01** criar usuário: ✅ RESOLVIDO (erro genérico escondido + validação; commit ba5601c).
-- **B-02** aba Turno sem separador dia/turno (UI; MÉDIA).
-- **B-03** dashboard escolher competência (UI + talvez param no endpoint; MÉDIA).
-- **B-04** dialog "Alterar senha" com mesmo erro-escondido do B-01 (BAIXA).
+- **B-02** ✅ RESOLVIDO (2026-07-15) — separador visual entre dias na aba Turnos.
+- **B-03** ✅ RESOLVIDO (2026-07-15) — seletor de competência no dashboard (backend já aceitava `period_id`).
+- **B-04** ✅ RESOLVIDO (2026-07-15) — erro dentro do dialog "Alterar senha", padrão B-01.
 - **B-05** ✅ RESOLVIDO (2026-07-15) — `location = /index.html { expires -1; }` no nginx.conf; validado com curl.
 - **B-06** ✅ DESCARTADO — não é gap: o relatório de pagamento (PDF/Excel) já existe; folha oficial é do ERP.
 - **B-07** ✅ ENCERRADO (2026-07-15, spec 006) — remoção total da superfície payroll/cobertura
@@ -161,5 +161,5 @@ provavelmente pode ser **removida**, não só relocada.
    só testes de código removido); cobertura 65,5% (gate 65). Validado no navegador (jornadas,
    relatórios, 404 nas rotas). ⚠️ **PRÓXIMO DEPLOY EXIGE `./scripts/backup.sh` ANTES** (a
    migration droppa a tabela `payrolls`).
-4. **Lote curto de frontend**: B-02/B-03/B-04 (sem spec formal — cerimônia demais para o tamanho).
+4. ✅ **Lote curto de frontend**: B-02/B-03/B-04 — FEITO (2026-07-15, validado no navegador).
 5. **Fase 3**: arquivar docs/ADRs superados + gates de CI legados + migrations rodando 2×.
