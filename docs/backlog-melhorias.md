@@ -35,13 +35,19 @@ retrabalho.
   do modal). Vale aplicar a mesma correção (erro dentro do dialog) por consistência.
 - **Escopo**: `frontend/src/pages/UserListPage.tsx`.
 
-## B-05 · Cache do `index.html` após novo deploy (footgun de deploy) — prioridade MÉDIA
+## B-05 · Cache do `index.html` após novo deploy (footgun de deploy) — ✅ RESOLVIDO (2026-07-15)
 
 - Descoberto ao testar o B-01: após rebuild do frontend, o navegador continuava servindo o
   `index.html` antigo (com hashes de JS antigos) até um reload forçado com cache-buster.
 - **Risco**: depois de um deploy novo, usuários podem ver a versão antiga até dar hard refresh.
-- **Correção**: no Nginx, servir `index.html` com `Cache-Control: no-cache` (os assets com hash
-  podem ser `immutable`). **Escopo**: `docker/nginx/nginx.conf`. Relevante à Fase 0 (deploy).
+- **Correção aplicada**: `location = /index.html { expires -1; }` em `docker/nginx/nginx.conf` —
+  gera `Cache-Control: no-cache` **sem** `add_header` (que descartaria os security headers
+  herdados do bloco `server`, pela regra de herança do Nginx). Assets com hash seguem `immutable`.
+- **Validado** com nginx:alpine real + curl: `/`, `/index.html` e rota SPA (`/dashboard`) retornam
+  `Cache-Control: no-cache` com os 4 security headers presentes; `.js` segue
+  `max-age=31536000, public, immutable`. Vale para dev e prod (mesmo conf na imagem).
+- **Nota**: o efeito começa no **próximo** deploy; a transição para essa versão ainda pode exigir
+  um último hard refresh (o `index.html` já cacheado não sabe do no-cache).
 
 ## B-06 · ~~Cálculo/relatório de folha~~ — ✅ NÃO É GAP (esclarecido pelo stakeholder 2026-07-14)
 

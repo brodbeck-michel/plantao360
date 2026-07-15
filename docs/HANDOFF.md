@@ -97,7 +97,7 @@ entre passos. Verificação de paridade tripla: suíte 0 falhas + grep sem impor
 - **B-02** aba Turno sem separador dia/turno (UI; MÉDIA).
 - **B-03** dashboard escolher competência (UI + talvez param no endpoint; MÉDIA).
 - **B-04** dialog "Alterar senha" com mesmo erro-escondido do B-01 (BAIXA).
-- **B-05** Nginx cacheia `index.html` no deploy → `Cache-Control: no-cache` em `docker/nginx/nginx.conf` (MÉDIA).
+- **B-05** ✅ RESOLVIDO (2026-07-15) — `location = /index.html { expires -1; }` no nginx.conf; validado com curl.
 - **B-06** ✅ DESCARTADO — não é gap: o relatório de pagamento (PDF/Excel) já existe; folha oficial é do ERP.
 - **B-07** cluster payroll ainda em `domain/` (dívida de simplificação; MÉDIA; backend) — reduzir
   via análise do fluxo real de folha, não colapso mecânico.
@@ -110,8 +110,9 @@ entre passos. Verificação de paridade tripla: suíte 0 falhas + grep sem impor
 - **Suíte de testes**:
   `docker build -t plantao360-backend-test ./backend && docker run --rm -e ENVIRONMENT=test plantao360-backend-test python -m pytest -p no:cacheprovider -q`
 - **App dev usa BUILD ESTÁTICO** (nginx), não HMR: mudança no frontend exige
-  `docker compose up -d --build frontend`; e o navegador cacheia `index.html` → recarregar com
-  cache-buster `?cb=x` (ver B-05).
+  `docker compose up -d --build frontend`. O cache do `index.html` foi resolvido (B-05,
+  2026-07-15): a partir do primeiro build com o fix, o navegador sempre revalida — só a
+  transição para essa versão pode pedir um último hard refresh / `?cb=x`.
 
 ## Armadilhas conhecidas
 
@@ -150,7 +151,7 @@ provavelmente pode ser **removida**, não só relocada.
 **Próximos passos (ordem acordada em 2026-07-15, parecer do arquiteto):**
 1. ✅ Atualizar este HANDOFF (contradições do B-06) + remover cascas vazias de `use_cases/`
    (`imports`/`remuneration`/`reports`/`shifts`, só `__init__.py` placeholder) — FEITO.
-2. **B-05**: Nginx servir `index.html` com `Cache-Control: no-cache` (footgun de deploy; Princípio IV).
+2. ✅ **B-05**: Nginx servir `index.html` com `Cache-Control: no-cache` (footgun de deploy; Princípio IV) — FEITO.
 3. **B-07 como spec 006**: mapear o uso real do agregado payroll (o que API/relatório de fato usam);
    remover selo/versão/governança não usados; então colapsar o núcleo restante nos services.
 4. **Lote curto de frontend**: B-02/B-03/B-04 (sem spec formal — cerimônia demais para o tamanho).
