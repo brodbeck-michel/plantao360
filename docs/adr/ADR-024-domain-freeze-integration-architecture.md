@@ -1,3 +1,9 @@
+> ⚠️ **ADR HISTÓRICO — SUPERADO.** Registro mantido para rastreabilidade. A
+> [Constituição](../../.specify/memory/constitution.md) (v1.1.0) supera os 31 ADRs onde houver
+> conflito — em especial os de *freeze* e a arquitetura DDD/CQRS/event-sourcing, desmontada nas
+> specs 003–006 (a `domain/` foi de 118 → ~13 arquivos; payroll/cobertura removidos). Índice e
+> contexto em [docs/adr/README.md](README.md).
+
 # ADR-024: Domain Freeze, Application Baseline & Integration Architecture
 
 **Date:** 2026-06-27
