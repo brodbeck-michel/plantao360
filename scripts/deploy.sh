@@ -27,7 +27,12 @@ if [ ! -f .env.production ]; then
 fi
 
 echo "==> Baixando imagens da tag '${TAG}' no GHCR..."
-docker compose -f "$COMPOSE_FILE" pull
+if ! docker compose -f "$COMPOSE_FILE" pull; then
+  echo "ERRO: falha ao baixar as imagens da tag '${TAG}'." >&2
+  echo "      Verifique: (1) a tag existe no GHCR; (2) 'docker login ghcr.io' foi feito" >&2
+  echo "      com um token de escopo read:packages." >&2
+  exit 1
+fi
 
 echo "==> Subindo serviços (db -> backend -> frontend)..."
 docker compose -f "$COMPOSE_FILE" up -d
