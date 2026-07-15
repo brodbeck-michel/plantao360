@@ -22,7 +22,7 @@ import { tokens } from '../../../theme';
 // Types
 // ============================================================
 
-type EmptyContext = 'shifts' | 'doctors' | 'alerts' | 'dashboard' | 'periods' | 'assignments' | 'extras' | 'payroll';
+type EmptyContext = 'shifts' | 'doctors' | 'alerts' | 'dashboard' | 'periods' | 'assignments' | 'extras';
 
 interface EmptyConfig {
   title: string;
@@ -83,14 +83,6 @@ const EMPTY_CONFIGS: Record<EmptyContext, EmptyConfig> = {
   extras: {
     title: 'Nenhum horário extra registrado',
     description: 'Registre horas extras quando necessário.',
-    icon: <EventNote sx={{ fontSize: 48, color: tokens.colors.primary.main }} />,
-  },
-  payroll: {
-    title: 'Nenhum payroll calculado',
-    description: 'Calcule a folha de pagamento da competência.',
-    actionLabel: 'Calcular Payroll',
-    actionRoute: '/app/payroll/new',
-    prereq: 'Certifique-se de que a competência está fechada.',
     icon: <EventNote sx={{ fontSize: 48, color: tokens.colors.primary.main }} />,
   },
 };

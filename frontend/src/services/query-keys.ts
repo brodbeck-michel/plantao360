@@ -75,18 +75,6 @@ export const queryKeys = {
     detail: (id: string) => [...queryKeys.coverage.details(), id] as const,
   },
 
-  // Payroll
-  payroll: {
-    all: ['payroll'] as const,
-    lists: () => [...queryKeys.payroll.all, 'list'] as const,
-    list: (filters: Record<string, unknown>) =>
-      [...queryKeys.payroll.lists(), filters] as const,
-    details: () => [...queryKeys.payroll.all, 'detail'] as const,
-    detail: (id: string) => [...queryKeys.payroll.details(), id] as const,
-    readiness: (id: string) =>
-      [...queryKeys.payroll.all, 'readiness', id] as const,
-  },
-
   // Query Domain
   query: {
     doctors: (filters?: Record<string, unknown>) =>
@@ -95,8 +83,6 @@ export const queryKeys = {
       ['query', 'coverage', filters] as const,
     financial: (filters?: Record<string, unknown>) =>
       ['query', 'financial', filters] as const,
-    payroll: (filters?: Record<string, unknown>) =>
-      ['query', 'payroll', filters] as const,
     timeline: (filters?: Record<string, unknown>) =>
       ['query', 'timeline', filters] as const,
     dashboard: (filters?: Record<string, unknown>) =>
@@ -113,7 +99,6 @@ export const queryKeys = {
   kpi: {
     coverage: ['kpi', 'coverage'] as const,
     financial: ['kpi', 'financial'] as const,
-    payroll: ['kpi', 'payroll'] as const,
     operational: ['kpi', 'operational'] as const,
   },
 

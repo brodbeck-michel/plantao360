@@ -103,7 +103,6 @@ function App() {
         <Route path={ROUTES.ANALYTICS} element={<LazyPage><DashboardPage /></LazyPage>} />
         <Route path={ROUTES.TIMELINE} element={<LazyPage><DashboardPage /></LazyPage>} />
         <Route path={ROUTES.REPORTS} element={<LazyPage><DashboardPage /></LazyPage>} />
-        <Route path={ROUTES.READINESS} element={<LazyPage><DashboardPage /></LazyPage>} />
 
         <Route path={ROUTES.USERS} element={<AdminRoute><LazyPage><UserListPage /></LazyPage></AdminRoute>} />
 

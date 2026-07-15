@@ -48,8 +48,6 @@ export const ROUTES = {
 
   // Coverage
   COVERAGE: '/app/coverage',
-  COVERAGE_NEW: '/app/coverage/new',
-  COVERAGE_DETAIL: '/app/coverage/:id',
 
   // Extras
   EXTRAS: '/app/extras',
@@ -57,19 +55,13 @@ export const ROUTES = {
   EXTRA_DETAIL: '/app/extras/:id',
   EXTRA_EDIT: '/app/extras/:id/edit',
 
-  // Payroll
+  // Payroll (rota SPA viva no menu Financeiro; backend de payroll foi removido — spec 006)
   PAYROLL: '/app/payroll',
-  PAYROLL_NEW: '/app/payroll/new',
-  PAYROLL_DETAIL: '/app/payroll/:id',
-  PAYROLL_APPROVE: '/app/payroll/:id/approve',
 
   // Analytics
   ANALYTICS: '/app/analytics',
   TIMELINE: '/app/analytics/timeline',
   REPORTS: '/app/analytics/reports',
-
-  // Readiness
-  READINESS: '/app/readiness',
 
   // Users (Admin only)
   USERS: '/app/users',
