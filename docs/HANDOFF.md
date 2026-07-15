@@ -1,7 +1,7 @@
 # HANDOFF — Plantão 360 (contexto para continuar em outra conversa)
 
 **Atualizado:** 2026-07-15. Leia este arquivo primeiro; ele resume tudo que foi decidido e feito.
-Detalhes vivos em `.specify/memory/constitution.md`, `docs/levantamento-domain.md`,
+Detalhes vivos em `.specify/memory/constitution.md`, `docs/historico/levantamento-domain.md`,
 `docs/backlog-melhorias.md` e `specs/00X-*/`.
 
 ## O que é o projeto
@@ -62,7 +62,7 @@ Papel do assistente: **arquiteto de desenvolvimento**. Trabalho orientado a spec
   `domain/` — colapsar mecanicamente só relocaria ~1000 linhas (não reduz); exige antes análise
   do fluxo real de folha. Detalhe em `specs/005-colapso-domain-final/` e no backlog (B-07).
 
-## Levantamento da `domain/` (mapa histórico do colapso — executado) — `docs/levantamento-domain.md`
+## Levantamento da `domain/` (mapa histórico do colapso — executado) — `docs/historico/levantamento-domain.md`
 
 - **Grupo A — DELETAR** (prod=0, ~23 arqs): entities, services, reports, calendar, metrics,
   snapshots, transitions, contracts, overlap, value_objects, remuneration, base. (`base` por
