@@ -25,7 +25,6 @@ from app.models.period import Period
 from app.models.shift import Shift
 from app.models.shift_part import ShiftPart
 from app.models.shift_extra import ShiftExtra
-from app.models.payroll import Payroll
 from app.domain.constants.competency_dates import get_competency_dates
 
 # ============================================================

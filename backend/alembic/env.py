@@ -8,7 +8,7 @@ from app.database.base import Base
 from app.core.config import get_settings
 
 # Import all models to register them with Base.metadata
-from app.models import Doctor, Period, Shift, ShiftPart, ShiftExtra, Payroll  # noqa: F401
+from app.models import Doctor, Period, Shift, ShiftPart, ShiftExtra, User  # noqa: F401
 
 config = context.config
 settings = get_settings()

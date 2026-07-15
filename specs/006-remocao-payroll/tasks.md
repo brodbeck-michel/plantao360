@@ -20,7 +20,7 @@ passos. Por isso as fases são **sequenciais** ([P] só dentro da mesma fase).
 
 **Purpose**: ponto de retorno limpo e número de referência da suíte
 
-- [ ] T001 Registrar baseline: rodar a suíte no Docker (quickstart §1) e anotar a contagem
+- [X] T001 Registrar baseline: rodar a suíte no Docker (quickstart §1) e anotar a contagem
   (esperado: 632 passed / 0 failed) neste arquivo; confirmar `git status` limpo (checkpoint git
   é o próprio commit anterior)
 
@@ -42,39 +42,39 @@ Swagger sem os grupos Payrolls/Coverage; migration sobe e desce num banco limpo 
 
 ### Passo 1a — Borda HTTP (commit 1)
 
-- [ ] T002 [US1] Editar `backend/app/api/app.py`: remover `coverage` e `payroll` do import
+- [X] T002 [US1] Editar `backend/app/api/app.py`: remover `coverage` e `payroll` do import
   (linha 9) e os `include_router` correspondentes (linhas 48–49)
-- [ ] T003 [P] [US1] Deletar `backend/app/api/routes/payroll.py`,
+- [X] T003 [P] [US1] Deletar `backend/app/api/routes/payroll.py`,
   `backend/app/api/routes/coverage.py` e `backend/app/api/routes/query.py` (router de query
   nunca foi registrado — research R2); verificar `backend/app/api/routes/__init__.py`
-- [ ] T004 [US1] Gate + commit: suíte verde; `grep -rn "routes.payroll\|routes.coverage\|routes.query"
+- [X] T004 [US1] Gate + commit: suíte verde; `grep -rn "routes.payroll\|routes.coverage\|routes.query"
   backend/app` sem hits de produção; commit `refactor(api): remove rotas payroll/coverage/query (spec 006, US1)`
 
 ### Passo 1b — Services, schemas, repositories (commit 2)
 
-- [ ] T005 [P] [US1] Deletar `backend/app/services/payroll_service.py`,
+- [X] T005 [P] [US1] Deletar `backend/app/services/payroll_service.py`,
   `backend/app/services/coverage_service.py` e `backend/app/services/query_service.py`
-- [ ] T006 [P] [US1] Deletar `backend/app/validators/payroll_governance_validator.py` (morto,
+- [X] T006 [P] [US1] Deletar `backend/app/validators/payroll_governance_validator.py` (morto,
   research R5) e o pacote `backend/app/schemas/payroll/` (6 arquivos); verificar re-exports em
   `backend/app/schemas/__init__.py` e `backend/app/validators/__init__.py`
-- [ ] T007 [P] [US1] Deletar `backend/app/repositories/{payroll_repository,
+- [X] T007 [P] [US1] Deletar `backend/app/repositories/{payroll_repository,
   coverage_snapshot_repository,financial_snapshot_repository,financial_fact_repository}.py`;
   verificar `backend/app/repositories/__init__.py`
-- [ ] T008 [P] [US1] Deletar `backend/app/tests/unit/domain/test_query_domain.py` (testa o
+- [X] T008 [P] [US1] Deletar `backend/app/tests/unit/domain/test_query_domain.py` (testa o
   query_service removido)
-- [ ] T009 [US1] Gate + commit: suíte verde; `grep -rn "payroll_service\|coverage_service\|query_service"
+- [X] T009 [US1] Gate + commit: suíte verde; `grep -rn "payroll_service\|coverage_service\|query_service"
   backend/app` sem hits de produção; commit `refactor(services): remove payroll/coverage/query services (spec 006, US1)`
 
 ### Passo 1c — Modelos e migration (commit 3)
 
-- [ ] T010 [US1] Deletar `backend/app/models/{payroll,coverage_snapshot,financial_snapshot,
+- [X] T010 [US1] Deletar `backend/app/models/{payroll,coverage_snapshot,financial_snapshot,
   financial_fact}.py`; remover as linhas 9–12 de `backend/app/models/__init__.py`; remover o
   import morto `from app.models.payroll import Payroll` de `backend/app/seed/seed_data.py:28`
-- [ ] T011 [US1] Criar migration `backend/alembic/versions/20260715_008_drop_payroll.py`:
+- [X] T011 [US1] Criar migration `backend/alembic/versions/20260715_008_drop_payroll.py`:
   upgrade droppa `payrolls` e droppa condicionalmente (via `sa.inspect`, padrão da migration
   004) `coverage_snapshots`, `financial_snapshots`, `financial_facts`; downgrade recria
   `payrolls` com o schema da migration 003 ([data-model.md](data-model.md))
-- [ ] T012 [US1] Gate + commit: suíte verde; ciclo de migration num banco limpo (quickstart §2:
+- [X] T012 [US1] Gate + commit: suíte verde; ciclo de migration num banco limpo (quickstart §2:
   `upgrade head → downgrade -1 → upgrade head`); commit
   `refactor(models)!: remove payroll/snapshots + migration 008 drop (spec 006, US1)`
 
@@ -194,5 +194,12 @@ T008 deletar test_query_domain.py
 
 ## Baseline (T001)
 
-- Suíte antes: _preencher_ (esperado 632 passed / 0 failed)
-- Commit baseline: _preencher_
+- Suíte antes: **632 passed / 0 failed** (cobertura 69%)
+- Commit baseline: **d75ea29**
+
+## Progresso
+
+- **US1 concluída** (3 commits): passo 1a rotas (632✓), passo 1b services (608✓ — saem os 24
+  do test_query_domain), passo 1c modelos + migration 008 (608✓ + ciclo upgrade/downgrade/upgrade OK).
+  Achados dos gates, corrigidos junto: relationship `Period.payrolls` (cascade) em
+  `models/period.py` e import de `Payroll` em `alembic/env.py`.

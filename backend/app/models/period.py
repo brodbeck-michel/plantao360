@@ -9,7 +9,6 @@ from app.domain.constants.period_status import PeriodStatus
 
 if TYPE_CHECKING:
     from app.models.shift import Shift
-    from app.models.payroll import Payroll
 
 
 class Period(Base, TimestampMixin):
@@ -32,11 +31,6 @@ class Period(Base, TimestampMixin):
     )
 
     shifts: Mapped[list["Shift"]] = relationship(
-        back_populates="period",
-        lazy="selectin",
-        cascade="all, delete-orphan",
-    )
-    payrolls: Mapped[list["Payroll"]] = relationship(
         back_populates="period",
         lazy="selectin",
         cascade="all, delete-orphan",
