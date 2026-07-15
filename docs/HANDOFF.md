@@ -162,4 +162,18 @@ provavelmente pode ser **removida**, não só relocada.
    relatórios, 404 nas rotas). ⚠️ **PRÓXIMO DEPLOY EXIGE `./scripts/backup.sh` ANTES** (a
    migration droppa a tabela `payrolls`).
 4. ✅ **Lote curto de frontend**: B-02/B-03/B-04 — FEITO (2026-07-15, validado no navegador).
-5. **Fase 3**: arquivar docs/ADRs superados + gates de CI legados + migrations rodando 2×.
+5. ✅ **Fase 3 — CONCLUÍDA (2026-07-15)**:
+   - **Migrations rodavam 2×** (start.sh + lifespan) → lifespan é o dono único; start.sh só espera
+     o Postgres e sobe o uvicorn. Validado no container (migrations 1×, health 200).
+   - **CI legado**: 5 workflows quebrados (path `plantao360/backend` inexistente, branch main/develop,
+     cobertura 80, fiscalização da arquitetura DDD/freeze removida) + `tools/` (18 scripts sem
+     consumidor) → removidos. Novo `ci.yml` enxuto (suíte backend + build frontend, Docker,
+     verificados verdes). `release-images.yml` intacto.
+   - **ADRs**: 31 marcados como histórico (banner + `docs/adr/README.md`).
+   - **Docs arquivados**: sprints/golden-module/domain-readiness/levantamento + dirs de governança
+     (architecture/developer/engineering/modules) → `docs/historico/`. `docs/` raiz agora: HANDOFF,
+     backlog, deploy.
+
+**Backlog inteiro zerado (B-01..B-07) + Fase 3 concluída.** Cleanup opcional futuro: curar os demais
+subdirs de `docs/` (api/frontend/domain/product/etc. — alguns podem estar stale); bug pré-existente do
+DELETE de período (`PERIOD_DEACTIVATED_V1` inexistente no enum → 500; chip spawnado).

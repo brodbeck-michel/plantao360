@@ -20,9 +20,9 @@ Templates verificados:
   ✅ spec-template.md — sem conflito
   ✅ tasks-template.md — sem conflito
 Follow-up:
-  - Os 31 ADRs em docs/adr (incl. "engineering-freeze"/"domain-freeze") ficam
-    SUPERADOS por esta constituição onde houver conflito. Não remover ainda;
-    marcar como histórico na Fase 3.
+  - [FEITO na Fase 3, 2026-07-15] Os 31 ADRs em docs/adr foram marcados como
+    histórico (banner em cada + docs/adr/README.md índice). Superados por esta
+    constituição onde houver conflito. Mantidos como rastro, não removidos.
 -->
 
 # Plantão 360 — Constituição

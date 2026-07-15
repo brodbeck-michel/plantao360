@@ -11,5 +11,13 @@ mais o sistema atual** — arquivados na Fase 3 (2026-07-15) para desafogar `doc
 - **levantamento-domain.md** — o mapa que guiou o colapso da `domain/` (118 → ~13 arquivos). Já
   **executado**; útil só como registro de como foi feito.
 
+Diretórios de governança/tooling da arquitetura enterprise removida (referenciavam scripts
+`tools/` que já não existem — o CI legado e o `tools/` foram removidos na Fase 3):
+
+- **architecture/** — processo de mudança e baseline da arquitetura enterprise.
+- **developer/** — onboarding no "IDP" (module generators, architecture linters).
+- **engineering/** — baselines de engenharia (golden guard, validate_architecture).
+- **modules/** — manifestos de módulo (conceito removido).
+
 Fontes vigentes: [Constituição](../../.specify/memory/constitution.md), `docs/HANDOFF.md`,
 `docs/deploy.md`, `docs/backlog-melhorias.md` e `specs/`.
