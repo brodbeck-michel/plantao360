@@ -1,16 +1,14 @@
 #!/bin/sh
 # Startup script for Plantão 360
-# Reads ENVIRONMENT env var and runs the appropriate initialization flow.
 #
-# Modes:
-#   DEMO:       migrations → seed demo → start API
-#   DEVELOPMENT: migrations → start API
-#   PRODUCTION:  migrations → start API
-#   TEST:        start API (no migrations, no seed)
+# Responsabilidade deste script: garantir que o banco esteja acessível e então
+# iniciar o uvicorn. As migrations, o seed (só DEMO) e a criação do admin são
+# de responsabilidade do lifespan do app (app/core/lifespan.py + runtime.py),
+# que roda antes de aceitar tráfego — fonte única, independente do launcher.
+# (Antes, migrations/seed rodavam aqui E no lifespan: 2× no boot.)
 set -e
 
 ENVIRONMENT="${ENVIRONMENT:-development}"
-RELOAD_FLAG=""
 PORT="${PORT:-8000}"
 HOST="${HOST:-0.0.0.0}"
 
@@ -39,30 +37,10 @@ case "${DATABASE_URL:-}" in
         ;;
 esac
 
-# Step 1: Database migrations (skip for test mode)
-if [ "$ENVIRONMENT" != "test" ]; then
-    echo "[startup] Running database migrations..."
-    alembic upgrade head
-    echo "[startup] Migrations completed successfully."
-fi
+# Migrations + seed + admin: ver app/core/lifespan.py (rodam no startup do app,
+# antes de servir tráfego). Não duplicar aqui.
 
-# Step 2: Seed data (only in DEMO mode)
-# NOTE: Seed failures must NOT prevent the server from starting.
-if [ "$ENVIRONMENT" = "development" ]; then
-    DEMO_MODE="${DEMO_MODE:-false}"
-    if [ "$DEMO_MODE" = "true" ]; then
-        echo "[startup] DEMO_MODE detected — seeding demo data..."
-        if python -m app.seed.seed_data --dataset demo --clear; then
-            echo "[startup] Seed completed successfully."
-        else
-            echo "[startup] WARNING: Seed failed (exit code $?). Server will start anyway."
-        fi
-    else
-        echo "[startup] No seed — DEVELOPMENT mode without DEMO_MODE"
-    fi
-fi
-
-# Step 3: Uvicorn config
+# Uvicorn config
 case "$ENVIRONMENT" in
     production)
         echo "[startup] Starting uvicorn in production mode (no reload)"
