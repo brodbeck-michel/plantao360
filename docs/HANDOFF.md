@@ -99,8 +99,8 @@ entre passos. Verificação de paridade tripla: suíte 0 falhas + grep sem impor
 - **B-04** dialog "Alterar senha" com mesmo erro-escondido do B-01 (BAIXA).
 - **B-05** ✅ RESOLVIDO (2026-07-15) — `location = /index.html { expires -1; }` no nginx.conf; validado com curl.
 - **B-06** ✅ DESCARTADO — não é gap: o relatório de pagamento (PDF/Excel) já existe; folha oficial é do ERP.
-- **B-07** cluster payroll ainda em `domain/` (dívida de simplificação; MÉDIA; backend) — reduzir
-  via análise do fluxo real de folha, não colapso mecânico.
+- **B-07** ✅ ENCERRADO (2026-07-15, spec 006) — remoção total da superfície payroll/cobertura
+  (nenhuma tela usava; pagamento real = aba Relatórios). Ver `specs/006-remocao-payroll/`.
 
 ## Como rodar/testar (Docker do usuário funciona após reiniciar o PC)
 
@@ -152,10 +152,14 @@ provavelmente pode ser **removida**, não só relocada.
 1. ✅ Atualizar este HANDOFF (contradições do B-06) + remover cascas vazias de `use_cases/`
    (`imports`/`remuneration`/`reports`/`shifts`, só `__init__.py` placeholder) — FEITO.
 2. ✅ **B-05**: Nginx servir `index.html` com `Cache-Control: no-cache` (footgun de deploy; Princípio IV) — FEITO.
-3. 🔄 **B-07 como spec 006 (`specs/006-remocao-payroll`) — EM ANDAMENTO**: o mapeamento de uso real
-   (2026-07-15) revelou que **nenhuma tela** usa os 14 endpoints de payroll nem os 2 de cobertura
-   (o pagamento real é a aba Relatórios, client-side). Decisão do stakeholder: **remoção total**
-   (endpoints, services, modelos, tabelas via migration com backup). Spec escrita; falta
-   plan → tasks → implement.
+3. ✅ **B-07 via spec 006 (`specs/006-remocao-payroll`) — CONCLUÍDA (2026-07-15)**: nenhuma tela
+   usava os 14 endpoints de payroll nem os 2 de cobertura (pagamento real = aba Relatórios,
+   client-side). Remoção total em 6 commits com suíte verde: rotas → services → modelos +
+   **migration 008 (droppa `payrolls`)** → cluster `domain/` → órfãos → `integrations/` (28
+   arquivos de adapters de ERP mortos) + resíduos do frontend. Também removidos: `routes/query.py`
+   + `query_service.py` (931 linhas — router nunca registrado). Suíte **632 → 404 verde** (saíram
+   só testes de código removido); cobertura 65,5% (gate 65). Validado no navegador (jornadas,
+   relatórios, 404 nas rotas). ⚠️ **PRÓXIMO DEPLOY EXIGE `./scripts/backup.sh` ANTES** (a
+   migration droppa a tabela `payrolls`).
 4. **Lote curto de frontend**: B-02/B-03/B-04 (sem spec formal — cerimônia demais para o tamanho).
 5. **Fase 3**: arquivar docs/ADRs superados + gates de CI legados + migrations rodando 2×.

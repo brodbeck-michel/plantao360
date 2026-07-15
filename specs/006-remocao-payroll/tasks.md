@@ -92,27 +92,27 @@ produção comprovável por grep.
 
 ### Passo 2a — Cluster (commit 4)
 
-- [ ] T013 [P] [US2] Deletar `backend/app/domain/{payroll,coverage,financial,remuneration,base,
+- [X] T013 [P] [US2] Deletar `backend/app/domain/{payroll,coverage,financial,remuneration,base,
   state_machines}/` (pacotes inteiros)
-- [ ] T014 [P] [US2] Deletar os 15 testes do cluster em `backend/app/tests/unit/domain/`:
+- [X] T014 [P] [US2] Deletar os 15 testes do cluster em `backend/app/tests/unit/domain/`:
   test_aggregate_root, test_aggregate_version, test_lifecycle_hooks, test_coverage_engine,
   test_financial_constants, test_financial_events, test_financial_snapshot, test_governance,
   test_payroll_competency, test_payroll_errors, test_payroll_events, test_payroll_state_machine,
   test_payroll_status, test_remuneration_events, test_remuneration_rule (research R7)
-- [ ] T015 [US2] Gate + commit: suíte verde; `grep -rn "domain.payroll\|domain.coverage\|
+- [X] T015 [US2] Gate + commit: suíte verde; `grep -rn "domain.payroll\|domain.coverage\|
   domain.financial\|domain.remuneration\|domain.base\|domain.state_machines" backend/app` sem
   hits; commit `refactor(domain): remove cluster payroll/coverage/financial/base (spec 006, US2)`
 
 ### Passo 2b — Fundação órfã (commit 5)
 
-- [ ] T016 [US2] Deletar constantes órfãs `backend/app/domain/constants/{payroll_status,
+- [X] T016 [US2] Deletar constantes órfãs `backend/app/domain/constants/{payroll_status,
   snapshot_status,financial_fact_status,financial_fact_type,inconsistency_type,rule_status}.py`
   (tabela research R6); verificar `constants/__init__.py`
-- [ ] T017 [US2] Deletar `backend/app/domain/errors/payroll_errors.py`; verificar/editar
+- [X] T017 [US2] Deletar `backend/app/domain/errors/payroll_errors.py`; verificar/editar
   `errors/__init__.py` e `errors/error_catalog.py`; editar
   `backend/app/domain/events/event_names.py` removendo os nomes `PAYROLL_*`, `COVERAGE_*` e
   `FINANCIAL_*` mortos (research R1: dispatch é no-op — sem `register` em produção)
-- [ ] T018 [US2] Gate + commit: suíte verde; para cada arquivo restante em `domain/`, grep
+- [X] T018 [US2] Gate + commit: suíte verde; para cada arquivo restante em `domain/`, grep
   comprova ≥1 consumidor de produção (SC-003); commit
   `refactor(domain): remove constantes/erros/eventos orfaos (spec 006, US2)`
 
@@ -128,10 +128,10 @@ produção comprovável por grep.
 resíduos aceitos (rótulo hardcoded do painel e literais de navegação — ver T020); build do
 frontend verde.
 
-- [ ] T019 [P] [US3] Deletar o pacote `backend/app/integrations/` inteiro (28 arquivos —
+- [X] T019 [P] [US3] Deletar o pacote `backend/app/integrations/` inteiro (28 arquivos —
   scaffolding de ERPs, research R5) e `backend/app/tests/integration/test_integration_architecture.py`
   (único consumidor)
-- [ ] T020 [P] [US3] Frontend — remover somente o comprovadamente morto, sem mudança visual:
+- [X] T020 [P] [US3] Frontend — remover somente o comprovadamente morto, sem mudança visual:
   entradas `PAYROLL`, `PAYROLL_NEW`, `PAYROLL_DETAIL`, `PAYROLL_APPROVE`, `COVERAGE`,
   `COVERAGE_NEW`, `COVERAGE_DETAIL`, `READINESS` em `frontend/src/routes/routes.ts` (conferir
   cada uma por grep antes de remover); rota `READINESS` em `frontend/src/App.tsx:106`;
@@ -140,7 +140,7 @@ frontend verde.
   `frontend/src/shared/components/operational/OperationalEmptyState.tsx`.
   **NÃO tocar**: rótulo "Payroll: Pendente" em `OperationalMetricsPanel.tsx` e literais de
   navegação em `dashboard-page.tsx` (paridade visual — anotados para o lote B-02/B-04)
-- [ ] T021 [US3] Gate + commit: suíte backend verde; `cd frontend && npx vite build` verde;
+- [X] T021 [US3] Gate + commit: suíte backend verde; `cd frontend && npx vite build` verde;
   `git grep -il payroll -- backend/app frontend/src` só com resíduos aceitos; commit
   `refactor: remove integrations mortas e residuos payroll do frontend (spec 006, US3)`
 
@@ -150,14 +150,14 @@ frontend verde.
 
 ## Phase 6: Polish & Encerramento
 
-- [ ] T022 Validação no navegador conforme [quickstart.md](quickstart.md) §3: jornadas vivas,
+- [X] T022 Validação no navegador conforme [quickstart.md](quickstart.md) §3: jornadas vivas,
   relatórios PDF/Excel/CSV idênticos (SC-001/SC-002), Swagger sem grupos removidos, 404 em
   `/api/v1/payrolls`
-- [ ] T023 [P] Docs: marcar B-07 ✅ encerrado em `docs/backlog-melhorias.md` (apontando para a
+- [X] T023 [P] Docs: marcar B-07 ✅ encerrado em `docs/backlog-melhorias.md` (apontando para a
   spec 006); atualizar `docs/HANDOFF.md` (Fase 2 100% encerrada, próximos passos); anotar na
   spec 001 (`specs/001-baseline-funcional/spec.md`) o escopo real de "remuneração" (relatório,
   não folha); nota de release: **backup obrigatório antes do deploy** (migration droppa `payrolls`)
-- [ ] T024 Medir resultado e registrar neste arquivo: linhas de produção removidas
+- [X] T024 Medir resultado e registrar neste arquivo: linhas de produção removidas
   (`git diff --stat <baseline>..HEAD`, esperado ≥3.000 — SC-004), arquivos finais em `domain/`
   (SC-003) e contagem final da suíte (SC-005); commit final de docs
 
@@ -203,3 +203,26 @@ T008 deletar test_query_domain.py
   do test_query_domain), passo 1c modelos + migration 008 (608✓ + ciclo upgrade/downgrade/upgrade OK).
   Achados dos gates, corrigidos junto: relationship `Period.payrolls` (cascade) em
   `models/period.py` e import de `Payroll` em `alembic/env.py`.
+- **US2 concluída** (2 commits): cluster domain (437✓) + fundação órfã (429✓). Achados dos gates:
+  `EventCollector` órfão removido; bug latente pré-existente `PERIOD_DEACTIVATED_V1` (membro
+  inexistente no enum, DELETE de período → 500) registrado como tarefa separada — fora de escopo.
+- **US3 concluída** (1 commit): `integrations/` + teste (404✓); frontend só o comprovadamente
+  morto. Descoberta do gate: `ROUTES.PAYROLL`/`COVERAGE` são rotas SPA VIVAS (menu Financeiro/
+  Operacional → ShiftListPage) — mantidas; removidos só `_NEW/_DETAIL/_APPROVE`, `READINESS`,
+  queryKeys e contexto de empty-state. Resíduos aceitos (UI visível): rota SPA `/app/payroll`,
+  rótulo "Payroll: Pendente" e ação "Processar folha" do dashboard (strings).
+
+## Resultado final (T024)
+
+- **Suíte**: 632 → **404 passed / 0 failed** (–228, todos de código removido); cobertura 65,5%
+  (gate 65) — SC-005 ✓
+- **Produção removida**: **5.885 linhas / 84 arquivos** (+79 inseridas: migration + ajustes) —
+  SC-004 ✓ (meta ≥3.000); testes de código morto: +2.315 linhas / 18 arquivos
+- **`domain/`**: 20 arquivos (13 sem `__init__`) — só `constants`, `errors`, `events`,
+  `exceptions`, todos com consumidor de produção — SC-003 ✓
+- **Navegador** (SC-001/SC-002 ✓): login, dashboard com dados, workspace/grade, aba Financeiro
+  (valores por médico), aba Relatórios (4 geradores), rota SPA `/app/payroll` renderizando como
+  antes; `/api/v1/payrolls` e `/api/v1/coverage/*` → 404; OpenAPI sem os grupos removidos
+- **Backend**: 205 arquivos .py de produção (era 281 no início da spec 006)
+- ⚠️ **Deploy**: backup obrigatório antes (migration 008 droppa `payrolls`) — avisado em
+  `docs/deploy.md` e no HANDOFF

@@ -123,6 +123,13 @@ a remuneração passam a refletir o médico que efetivamente cobriu.
 
 ### User Story 5 - Cálculo e exportação da remuneração (Priority: P1)
 
+> **⚠️ ESCOPO CORRIGIDO (2026-07-14/15, stakeholder — ver B-06 no backlog e spec 006):** esta
+> user story foi escrita com uma leitura errada do papel do sistema. A **folha oficial**
+> (honorários, impostos) é feita no **ERP**, não aqui. O que o pagamento precisa **já existe e
+> está em uso**: a **aba Relatórios** gera o relatório com valores e horas por médico
+> (PDF/Excel), enviado ao financeiro. O "ciclo de folha" no backend (payroll/cobertura) nunca
+> teve tela e foi **removido na spec 006**. Esta US permanece como registro histórico.
+
 A Gestão fecha a remuneração do período: o sistema **calcula** os valores a pagar por médico
 (com base no tipo de plantão/hora e nos extras aprovados) e **exporta** um relatório para o
 financeiro/folha.

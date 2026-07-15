@@ -65,7 +65,17 @@ retrabalho.
 - **Nice-to-have futuro (opcional, baixa prioridade)**: se algum dado do relatório ainda for montado
   manualmente, dá para acrescentar; mas o fluxo principal (PDF/Excel → financeiro) funciona.
 
-## B-07 · Cluster payroll ainda em `domain/` (dívida de simplificação) — prioridade MÉDIA
+## B-07 · Cluster payroll ainda em `domain/` (dívida de simplificação) — ✅ ENCERRADO (2026-07-15, spec 006)
+
+> **Como foi encerrado**: o mapeamento do fluxo real (spec 006, `specs/006-remocao-payroll/`)
+> mostrou que **nenhuma tela** usava os 14 endpoints de payroll nem os 2 de cobertura — o
+> pagamento real é a aba Relatórios (PDF/Excel client-side). Decisão do stakeholder: **remoção
+> total** — rotas, services, schemas, repositories, modelos, tabela `payrolls` (migration 008,
+> com downgrade; backup obrigatório antes do deploy), o cluster `domain/` inteiro e o pacote
+> `integrations/` (scaffolding de ERPs sem consumidor). `domain/` ficou só com fundação viva.
+> Suíte 404 verde; jornadas vivas intactas. Detalhes e evidências na spec 006.
+
+Registro original (histórico):
 
 - Descoberto ao fechar a spec 005 (colapso final da `domain/`). A meta de tamanho da Fase 2 foi
   atingida (`domain/` 118→32; meta 30–40), mas **restou um cluster acoplado** em `domain/`:

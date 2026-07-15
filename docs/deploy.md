@@ -68,6 +68,10 @@ TAG=v1.2.0 ./scripts/deploy.sh
 O script baixa as imagens da tag e sobe os serviços na ordem `db → backend → frontend`.
 O backend espera o Postgres ficar saudável, aplica as migrations e só então serve.
 
+> ⚠️ **Deploy com a migration 008 (spec 006, 2026-07-15)**: rode `./scripts/backup.sh`
+> **antes** — a migration `008_drop_payroll` remove a tabela `payrolls` (e tabelas de
+> snapshot, se existirem). O downgrade recria o schema, mas **não** os dados.
+
 ## 5. Rollback
 
 ```bash
