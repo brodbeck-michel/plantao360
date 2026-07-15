@@ -121,7 +121,7 @@ entre passos. Verificação de paridade tripla: suíte 0 falhas + grep sem impor
 - Dentro do container o path é `app/...` (workdir `/app`), não `backend/app/...`.
 - `git commit` já usa `Co-Authored-By: Claude Opus 4.8`. Estamos na branch `master`.
 - Spec Kit: sem hooks (`.specify/extensions.yml` não existe). `.specify/feature.json` aponta para
-  a feature ativa (hoje `specs/005-colapso-domain-final`, encerrada — a próxima spec deve atualizá-lo).
+  a feature ativa (hoje `specs/006-remocao-payroll`).
 
 ## Estado do git (principais commits, mais recente por último)
 
@@ -152,7 +152,10 @@ provavelmente pode ser **removida**, não só relocada.
 1. ✅ Atualizar este HANDOFF (contradições do B-06) + remover cascas vazias de `use_cases/`
    (`imports`/`remuneration`/`reports`/`shifts`, só `__init__.py` placeholder) — FEITO.
 2. ✅ **B-05**: Nginx servir `index.html` com `Cache-Control: no-cache` (footgun de deploy; Princípio IV) — FEITO.
-3. **B-07 como spec 006**: mapear o uso real do agregado payroll (o que API/relatório de fato usam);
-   remover selo/versão/governança não usados; então colapsar o núcleo restante nos services.
+3. 🔄 **B-07 como spec 006 (`specs/006-remocao-payroll`) — EM ANDAMENTO**: o mapeamento de uso real
+   (2026-07-15) revelou que **nenhuma tela** usa os 14 endpoints de payroll nem os 2 de cobertura
+   (o pagamento real é a aba Relatórios, client-side). Decisão do stakeholder: **remoção total**
+   (endpoints, services, modelos, tabelas via migration com backup). Spec escrita; falta
+   plan → tasks → implement.
 4. **Lote curto de frontend**: B-02/B-03/B-04 (sem spec formal — cerimônia demais para o tamanho).
 5. **Fase 3**: arquivar docs/ADRs superados + gates de CI legados + migrations rodando 2×.
