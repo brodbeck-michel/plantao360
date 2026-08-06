@@ -7,7 +7,7 @@ from app.seed.seed_data import (
     SHIFT_TYPE_MAP,
     generate_name,
     generate_crm,
-    generate_hour_rate,
+    generate_career_start_date,
 )
 
 
@@ -21,7 +21,8 @@ def generate_data() -> dict:
         doctors_data.append({
             "name": generate_name(),
             "crm": generate_crm(),
-            "hour_rate": generate_hour_rate(),
+            "has_rqe": random.random() > 0.5,
+            "career_start_date": generate_career_start_date(),
             "active": True,
         })
 

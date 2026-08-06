@@ -73,8 +73,10 @@ def generate_crm() -> str:
 def generate_name() -> str:
     return f"{random.choice(NAMES_FIRST)} {random.choice(NAMES_LAST)}"
 
-def generate_hour_rate() -> float:
-    return round(random.uniform(80, 250), 2)
+def generate_career_start_date() -> date:
+    years_back = random.randint(0, 15)
+    days_back = years_back * 365 + random.randint(0, 364)
+    return date.today() - timedelta(days=days_back)
 
 def generate_phone() -> str:
     return f"(27) 9{random.randint(1000, 9999)}-{random.randint(1000, 9999)}"
@@ -103,7 +105,8 @@ def generate_demo_data() -> dict:
         doctors_data.append({
             "name": name,
             "crm": generate_crm(),
-            "hour_rate": generate_hour_rate(),
+            "has_rqe": random.random() > 0.5,
+            "career_start_date": generate_career_start_date(),
             "specialty": random.choice(SPECIALTIES),
             "phone": generate_phone(),
             "email": generate_email(name),
@@ -164,9 +167,9 @@ def generate_edge_cases_data() -> dict:
     random.seed(99)
 
     doctors_data = [
-        {"name": "Dr. Jose da Silva", "crm": "00001/ES", "hour_rate": 80.00, "specialty": "Clinica Medica", "phone": "(27) 99999-0001", "email": "jose.silva@email.com", "doctor_type": "plantonista", "active": True},
-        {"name": "Dr. Joao Paulo Teste", "crm": "99999/ES", "hour_rate": 250.00, "specialty": "Cardiologia", "phone": "(27) 99999-9999", "email": "joao.teste@email.com", "doctor_type": "plantonista", "active": True},
-        {"name": "Dra. Ana Maria Limite", "crm": "12345/ES", "hour_rate": 150.00, "specialty": "Pediatria", "phone": None, "email": None, "doctor_type": "diarista", "active": False},
+        {"name": "Dr. Jose da Silva", "crm": "00001/ES", "has_rqe": False, "career_start_date": date.today() - timedelta(days=365), "specialty": "Clinica Medica", "phone": "(27) 99999-0001", "email": "jose.silva@email.com", "doctor_type": "plantonista", "active": True},
+        {"name": "Dr. Joao Paulo Teste", "crm": "99999/ES", "has_rqe": True, "career_start_date": date.today() - timedelta(days=15 * 365), "specialty": "Cardiologia", "phone": "(27) 99999-9999", "email": "joao.teste@email.com", "doctor_type": "plantonista", "active": True},
+        {"name": "Dra. Ana Maria Limite", "crm": "12345/ES", "has_rqe": False, "career_start_date": date.today() - timedelta(days=6 * 365), "specialty": "Pediatria", "phone": None, "email": None, "doctor_type": "diarista", "active": False},
     ]
 
     periods_data = [{"year": 2026, "month": 1, "status": "draft"}]
@@ -211,9 +214,9 @@ def generate_showcase_data() -> dict:
     random.seed(123)
 
     doctors_data = [
-        {"name": "Dr. Pedro Showcase", "crm": "11111/ES", "hour_rate": 150.00, "specialty": "Clinica Medica", "phone": "(27) 99999-1111", "email": "pedro.showcase@email.com", "doctor_type": "plantonista", "active": True},
-        {"name": "Dra. Maria Demo", "crm": "22222/ES", "hour_rate": 180.00, "specialty": "Cardiologia", "phone": "(27) 99999-2222", "email": "maria.demo@email.com", "doctor_type": "plantonista", "active": True},
-        {"name": "Dr. Joao Example", "crm": "33333/ES", "hour_rate": 200.00, "specialty": "Pediatria", "phone": "(27) 99999-3333", "email": "joao.example@email.com", "doctor_type": "freelancer", "active": True},
+        {"name": "Dr. Pedro Showcase", "crm": "11111/ES", "has_rqe": False, "career_start_date": date.today() - timedelta(days=3 * 365), "specialty": "Clinica Medica", "phone": "(27) 99999-1111", "email": "pedro.showcase@email.com", "doctor_type": "plantonista", "active": True},
+        {"name": "Dra. Maria Demo", "crm": "22222/ES", "has_rqe": True, "career_start_date": date.today() - timedelta(days=7 * 365), "specialty": "Cardiologia", "phone": "(27) 99999-2222", "email": "maria.demo@email.com", "doctor_type": "plantonista", "active": True},
+        {"name": "Dr. Joao Example", "crm": "33333/ES", "has_rqe": True, "career_start_date": date.today() - timedelta(days=12 * 365), "specialty": "Pediatria", "phone": "(27) 99999-3333", "email": "joao.example@email.com", "doctor_type": "freelancer", "active": True},
     ]
 
     periods_data = [{"year": 2026, "month": 6, "status": "draft"}]
@@ -293,7 +296,8 @@ def load_doctors(session: Session, doctors_data: List[dict]) -> List[Doctor]:
         doctor = Doctor(
             name=d["name"],
             crm=d["crm"],
-            hour_rate=d["hour_rate"],
+            has_rqe=d.get("has_rqe", False),
+            career_start_date=d.get("career_start_date"),
             specialty=d.get("specialty", "Clinica Medica"),
             phone=d.get("phone"),
             email=d.get("email"),

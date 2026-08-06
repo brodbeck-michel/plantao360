@@ -1,5 +1,5 @@
 from app.validators.base_validator import BaseValidator, ValidationResult
-from app.validators.rules import validate_crm, validate_hour_rate, validate_doctor_name
+from app.validators.rules import validate_crm, validate_career_start_date, validate_doctor_name
 from app.schemas.doctor.doctor_create import DoctorCreateDTO
 from app.schemas.doctor.doctor_update import DoctorUpdateDTO
 
@@ -16,7 +16,7 @@ class DoctorValidator(BaseValidator):
             result.add_error(error)
         for error in validate_crm(data.crm):
             result.add_error(error)
-        for error in validate_hour_rate(data.hour_rate):
+        for error in validate_career_start_date(data.career_start_date):
             result.add_error(error)
 
     def _validate_update(self, data: DoctorUpdateDTO, result: ValidationResult) -> None:
@@ -26,6 +26,6 @@ class DoctorValidator(BaseValidator):
         if data.crm is not None:
             for error in validate_crm(data.crm):
                 result.add_error(error)
-        if data.hour_rate is not None:
-            for error in validate_hour_rate(data.hour_rate):
+        if data.career_start_date is not None:
+            for error in validate_career_start_date(data.career_start_date):
                 result.add_error(error)

@@ -14,6 +14,6 @@ class DoctorQueryDTO(BaseModel):
     def __post_init__(self) -> None:
         if self.sort_direction not in ("asc", "desc"):
             self.sort_direction = "asc"
-        allowed_sorts = {"id", "name", "crm", "hour_rate", "active"}
+        allowed_sorts = {"id", "name", "crm", "active"}
         if self.sort_by not in allowed_sorts:
             self.sort_by = "id"

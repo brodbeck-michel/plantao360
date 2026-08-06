@@ -25,16 +25,3 @@ class ActiveEquals(BaseSpecification):
 
     def is_satisfied_by(self, query: Select) -> Select:
         return query.filter(Doctor.active == self.active)
-
-
-class HourRateBetween(BaseSpecification):
-    def __init__(self, min_rate: float | None = None, max_rate: float | None = None):
-        self.min_rate = min_rate
-        self.max_rate = max_rate
-
-    def is_satisfied_by(self, query: Select) -> Select:
-        if self.min_rate is not None:
-            query = query.filter(Doctor.hour_rate >= self.min_rate)
-        if self.max_rate is not None:
-            query = query.filter(Doctor.hour_rate <= self.max_rate)
-        return query

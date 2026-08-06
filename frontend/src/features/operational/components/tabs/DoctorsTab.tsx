@@ -3,9 +3,10 @@ import {
   Box, Typography, Paper, Table, TableBody, TableCell, TableContainer,
   TableHead, TableRow, Chip, IconButton, Tooltip, Button, Dialog,
   DialogTitle, DialogContent, DialogActions, TextField, MenuItem,
-  Alert, Snackbar, InputAdornment,
+  Alert, Snackbar, InputAdornment, FormControlLabel, Switch,
 } from '@mui/material';
 import { Search as SearchIcon } from '@mui/icons-material';
+import { computeHourRate } from '../../../doctor/utils/hour-rate-table';
 import {
   Add as AddIcon, Edit as EditIcon, Block as DeactivateIcon,
   CheckCircle as ActivateIcon, Delete as DeleteIcon,
@@ -28,7 +29,7 @@ interface DoctorsTabProps {
 
 const EMPTY_FORM = {
   name: '', crm: '', specialty: 'Clinica Medica', phone: '', email: '',
-  doctor_type: 'plantonista', hour_rate: 0, active: true,
+  doctor_type: 'plantonista', has_rqe: false, career_start_date: '', active: true,
 };
 
 function getStatusColor(stats?: DoctorStats): 'success' | 'warning' | 'error' | 'default' {
@@ -90,7 +91,8 @@ export function DoctorsTab({ doctors, doctorStats, periodId, onRefresh }: Doctor
       phone: (doctor as any).phone || '',
       email: (doctor as any).email || '',
       doctor_type: (doctor as any).doctor_type || 'plantonista',
-      hour_rate: doctor.hour_rate,
+      has_rqe: doctor.has_rqe || false,
+      career_start_date: doctor.career_start_date || '',
       active: doctor.active,
     });
     setError('');
@@ -100,6 +102,7 @@ export function DoctorsTab({ doctors, doctorStats, periodId, onRefresh }: Doctor
   const handleSave = useCallback(async () => {
     if (!form.name.trim()) { setError('Nome e obrigatorio'); return; }
     if (!form.crm.trim()) { setError('CRM e obrigatorio'); return; }
+    if (!form.career_start_date) { setError('Data de inicio de carreira e obrigatoria'); return; }
     setSaving(true);
     setError('');
     try {
@@ -111,7 +114,8 @@ export function DoctorsTab({ doctors, doctorStats, periodId, onRefresh }: Doctor
           phone: form.phone || null,
           email: form.email || null,
           doctor_type: form.doctor_type,
-          hour_rate: form.hour_rate,
+          has_rqe: form.has_rqe,
+          career_start_date: form.career_start_date || null,
         });
         setToast({ open: true, message: 'Medico atualizado com sucesso', severity: 'success' });
       } else {
@@ -122,7 +126,8 @@ export function DoctorsTab({ doctors, doctorStats, periodId, onRefresh }: Doctor
           phone: form.phone || null,
           email: form.email || null,
           doctor_type: form.doctor_type,
-          hour_rate: form.hour_rate,
+          has_rqe: form.has_rqe,
+          career_start_date: form.career_start_date,
         });
         setToast({ open: true, message: 'Medico criado com sucesso', severity: 'success' });
       }
@@ -226,7 +231,12 @@ export function DoctorsTab({ doctors, doctorStats, periodId, onRefresh }: Doctor
                     {stats ? `${stats.totalHours.toFixed(0)}h` : '0h'}
                   </TableCell>
                   <TableCell align="right" sx={{ fontSize: '0.8125rem' }}>
-                    R$ {doctor.hour_rate.toFixed(2)}
+                    <Box display="flex" alignItems="center" justifyContent="flex-end" gap={0.5}>
+                      {doctor.hour_rate_tier && (
+                        <Chip label={doctor.hour_rate_tier} size="small" variant="outlined" sx={{ fontSize: '0.625rem', height: 18 }} />
+                      )}
+                      R$ {doctor.hour_rate.toFixed(2)}
+                    </Box>
                   </TableCell>
                   <TableCell align="center">
                     <Chip
@@ -282,7 +292,32 @@ export function DoctorsTab({ doctors, doctorStats, periodId, onRefresh }: Doctor
           </TextField>
           <TextField fullWidth label="Telefone" value={form.phone} onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))} sx={{ mb: 2 }} />
           <TextField fullWidth label="Email" value={form.email} onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))} sx={{ mb: 2 }} />
-          <TextField fullWidth type="number" label="Valor Hora (R$)" value={form.hour_rate} onChange={(e) => setForm((p) => ({ ...p, hour_rate: parseFloat(e.target.value) || 0 }))} sx={{ mb: 2 }} />
+          <TextField
+            fullWidth type="date" label="Início de carreira" value={form.career_start_date}
+            onChange={(e) => setForm((p) => ({ ...p, career_start_date: e.target.value }))}
+            InputLabelProps={{ shrink: true }} sx={{ mb: 2 }}
+          />
+          <FormControlLabel
+            sx={{ mb: 1 }}
+            control={<Switch checked={form.has_rqe} onChange={(e) => setForm((p) => ({ ...p, has_rqe: e.target.checked }))} />}
+            label="Possui RQE"
+          />
+          <Box display="flex" alignItems="center" gap={1} sx={{ p: 1.5, bgcolor: 'action.hover', borderRadius: 1 }}>
+            <Typography variant="body2" color="text.secondary">Valor hora calculado:</Typography>
+            {form.career_start_date ? (
+              (() => {
+                const preview = computeHourRate(form.has_rqe, form.career_start_date);
+                return (
+                  <>
+                    <Chip label={preview.tier} size="small" color="primary" variant="outlined" />
+                    <Typography variant="body2" fontWeight={700}>R$ {preview.rate.toFixed(2)}</Typography>
+                  </>
+                );
+              })()
+            ) : (
+              <Typography variant="body2" color="text.secondary">preencha a data de início de carreira</Typography>
+            )}
+          </Box>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDialogOpen(false)}>Cancelar</Button>

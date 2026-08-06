@@ -71,7 +71,8 @@ class DoctorService:
         doctor = Doctor(
             name=dto.name,
             crm=dto.crm,
-            hour_rate=dto.hour_rate,
+            has_rqe=dto.has_rqe,
+            career_start_date=dto.career_start_date,
             specialty=dto.specialty,
             phone=dto.phone,
             email=dto.email,
@@ -107,8 +108,10 @@ class DoctorService:
             doctor.name = dto.name
         if dto.crm is not None:
             doctor.crm = dto.crm
-        if dto.hour_rate is not None:
-            doctor.hour_rate = dto.hour_rate
+        if dto.has_rqe is not None:
+            doctor.has_rqe = dto.has_rqe
+        if dto.career_start_date is not None:
+            doctor.career_start_date = dto.career_start_date
         if dto.specialty is not None:
             doctor.specialty = dto.specialty
         if dto.phone is not None:

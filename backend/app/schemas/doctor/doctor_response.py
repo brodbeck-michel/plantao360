@@ -1,4 +1,6 @@
-﻿from pydantic import BaseModel, Field
+﻿from datetime import date
+
+from pydantic import BaseModel, Field
 
 from app.schemas.base.base_dto import BaseResponseDTO
 
@@ -6,7 +8,10 @@ from app.schemas.base.base_dto import BaseResponseDTO
 class DoctorResponseDTO(BaseResponseDTO):
     name: str = Field(..., description="Nome completo do medico")
     crm: str = Field(..., description="Numero do CRM")
-    hour_rate: float = Field(..., description="Valor da hora em R$")
+    has_rqe: bool = Field(..., description="Possui RQE")
+    career_start_date: date | None = Field(None, description="Data de inicio de carreira")
+    hour_rate: float = Field(..., description="Valor da hora em R$ (calculado)")
+    hour_rate_tier: str = Field(..., description="Faixa de valorizacao (ex: M-3, E-2)")
     specialty: str = Field(..., description="Especialidade medica")
     phone: str | None = Field(None, description="Telefone de contato")
     email: str | None = Field(None, description="Email de contato")

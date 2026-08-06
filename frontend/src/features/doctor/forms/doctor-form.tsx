@@ -1,8 +1,9 @@
 ﻿import React, { useEffect } from 'react';
-import { Box, TextField, Grid, Button, CircularProgress, Alert, MenuItem } from '@mui/material';
+import { Box, TextField, Grid, Button, CircularProgress, Alert, MenuItem, FormControlLabel, Switch, Chip, Typography } from '@mui/material';
 import { Save, Cancel } from '@mui/icons-material';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, useWatch } from 'react-hook-form';
 import type { DoctorFormState } from '../types/doctor-types';
+import { computeHourRate } from '../utils/hour-rate-table';
 
 interface DoctorFormProps {
   initialData?: Partial<DoctorFormState>;
@@ -17,7 +18,13 @@ const validationRules = {
   name: { required: 'Nome e obrigatorio', minLength: { value: 3, message: 'Nome deve ter no minimo 3 caracteres' } },
   crm: { required: 'CRM e obrigatorio', pattern: { value: /^[0-9]{4,6}$/, message: 'CRM deve ter entre 4 e 6 digitos' } },
   specialty: { required: 'Especialidade e obrigatoria' },
-  hour_rate: { required: 'Valor hora e obrigatorio', min: { value: 0.01, message: 'Valor deve ser maior que zero' } },
+  career_start_date: {
+    required: 'Data de inicio de carreira e obrigatoria',
+    validate: (value: string) => {
+      if (!value) return true;
+      return new Date(value) <= new Date() || 'Data nao pode ser no futuro';
+    },
+  },
 };
 
 const DOCTOR_TYPES = [
@@ -35,7 +42,8 @@ export function DoctorForm({ initialData, onSubmit, onCancel, loading = false, e
       email: initialData?.email || '',
       phone: initialData?.phone || '',
       doctor_type: initialData?.doctor_type || 'plantonista',
-      hour_rate: initialData?.hour_rate || 150,
+      has_rqe: initialData?.has_rqe || false,
+      career_start_date: initialData?.career_start_date || '',
     },
   });
 
@@ -48,10 +56,15 @@ export function DoctorForm({ initialData, onSubmit, onCancel, loading = false, e
         email: initialData.email || '',
         phone: initialData.phone || '',
         doctor_type: initialData.doctor_type || 'plantonista',
-        hour_rate: initialData.hour_rate || 150,
+        has_rqe: initialData.has_rqe || false,
+        career_start_date: initialData.career_start_date || '',
       });
     }
   }, [initialData, reset]);
+
+  const hasRqe = useWatch({ control, name: 'has_rqe' });
+  const careerStartDate = useWatch({ control, name: 'career_start_date' });
+  const preview = careerStartDate ? computeHourRate(hasRqe, careerStartDate) : null;
 
   return (
     <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
@@ -73,11 +86,6 @@ export function DoctorForm({ initialData, onSubmit, onCancel, loading = false, e
           )} />
         </Grid>
         <Grid item xs={12} sm={6}>
-          <Controller name="hour_rate" control={control} rules={validationRules.hour_rate} render={({ field }) => (
-            <TextField {...field} label="Valor Hora (R$)" type="number" fullWidth required error={!!errors.hour_rate} helperText={errors.hour_rate?.message} disabled={loading} inputProps={{ min: 0, step: 0.01 }} />
-          )} />
-        </Grid>
-        <Grid item xs={12} sm={6}>
           <Controller name="doctor_type" control={control} render={({ field }) => (
             <TextField {...field} label="Tipo" select fullWidth disabled={loading}>
               {DOCTOR_TYPES.map((t) => <MenuItem key={t.value} value={t.value}>{t.label}</MenuItem>)}
@@ -93,6 +101,34 @@ export function DoctorForm({ initialData, onSubmit, onCancel, loading = false, e
           <Controller name="email" control={control} render={({ field }) => (
             <TextField {...field} label="E-mail" type="email" fullWidth disabled={loading} />
           )} />
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <Controller name="career_start_date" control={control} rules={validationRules.career_start_date} render={({ field }) => (
+            <TextField {...field} label="Início de carreira" type="date" fullWidth required error={!!errors.career_start_date} helperText={errors.career_start_date?.message} disabled={loading} InputLabelProps={{ shrink: true }} />
+          )} />
+        </Grid>
+        <Grid item xs={12} sm={6} display="flex" alignItems="center">
+          <Controller name="has_rqe" control={control} render={({ field }) => (
+            <FormControlLabel
+              control={<Switch checked={field.value} onChange={(e) => field.onChange(e.target.checked)} disabled={loading} />}
+              label="Possui RQE"
+            />
+          )} />
+        </Grid>
+        <Grid item xs={12}>
+          <Box display="flex" alignItems="center" gap={1} sx={{ p: 1.5, bgcolor: 'action.hover', borderRadius: 1 }}>
+            <Typography variant="body2" color="text.secondary">Valor hora calculado:</Typography>
+            {preview ? (
+              <>
+                <Chip label={preview.tier} size="small" color="primary" variant="outlined" />
+                <Typography variant="body2" fontWeight={700}>
+                  R$ {preview.rate.toFixed(2)}
+                </Typography>
+              </>
+            ) : (
+              <Typography variant="body2" color="text.secondary">preencha a data de início de carreira</Typography>
+            )}
+          </Box>
         </Grid>
       </Grid>
       <Box display="flex" justifyContent="flex-end" gap={1} mt={3}>

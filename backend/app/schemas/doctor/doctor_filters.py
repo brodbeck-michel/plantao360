@@ -14,7 +14,7 @@ class DoctorFilterDTO(BaseModel):
     def _validate_sort(self) -> "DoctorFilterDTO":
         if self.sort_direction not in ("asc", "desc"):
             self.sort_direction = "asc"
-        allowed_sorts = {"id", "name", "crm", "hour_rate", "active", "specialty", "created_at"}
+        allowed_sorts = {"id", "name", "crm", "active", "specialty", "created_at"}
         if self.sort_by not in allowed_sorts:
             self.sort_by = "id"
         return self

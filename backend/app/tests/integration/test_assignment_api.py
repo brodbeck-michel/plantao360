@@ -29,9 +29,9 @@ def client(auth_override):
     TestSession = sessionmaker(bind=connection)
 
     session = TestSession()
-    doctor = Doctor(name="Test Doctor", crm="12345/ES", hour_rate=150.0, specialty="Clinica Medica", active=True)
+    doctor = Doctor(name="Test Doctor", crm="12345/ES", has_rqe=False, career_start_date=date(2020, 1, 1), specialty="Clinica Medica", active=True)
     session.add(doctor)
-    doctor2 = Doctor(name="Second Doctor", crm="67890/ES", hour_rate=200.0, specialty="Cardiologia", active=True)
+    doctor2 = Doctor(name="Second Doctor", crm="67890/ES", has_rqe=False, career_start_date=date(2020, 1, 1), specialty="Cardiologia", active=True)
     session.add(doctor2)
     period = Period(year=2025, month=1)
     session.add(period)

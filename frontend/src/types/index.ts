@@ -27,7 +27,10 @@ export interface Doctor {
   phone?: string;
   email?: string;
   doctor_type: string;
+  has_rqe: boolean;
+  career_start_date: string | null;
   hour_rate: number;
+  hour_rate_tier: string;
   active: boolean;
   created_at: string;
   updated_at: string;

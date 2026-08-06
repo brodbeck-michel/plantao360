@@ -32,7 +32,10 @@ class DoctorOption(BaseModel):
     id: int
     name: str
     crm: str
+    has_rqe: bool = False
+    career_start_date: Optional[date] = None
     hour_rate: float
+    hour_rate_tier: str = ""
     specialty: str = ""
     active: bool = True
 

@@ -28,7 +28,8 @@ export interface DoctorFormState {
   email: string;
   phone: string;
   doctor_type: string;
-  hour_rate: number;
+  has_rqe: boolean;
+  career_start_date: string;
 }
 
 export interface DoctorHistory {

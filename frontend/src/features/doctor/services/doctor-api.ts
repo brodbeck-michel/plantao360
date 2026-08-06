@@ -22,7 +22,8 @@ export interface CreateDoctorData {
   email: string;
   phone?: string;
   doctor_type?: string;
-  hour_rate: number;
+  has_rqe: boolean;
+  career_start_date: string;
 }
 
 export interface UpdateDoctorData {
@@ -33,7 +34,8 @@ export interface UpdateDoctorData {
   email?: string;
   phone?: string;
   doctor_type?: string;
-  hour_rate?: number;
+  has_rqe?: boolean;
+  career_start_date?: string;
   active?: boolean;
 }
 

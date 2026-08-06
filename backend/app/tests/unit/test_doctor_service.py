@@ -1,4 +1,6 @@
 import pytest
+from datetime import date
+
 from app.services.doctor_service import DoctorService
 from app.schemas.doctor.doctor_create import DoctorCreateDTO
 from app.schemas.doctor.doctor_update import DoctorUpdateDTO
@@ -19,7 +21,7 @@ def test_service_list(service):
 
 
 def test_service_create(service):
-    dto = DoctorCreateDTO(name="Dr. Criado", crm="11111", hour_rate=150.0)
+    dto = DoctorCreateDTO(name="Dr. Criado", crm="11111", has_rqe=False, career_start_date=date(2020, 1, 1))
     result = service.create(dto)
     assert result.is_success
     assert result.data.name == "Dr. Criado"
@@ -27,16 +29,16 @@ def test_service_create(service):
 
 
 def test_service_create_duplicate_crm(service):
-    dto = DoctorCreateDTO(name="Dr. First", crm="11111", hour_rate=150.0)
+    dto = DoctorCreateDTO(name="Dr. First", crm="11111", has_rqe=False, career_start_date=date(2020, 1, 1))
     service.create(dto)
-    dto2 = DoctorCreateDTO(name="Dr. Second", crm="11111", hour_rate=200.0)
+    dto2 = DoctorCreateDTO(name="Dr. Second", crm="11111", has_rqe=False, career_start_date=date(2020, 1, 1))
     result = service.create(dto2)
     assert result.is_failure
     assert "DOCTOR_ALREADY_EXISTS" in result.code
 
 
 def test_service_get_by_id(service):
-    dto = DoctorCreateDTO(name="Dr. Find", crm="22222", hour_rate=160.0)
+    dto = DoctorCreateDTO(name="Dr. Find", crm="22222", has_rqe=False, career_start_date=date(2020, 1, 1))
     created = service.create(dto)
     result = service.get_by_id(created.data.id)
     assert result.is_success
@@ -50,7 +52,7 @@ def test_service_get_by_id_not_found(service):
 
 
 def test_service_update(service):
-    dto = DoctorCreateDTO(name="Dr. Update", crm="33333", hour_rate=170.0)
+    dto = DoctorCreateDTO(name="Dr. Update", crm="33333", has_rqe=False, career_start_date=date(2020, 1, 1))
     created = service.create(dto)
     update_dto = DoctorUpdateDTO(name="Dr. Updated")
     result = service.update(created.data.id, update_dto)
@@ -66,9 +68,9 @@ def test_service_update_not_found(service):
 
 
 def test_service_update_duplicate_crm(service):
-    dto1 = DoctorCreateDTO(name="Dr. First", crm="44444", hour_rate=150.0)
+    dto1 = DoctorCreateDTO(name="Dr. First", crm="44444", has_rqe=False, career_start_date=date(2020, 1, 1))
     service.create(dto1)
-    dto2 = DoctorCreateDTO(name="Dr. Second", crm="55555", hour_rate=200.0)
+    dto2 = DoctorCreateDTO(name="Dr. Second", crm="55555", has_rqe=False, career_start_date=date(2020, 1, 1))
     created2 = service.create(dto2)
     update_dto = DoctorUpdateDTO(crm="44444")
     result = service.update(created2.data.id, update_dto)
@@ -77,7 +79,7 @@ def test_service_update_duplicate_crm(service):
 
 
 def test_service_delete(service):
-    dto = DoctorCreateDTO(name="Dr. Delete", crm="66666", hour_rate=180.0)
+    dto = DoctorCreateDTO(name="Dr. Delete", crm="66666", has_rqe=False, career_start_date=date(2020, 1, 1))
     created = service.create(dto)
     result = service.delete(created.data.id)
     assert result.is_success

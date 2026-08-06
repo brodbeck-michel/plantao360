@@ -12,6 +12,7 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/
 import { DoctorForm } from '../forms/doctor-form';
 import { useCreateDoctor } from '../hooks/use-doctors';
 import { useErrorExperience } from '../../../shared/hooks/use-error-experience';
+import type { DoctorFormState } from '../types/doctor-types';
 
 // ============================================================
 // Types
@@ -30,7 +31,7 @@ export function DoctorCreateDialog({ open, onClose }: DoctorCreateDialogProps) {
   const createDoctor = useCreateDoctor();
   const { showError, showSuccess } = useErrorExperience();
 
-  const handleSubmit = async (data: { name: string; crm: string; specialty: string; email: string }) => {
+  const handleSubmit = async (data: DoctorFormState) => {
     try {
       await createDoctor.mutateAsync(data);
       showSuccess('Médico criado com sucesso');

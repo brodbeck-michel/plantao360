@@ -28,7 +28,7 @@ standard_responses = {
             "application/json": {
                 "example": {
                     "success": True,
-                    "data": {"id": 1, "name": "Dr. João", "crm": "12345", "hour_rate": 150.0, "active": True},
+                    "data": {"id": 1, "name": "Dr. João", "crm": "12345", "has_rqe": False, "career_start_date": "2018-03-01", "hour_rate": 146.88, "hour_rate_tier": "M-2", "active": True},
                     "meta": {},
                     "errors": [],
                 }

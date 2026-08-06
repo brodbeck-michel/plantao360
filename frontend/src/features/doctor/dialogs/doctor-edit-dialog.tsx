@@ -12,7 +12,7 @@ import { Dialog, DialogTitle, DialogContent } from '@mui/material';
 import { DoctorForm } from '../forms/doctor-form';
 import { useUpdateDoctor } from '../hooks/use-doctors';
 import { useErrorExperience } from '../../../shared/hooks/use-error-experience';
-import type { Doctor } from '../types/doctor-types';
+import type { Doctor, DoctorFormState } from '../types/doctor-types';
 
 // ============================================================
 // Types
@@ -32,7 +32,7 @@ export function DoctorEditDialog({ open, doctor, onClose }: DoctorEditDialogProp
   const updateDoctor = useUpdateDoctor();
   const { showError, showSuccess } = useErrorExperience();
 
-  const handleSubmit = async (data: { name: string; crm: string; specialty: string; email: string }) => {
+  const handleSubmit = async (data: DoctorFormState) => {
     try {
       await updateDoctor.mutateAsync({ id: doctor.id, ...data });
       showSuccess('Médico atualizado com sucesso');

@@ -54,28 +54,19 @@ def test_shift_extras_table_exists(engine):
 
 
 def test_doctor_create(session):
-    doctor = Doctor(name="Dr. João", crm="12345", hour_rate=150.0)
+    doctor = Doctor(name="Dr. João", crm="12345", has_rqe=False, career_start_date=date(2020, 1, 1))
     session.add(doctor)
     session.commit()
     assert doctor.id is not None
     assert doctor.active is True
 
 
-def test_doctor_hour_rate_positive(session):
-    from sqlalchemy.exc import IntegrityError
-
-    doctor = Doctor(name="Dr. Test", crm="99999", hour_rate=-10.0)
-    session.add(doctor)
-    with pytest.raises(IntegrityError):
-        session.commit()
-    session.rollback()
-
 
 def test_doctor_crm_unique(session):
     from sqlalchemy.exc import IntegrityError
 
-    d1 = Doctor(name="Dr. A", crm="UNIQUE01", hour_rate=100.0)
-    d2 = Doctor(name="Dr. B", crm="UNIQUE01", hour_rate=200.0)
+    d1 = Doctor(name="Dr. A", crm="UNIQUE01", has_rqe=False, career_start_date=date(2020, 1, 1))
+    d2 = Doctor(name="Dr. B", crm="UNIQUE01", has_rqe=False, career_start_date=date(2020, 1, 1))
     session.add(d1)
     session.commit()
     session.add(d2)
@@ -116,7 +107,7 @@ def test_period_month_range(session):
 
 
 def test_shift_create(session):
-    doctor = Doctor(name="Dr. Shift", crm="SHIFT01", hour_rate=100.0)
+    doctor = Doctor(name="Dr. Shift", crm="SHIFT01", has_rqe=False, career_start_date=date(2020, 1, 1))
     session.add(doctor)
     session.flush()
     period = Period(year=2026, month=1, status=PeriodStatus.DRAFT)
@@ -135,7 +126,7 @@ def test_shift_create(session):
 def test_shift_unique_date_type(session):
     from sqlalchemy.exc import IntegrityError
 
-    doctor = Doctor(name="Dr. Dup", crm="DUP01", hour_rate=100.0)
+    doctor = Doctor(name="Dr. Dup", crm="DUP01", has_rqe=False, career_start_date=date(2020, 1, 1))
     session.add(doctor)
     session.flush()
     period = Period(year=2026, month=2, status=PeriodStatus.DRAFT)
@@ -160,7 +151,7 @@ def test_shift_unique_date_type(session):
 
 
 def test_shift_part_create(session):
-    doctor = Doctor(name="Dr. Part", crm="PART01", hour_rate=100.0)
+    doctor = Doctor(name="Dr. Part", crm="PART01", has_rqe=False, career_start_date=date(2020, 1, 1))
     session.add(doctor)
     session.flush()
     period = Period(year=2026, month=3, status=PeriodStatus.DRAFT)
@@ -191,7 +182,7 @@ def test_shift_part_create(session):
 
 
 def test_shift_extra_create(session):
-    doctor = Doctor(name="Dr. Extra", crm="EXTRA01", hour_rate=100.0)
+    doctor = Doctor(name="Dr. Extra", crm="EXTRA01", has_rqe=False, career_start_date=date(2020, 1, 1))
     session.add(doctor)
     session.flush()
     period = Period(year=2026, month=5, status=PeriodStatus.DRAFT)
@@ -219,7 +210,7 @@ def test_shift_extra_create(session):
 def test_shift_extra_duration_positive(session):
     from sqlalchemy.exc import IntegrityError
 
-    doctor = Doctor(name="Dr. Dur", crm="DUR01", hour_rate=100.0)
+    doctor = Doctor(name="Dr. Dur", crm="DUR01", has_rqe=False, career_start_date=date(2020, 1, 1))
     session.add(doctor)
     session.flush()
     period = Period(year=2026, month=9, status=PeriodStatus.DRAFT)
@@ -245,7 +236,7 @@ def test_shift_extra_duration_positive(session):
 
 
 def test_doctor_relationships(session):
-    doctor = Doctor(name="Dr. Rel", crm="REL01", hour_rate=100.0)
+    doctor = Doctor(name="Dr. Rel", crm="REL01", has_rqe=False, career_start_date=date(2020, 1, 1))
     session.add(doctor)
     session.flush()
     period = Period(year=2026, month=7, status=PeriodStatus.DRAFT)
@@ -271,7 +262,7 @@ def test_doctor_relationships(session):
 
 
 def test_cascade_delete_shift(session):
-    doctor = Doctor(name="Dr. Cascade", crm="CAS01", hour_rate=100.0)
+    doctor = Doctor(name="Dr. Cascade", crm="CAS01", has_rqe=False, career_start_date=date(2020, 1, 1))
     session.add(doctor)
     session.flush()
     period = Period(year=2026, month=8, status=PeriodStatus.DRAFT)

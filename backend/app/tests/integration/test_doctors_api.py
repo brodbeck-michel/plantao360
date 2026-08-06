@@ -63,13 +63,18 @@ def test_create_doctor(client):
         json={
             "name": "Dr. Teste API",
             "crm": "12345",
-            "hour_rate": 150.0,
+            "has_rqe": False,
+            "career_start_date": "2025-01-01",
         },
     )
     assert response.status_code == 201
     data = response.json()
     assert data["success"] is True
     assert data["data"]["name"] == "Dr. Teste API"
+    assert data["data"]["has_rqe"] is False
+    assert data["data"]["career_start_date"] == "2025-01-01"
+    assert data["data"]["hour_rate_tier"] == "M-1"
+    assert data["data"]["hour_rate"] == 141.00
     assert "error" not in data or data.get("error") is None
 
 
@@ -79,7 +84,8 @@ def test_get_doctor(client):
         json={
             "name": "Dr. Find API",
             "crm": "54321",
-            "hour_rate": 200.0,
+            "has_rqe": False,
+            "career_start_date": "2020-01-01",
         },
     )
     doctor_id = create_resp.json()["data"]["id"]
@@ -103,7 +109,8 @@ def test_update_doctor(client):
         json={
             "name": "Dr. Update API",
             "crm": "11111",
-            "hour_rate": 180.0,
+            "has_rqe": False,
+            "career_start_date": "2020-01-01",
         },
     )
     doctor_id = create_resp.json()["data"]["id"]
@@ -122,7 +129,8 @@ def test_delete_doctor(client):
         json={
             "name": "Dr. Delete API",
             "crm": "22222",
-            "hour_rate": 190.0,
+            "has_rqe": False,
+            "career_start_date": "2020-01-01",
         },
     )
     doctor_id = create_resp.json()["data"]["id"]
@@ -135,11 +143,11 @@ def test_delete_doctor(client):
 def test_create_doctor_duplicate_crm(client):
     client.post(
         "/api/v1/doctors/",
-        json={"name": "Dr. First", "crm": "99999", "hour_rate": 150.0},
+        json={"name": "Dr. First", "crm": "99999", "has_rqe": False, "career_start_date": "2020-01-01"},
     )
     response = client.post(
         "/api/v1/doctors/",
-        json={"name": "Dr. Second", "crm": "99999", "hour_rate": 200.0},
+        json={"name": "Dr. Second", "crm": "99999", "has_rqe": False, "career_start_date": "2015-01-01"},
     )
     assert response.status_code == 201
     data = response.json()
@@ -150,11 +158,11 @@ def test_create_doctor_duplicate_crm(client):
 def test_list_doctors_with_filters(client):
     client.post(
         "/api/v1/doctors/",
-        json={"name": "Dr. Silva", "crm": "11111", "hour_rate": 150.0},
+        json={"name": "Dr. Silva", "crm": "11111", "has_rqe": False, "career_start_date": "2020-01-01"},
     )
     client.post(
         "/api/v1/doctors/",
-        json={"name": "Dr. Santos", "crm": "22222", "hour_rate": 200.0},
+        json={"name": "Dr. Santos", "crm": "22222", "has_rqe": True, "career_start_date": "2010-01-01"},
     )
     response = client.get("/api/v1/doctors/?name=Silva")
     assert response.status_code == 200

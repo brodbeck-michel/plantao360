@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { Paper, Grid, Typography, Box, Divider } from '@mui/material';
+import { Paper, Grid, Typography, Box, Divider, Chip } from '@mui/material';
 import { EntityAvatar } from '../../../shared/components/entity-avatar';
 import { StatusChip } from '../../../shared/components/status-chip';
 import type { Doctor, DoctorSummary } from '../types/doctor-types';
@@ -62,6 +62,33 @@ export function DoctorDetailsPanel({ doctor, summary }: DoctorDetailsPanelProps)
           <Typography variant="body1" fontWeight={500}>
             {doctor.email}
           </Typography>
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <Typography variant="caption" color="text.secondary" gutterBottom>
+            Possui RQE
+          </Typography>
+          <Typography variant="body1" fontWeight={500}>
+            {doctor.has_rqe ? 'Sim' : 'Não'}
+          </Typography>
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <Typography variant="caption" color="text.secondary" gutterBottom>
+            Início de carreira
+          </Typography>
+          <Typography variant="body1" fontWeight={500}>
+            {doctor.career_start_date ? new Date(doctor.career_start_date + 'T12:00:00').toLocaleDateString('pt-BR') : '—'}
+          </Typography>
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <Typography variant="caption" color="text.secondary" gutterBottom display="block">
+            Valor hora (calculado)
+          </Typography>
+          <Box display="flex" alignItems="center" gap={1}>
+            <Chip label={doctor.hour_rate_tier} size="small" color="primary" variant="outlined" />
+            <Typography variant="body1" fontWeight={500}>
+              R$ {doctor.hour_rate.toFixed(2)}
+            </Typography>
+          </Box>
         </Grid>
         <Grid item xs={12} sm={6}>
           <Typography variant="caption" color="text.secondary" gutterBottom>

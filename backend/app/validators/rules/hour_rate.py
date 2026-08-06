@@ -1,7 +1,10 @@
-def validate_hour_rate(value: float | None) -> list[str]:
+from datetime import date
+
+
+def validate_career_start_date(value: date | None) -> list[str]:
     errors = []
     if value is None:
         pass
-    elif value <= 0:
-        errors.append("Valor hora deve ser maior que zero")
+    elif value > date.today():
+        errors.append("Data de inicio de carreira nao pode ser no futuro")
     return errors

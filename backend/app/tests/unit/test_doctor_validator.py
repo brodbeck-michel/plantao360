@@ -1,3 +1,8 @@
+from datetime import date, timedelta
+
+import pytest
+from pydantic import ValidationError
+
 from app.validators.doctor_validator import DoctorValidator
 from app.schemas.doctor.doctor_create import DoctorCreateDTO
 from app.schemas.doctor.doctor_update import DoctorUpdateDTO
@@ -5,16 +10,26 @@ from app.schemas.doctor.doctor_update import DoctorUpdateDTO
 
 def test_validator_valid_create():
     validator = DoctorValidator()
-    dto = DoctorCreateDTO(name="Dr. Valid", crm="12345", hour_rate=150.0)
+    dto = DoctorCreateDTO(name="Dr. Valid", crm="12345", has_rqe=False, career_start_date=date(2020, 1, 1))
     result = validator.validate(dto)
     assert result.is_valid
 
 
 def test_validator_invalid_crm_format():
     validator = DoctorValidator()
-    dto = DoctorCreateDTO(name="Dr. Invalid", crm="abc", hour_rate=150.0)
+    dto = DoctorCreateDTO(name="Dr. Invalid", crm="abc", has_rqe=False, career_start_date=date(2020, 1, 1))
     result = validator.validate(dto)
     assert result.is_valid is False
+
+
+def test_create_dto_rejects_future_career_start_date():
+    with pytest.raises(ValidationError):
+        DoctorCreateDTO(
+            name="Dr. Future",
+            crm="12345",
+            has_rqe=False,
+            career_start_date=date.today() + timedelta(days=10),
+        )
 
 
 def test_validator_valid_update():
