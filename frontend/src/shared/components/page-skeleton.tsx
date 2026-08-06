@@ -38,7 +38,7 @@ export function PageSkeleton({
       {cards > 0 && (
         <Grid container spacing={2} sx={{ mb: 3 }}>
           {Array.from({ length: cards }).map((_, i) => (
-            <Grid size={{ xs: 12, sm: 6, md: 3 }} key={i}>
+            <Grid item xs={12} sm={6} md={3} key={i}>
               <Card>
                 <CardContent>
                   <Skeleton variant="text" width="60%" height={20} />

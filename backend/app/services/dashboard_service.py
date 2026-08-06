@@ -204,6 +204,121 @@ class UpcomingActionSummary:
 
 
 @dataclass(frozen=True)
+class RqeStatsSummary:
+    """Immutable RQE (Registro de Qualificação de Especialista) breakdown."""
+    with_rqe: int = 0
+    without_rqe: int = 0
+    total: int = 0
+    pct_with_rqe: float = 0.0
+
+    def to_dict(self) -> dict:
+        return {
+            "with_rqe": self.with_rqe,
+            "without_rqe": self.without_rqe,
+            "total": self.total,
+            "pct_with_rqe": self.pct_with_rqe,
+        }
+
+
+@dataclass(frozen=True)
+class DoctorRankingEntry:
+    """Immutable ranking entry for a doctor's hours worked in the current period."""
+    doctor_id: int
+    name: str
+    crm: str
+    has_rqe: bool
+    hour_rate_tier: str
+    hour_rate: float
+    total_hours: float
+    shift_count: int
+    extra_hours: float = 0.0
+    total_value: float = 0.0
+
+    def to_dict(self) -> dict:
+        return {
+            "doctor_id": self.doctor_id,
+            "name": self.name,
+            "crm": self.crm,
+            "has_rqe": self.has_rqe,
+            "hour_rate_tier": self.hour_rate_tier,
+            "hour_rate": self.hour_rate,
+            "total_hours": self.total_hours,
+            "shift_count": self.shift_count,
+            "extra_hours": self.extra_hours,
+            "total_value": self.total_value,
+        }
+
+
+@dataclass(frozen=True)
+class FinancialTrendPoint:
+    """Immutable point in the billing-over-time trend (one per competência)."""
+    period_id: int
+    period_name: str
+    year: int
+    month: int
+    total_hours: float
+    total_value: float
+    shift_count: int
+
+    def to_dict(self) -> dict:
+        return {
+            "period_id": self.period_id,
+            "period_name": self.period_name,
+            "year": self.year,
+            "month": self.month,
+            "total_hours": self.total_hours,
+            "total_value": self.total_value,
+            "shift_count": self.shift_count,
+        }
+
+
+@dataclass(frozen=True)
+class ShiftTypeBreakdownEntry:
+    """Immutable billing breakdown for one shift type (T1/T2/T3/R1/R2) in the current period."""
+    shift_type: str
+    total_hours: float
+    total_value: float
+    shift_count: int
+    doctor_count: int
+
+    def to_dict(self) -> dict:
+        return {
+            "shift_type": self.shift_type,
+            "total_hours": self.total_hours,
+            "total_value": self.total_value,
+            "shift_count": self.shift_count,
+            "doctor_count": self.doctor_count,
+        }
+
+
+@dataclass(frozen=True)
+class FinancialSummary:
+    """Immutable financial summary for the operational dashboard."""
+    current_total_value: float = 0.0
+    current_total_hours: float = 0.0
+    previous_total_value: float = 0.0
+    variation_pct: float = 0.0
+    avg_value_per_hour: float = 0.0
+    extras_value: float = 0.0
+    regular_value: float = 0.0
+    trend: list[FinancialTrendPoint] = field(default_factory=list)
+    shift_type_breakdown: list[ShiftTypeBreakdownEntry] = field(default_factory=list)
+
+    def to_dict(self) -> dict:
+        return {
+            "current_total_value": self.current_total_value,
+            "current_total_hours": self.current_total_hours,
+            "previous_total_value": self.previous_total_value,
+            "variation_pct": self.variation_pct,
+            "avg_value_per_hour": self.avg_value_per_hour,
+            "extras_value": self.extras_value,
+            "regular_value": self.regular_value,
+            "trend": [t.to_dict() for t in self.trend],
+            "shift_type_breakdown": [b.to_dict() for b in self.shift_type_breakdown],
+        }
+
+
+@dataclass(frozen=True)
 class DashboardSummary:
     """Immutable consolidated summary for the operational dashboard."""
     current_period: CurrentPeriodSummary | None = None
@@ -212,6 +327,9 @@ class DashboardSummary:
     recent_activities: list[ActivitySummary] = field(default_factory=list)
     operational_alerts: list[OperationalAlertSummary] = field(default_factory=list)
     upcoming_actions: list[UpcomingActionSummary] = field(default_factory=list)
+    rqe_stats: RqeStatsSummary = RqeStatsSummary()
+    doctor_ranking: list[DoctorRankingEntry] = field(default_factory=list)
+    financial: FinancialSummary = FinancialSummary()
     generated_at: datetime | None = None
 
     def to_dict(self) -> dict:
@@ -222,6 +340,9 @@ class DashboardSummary:
             "recent_activities": [a.to_dict() for a in self.recent_activities],
             "operational_alerts": [a.to_dict() for a in self.operational_alerts],
             "upcoming_actions": [a.to_dict() for a in self.upcoming_actions],
+            "rqe_stats": self.rqe_stats.to_dict(),
+            "doctor_ranking": [d.to_dict() for d in self.doctor_ranking],
+            "financial": self.financial.to_dict(),
             "generated_at": self.generated_at.isoformat() if self.generated_at else None,
         }
 
@@ -372,6 +493,9 @@ class DashboardService:
         recent_activities = self._build_recent_activities(query)
         operational_alerts = self._build_operational_alerts(projection, query)
         upcoming_actions = self._build_upcoming_actions(projection, query)
+        rqe_stats = self._build_rqe_stats()
+        doctor_ranking = self._build_doctor_ranking(projection)
+        financial = self._build_financial_summary(projection)
 
         return DashboardSummary(
             current_period=self._build_current_period(projection),
@@ -380,6 +504,9 @@ class DashboardService:
             recent_activities=recent_activities,
             operational_alerts=operational_alerts,
             upcoming_actions=upcoming_actions,
+            rqe_stats=rqe_stats,
+            doctor_ranking=doctor_ranking,
+            financial=financial,
             generated_at=datetime.utcnow(),
         )
 
@@ -825,3 +952,225 @@ class DashboardService:
             ))
 
         return actions
+
+    def _build_rqe_stats(self) -> RqeStatsSummary:
+        """Build RQE (Registro de Qualificação de Especialista) breakdown for active doctors."""
+        rqe_counts = (
+            self._session.query(Doctor.has_rqe, func.count(Doctor.id))
+            .filter(Doctor.active == True)
+            .group_by(Doctor.has_rqe)
+            .all()
+        )
+        counts_map = dict(rqe_counts)
+        with_rqe = counts_map.get(True, 0)
+        without_rqe = counts_map.get(False, 0)
+        total = with_rqe + without_rqe
+        pct_with_rqe = (with_rqe / total * 100) if total > 0 else 0.0
+        return RqeStatsSummary(
+            with_rqe=with_rqe,
+            without_rqe=without_rqe,
+            total=total,
+            pct_with_rqe=pct_with_rqe,
+        )
+
+    def _build_doctor_ranking(self, projection: DashboardProjection, limit: int = 10) -> list[DoctorRankingEntry]:
+        """Build a ranking of doctors by total hours worked (shifts + extras) in the current period."""
+        if projection.period_id == 0:
+            return []
+
+        shift_rows = (
+            self._session.query(
+                ShiftPart.doctor_id,
+                func.sum(ShiftPart.duration_minutes),
+                func.count(ShiftPart.id),
+            )
+            .join(Shift, Shift.id == ShiftPart.shift_id)
+            .filter(Shift.period_id == projection.period_id)
+            .group_by(ShiftPart.doctor_id)
+            .all()
+        )
+        shift_hours = {doctor_id: (minutes or 0, count) for doctor_id, minutes, count in shift_rows}
+
+        extra_rows = (
+            self._session.query(
+                ShiftExtra.doctor_id,
+                func.sum(ShiftExtra.duration_minutes),
+            )
+            .join(Shift, Shift.id == ShiftExtra.shift_id)
+            .filter(
+                Shift.period_id == projection.period_id,
+                ShiftExtra.status != ExtraStatus.REJECTED,
+                ShiftExtra.status != ExtraStatus.CANCELLED,
+            )
+            .group_by(ShiftExtra.doctor_id)
+            .all()
+        )
+        extra_minutes = {doctor_id: (minutes or 0) for doctor_id, minutes in extra_rows}
+
+        doctor_ids = set(shift_hours.keys()) | set(extra_minutes.keys())
+        if not doctor_ids:
+            return []
+
+        doctors = (
+            self._session.query(Doctor)
+            .filter(Doctor.id.in_(doctor_ids))
+            .all()
+        )
+
+        entries = []
+        for doctor in doctors:
+            shift_minutes, shift_count = shift_hours.get(doctor.id, (0, 0))
+            extra_min = extra_minutes.get(doctor.id, 0)
+            total_hours = shift_minutes / 60.0 + extra_min / 60.0
+            extra_hours = extra_min / 60.0
+            entries.append(DoctorRankingEntry(
+                doctor_id=doctor.id,
+                name=doctor.name,
+                crm=doctor.crm,
+                has_rqe=doctor.has_rqe,
+                hour_rate_tier=doctor.hour_rate_tier,
+                hour_rate=doctor.hour_rate,
+                total_hours=round(total_hours, 2),
+                shift_count=shift_count or 0,
+                extra_hours=round(extra_hours, 2),
+                total_value=round(total_hours * doctor.hour_rate, 2),
+            ))
+
+        entries.sort(key=lambda e: e.total_hours, reverse=True)
+        return entries[:limit]
+
+    def _get_period_value_and_hours(self, period_id: int) -> tuple[float, float, int, float, float]:
+        """Compute (total_hours, total_value, shift_count, extras_value, regular_value) for a period."""
+        parts = (
+            self._session.query(ShiftPart.doctor_id, ShiftPart.duration_minutes, ShiftPart.shift_id)
+            .join(Shift, Shift.id == ShiftPart.shift_id)
+            .filter(Shift.period_id == period_id)
+            .all()
+        )
+        extras = (
+            self._session.query(ShiftExtra.doctor_id, ShiftExtra.duration_minutes)
+            .join(Shift, Shift.id == ShiftExtra.shift_id)
+            .filter(
+                Shift.period_id == period_id,
+                ShiftExtra.status != ExtraStatus.REJECTED,
+                ShiftExtra.status != ExtraStatus.CANCELLED,
+            )
+            .all()
+        )
+
+        doctor_ids = {doctor_id for doctor_id, _, _ in parts} | {doctor_id for doctor_id, _ in extras}
+        if not doctor_ids:
+            return 0.0, 0.0, 0, 0.0, 0.0
+
+        doctors = {
+            d.id: d
+            for d in self._session.query(Doctor).filter(Doctor.id.in_(doctor_ids)).all()
+        }
+
+        regular_hours = 0.0
+        regular_value = 0.0
+        shift_ids = set()
+        for doctor_id, minutes, shift_id in parts:
+            doctor = doctors.get(doctor_id)
+            if not doctor:
+                continue
+            hours = (minutes or 0) / 60.0
+            regular_hours += hours
+            regular_value += hours * doctor.hour_rate
+            shift_ids.add(shift_id)
+
+        extras_hours = 0.0
+        extras_value = 0.0
+        for doctor_id, minutes in extras:
+            doctor = doctors.get(doctor_id)
+            if not doctor:
+                continue
+            hours = (minutes or 0) / 60.0
+            extras_hours += hours
+            extras_value += hours * doctor.hour_rate
+
+        total_hours = regular_hours + extras_hours
+        total_value = regular_value + extras_value
+        return total_hours, total_value, len(shift_ids), extras_value, regular_value
+
+    def _build_financial_summary(self, projection: DashboardProjection, trend_periods: int = 6) -> FinancialSummary:
+        """Build the billing summary: current totals, trend over time, and breakdown by shift type."""
+        if projection.period_id == 0:
+            return FinancialSummary()
+
+        current_hours, current_value, _, extras_value, regular_value = self._get_period_value_and_hours(
+            projection.period_id
+        )
+        avg_value_per_hour = (current_value / current_hours) if current_hours > 0 else 0.0
+
+        recent_periods = list(reversed(
+            self._session.query(Period)
+            .order_by(Period.year.desc(), Period.month.desc())
+            .limit(trend_periods)
+            .all()
+        ))
+
+        trend = []
+        previous_value = 0.0
+        for idx, p in enumerate(recent_periods):
+            hours, value, shift_count, _, _ = self._get_period_value_and_hours(p.id)
+            trend.append(FinancialTrendPoint(
+                period_id=p.id,
+                period_name=self._get_period_name(p),
+                year=p.year,
+                month=p.month,
+                total_hours=round(hours, 2),
+                total_value=round(value, 2),
+                shift_count=shift_count,
+            ))
+            if p.id == projection.period_id and idx > 0:
+                previous_value = trend[idx - 1].total_value
+
+        variation_pct = ((current_value - previous_value) / previous_value * 100) if previous_value > 0 else 0.0
+
+        breakdown_rows = (
+            self._session.query(ShiftPart.doctor_id, ShiftPart.duration_minutes, ShiftPart.shift_id, Shift.shift_type)
+            .join(Shift, Shift.id == ShiftPart.shift_id)
+            .filter(Shift.period_id == projection.period_id)
+            .all()
+        )
+        breakdown_doctor_ids = {row[0] for row in breakdown_rows}
+        breakdown_doctors = {
+            d.id: d
+            for d in self._session.query(Doctor).filter(Doctor.id.in_(breakdown_doctor_ids)).all()
+        } if breakdown_doctor_ids else {}
+
+        breakdown_map: dict[str, dict] = {}
+        for doctor_id, minutes, shift_id, shift_type in breakdown_rows:
+            doctor = breakdown_doctors.get(doctor_id)
+            if not doctor:
+                continue
+            hours = (minutes or 0) / 60.0
+            entry = breakdown_map.setdefault(shift_type, {"hours": 0.0, "value": 0.0, "shift_ids": set(), "doctor_ids": set()})
+            entry["hours"] += hours
+            entry["value"] += hours * doctor.hour_rate
+            entry["shift_ids"].add(shift_id)
+            entry["doctor_ids"].add(doctor_id)
+
+        shift_type_breakdown = [
+            ShiftTypeBreakdownEntry(
+                shift_type=shift_type,
+                total_hours=round(data["hours"], 2),
+                total_value=round(data["value"], 2),
+                shift_count=len(data["shift_ids"]),
+                doctor_count=len(data["doctor_ids"]),
+            )
+            for shift_type, data in sorted(breakdown_map.items())
+        ]
+
+        return FinancialSummary(
+            current_total_value=round(current_value, 2),
+            current_total_hours=round(current_hours, 2),
+            previous_total_value=round(previous_value, 2),
+            variation_pct=round(variation_pct, 2),
+            avg_value_per_hour=round(avg_value_per_hour, 2),
+            extras_value=round(extras_value, 2),
+            regular_value=round(regular_value, 2),
+            trend=trend,
+            shift_type_breakdown=shift_type_breakdown,
+        )

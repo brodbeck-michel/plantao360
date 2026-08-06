@@ -33,7 +33,7 @@ export default function HomePage() {
       </Typography>
 
       <Grid container spacing={2}>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+        <Grid item xs={12} sm={6} md={3}>
           <Card
             sx={{ cursor: 'pointer', '&:hover': { boxShadow: 4 } }}
             onClick={() => navigate(ROUTES.DASHBOARD)}
@@ -52,7 +52,7 @@ export default function HomePage() {
           </Card>
         </Grid>
 
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+        <Grid item xs={12} sm={6} md={3}>
           <Card
             sx={{ cursor: 'pointer', '&:hover': { boxShadow: 4 } }}
             onClick={() => navigate(ROUTES.DOCTORS)}
@@ -71,7 +71,7 @@ export default function HomePage() {
           </Card>
         </Grid>
 
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+        <Grid item xs={12} sm={6} md={3}>
           <Card
             sx={{ cursor: 'pointer', '&:hover': { boxShadow: 4 } }}
             onClick={() => navigate(ROUTES.PERIODS)}
@@ -90,7 +90,7 @@ export default function HomePage() {
           </Card>
         </Grid>
 
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+        <Grid item xs={12} sm={6} md={3}>
           <Card
             sx={{ cursor: 'pointer', '&:hover': { boxShadow: 4 } }}
             onClick={() => navigate(ROUTES.HEALTH)}

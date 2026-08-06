@@ -8,10 +8,10 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
   AppBar, Box, Drawer, IconButton, List, ListItemButton, ListItemIcon,
   ListItemText, Toolbar, Typography, Badge, Avatar, Tooltip, Divider,
-  Chip, InputBase, Breadcrumbs, Link, Skeleton, Stack,
+  Chip, Breadcrumbs, Link, Skeleton, Stack,
 } from '@mui/material';
 import {
-  Menu as MenuIcon, Search as SearchIcon, Notifications as NotificationsIcon,
+  Menu as MenuIcon, Notifications as NotificationsIcon,
   Help as HelpIcon, LightMode as LightModeIcon, DarkMode as DarkModeIcon,
   Dashboard as DashboardIcon, Assignment as AssignmentIcon,
   CalendarMonth as CalendarMonthIcon, EventNote as EventNoteIcon,
@@ -31,6 +31,7 @@ import { ROUTES, NAV_ITEMS, type NavItem } from '../routes/routes';
 import { FEATURE_FLAGS } from '../config';
 import { tokens, darkTokens } from '../theme';
 import { useAuth } from '../contexts/AuthContext';
+import { apiClient } from '../api/client';
 import { useColorMode } from '../contexts/ColorModeContext';
 import { BreadcrumbProvider, useBreadcrumbLabels } from '../contexts/BreadcrumbContext';
 
@@ -56,10 +57,12 @@ const segmentLabelMap: Record<string, string> = {
 };
 
 async function fetchDashboardContext() {
-  const response = await fetch('/api/v1/query/dashboard?include_health_cards=false&include_recent_activities=false&include_operational_alerts=false&include_upcoming_actions=false');
-  if (!response.ok) return null;
-  const json = await response.json();
-  return json.data ?? json;
+  try {
+    const response = await apiClient.get('/query/dashboard?include_health_cards=false&include_recent_activities=false&include_operational_alerts=false&include_upcoming_actions=false');
+    return response.data.data ?? response.data;
+  } catch {
+    return null;
+  }
 }
 
 function SidebarOperationalContext({ collapsed }: { collapsed: boolean }) {
@@ -156,6 +159,13 @@ function MainLayoutContent() {
   const breadcrumbLabels = useBreadcrumbLabels();
   const isDarkMode = mode === 'dark';
   const colors = isDarkMode ? darkTokens.colors : tokens.colors;
+  const { data: headerContext } = useQuery({
+    queryKey: ['dashboard', 'context'],
+    queryFn: fetchDashboardContext,
+    refetchInterval: 60000,
+    staleTime: 30000,
+  });
+  const currentCompetency = headerContext?.current_period?.name;
   const [mobileOpen, setMobileOpen] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     Operacional: true, 'Gestao de Pessoal': false, Financeiro: false, Analytics: false, Sistema: false,
@@ -276,7 +286,7 @@ function MainLayoutContent() {
         {isExpanded ? (
           <Box display="flex" alignItems="center" gap={1.25} sx={{ flex: 1 }}>
             <Box sx={logoContainerSx}>
-              <img src="/logo.png" alt="Unimed Tubarão" style={{ height: 30, objectFit: 'contain' }} />
+              <img src="/logo.png" alt="Unimed Tubarão" style={{ width: '100%', height: 'auto', objectFit: 'contain' }} />
             </Box>
             <Box sx={{ overflow: 'hidden' }}>
               <Typography variant="subtitle1" fontWeight={700} sx={{ color: colors.primary.dark, whiteSpace: 'nowrap' }}>
@@ -290,7 +300,7 @@ function MainLayoutContent() {
         ) : (
           <Tooltip title="Plantao 360" placement="right">
             <Box sx={logoContainerSx}>
-              <img src="/logo.png" alt="Unimed Tubarão" style={{ height: 28, objectFit: 'contain' }} />
+              <img src="/logo.png" alt="Unimed Tubarão" style={{ width: '100%', height: 'auto', objectFit: 'contain' }} />
             </Box>
           </Tooltip>
         )}
@@ -428,51 +438,60 @@ function MainLayoutContent() {
 
   return (
     <Box sx={{ display: 'flex' }}>
-      <AppBar position="fixed" sx={{
+      <AppBar position="fixed" elevation={0} sx={{
         width: { sm: `calc(100% - ${currentWidth}px)` }, ml: { sm: `${currentWidth}px` },
-        bgcolor: colors.background.paper, color: colors.text.primary,
-        borderBottom: `1px solid ${colors.grey[200]}`,
-        boxShadow: isDarkMode ? '0 1px 0 rgba(255,255,255,0.04)' : '0 1px 2px rgba(15,23,42,0.04)',
-        backdropFilter: 'blur(8px)',
+        bgcolor: colors.primary.main,
+        backgroundImage: 'none',
+        color: '#FFFFFF',
         transition: 'width 200ms ease, margin 200ms ease',
       }}>
-        <Toolbar sx={{ minHeight: '56px !important' }}>
-          <IconButton color="inherit" edge="start" onClick={handleDrawerToggle} sx={{ mr: 2, display: { sm: 'none' } }}>
+        <Toolbar sx={{ minHeight: '64px !important', gap: 1.5 }}>
+          <IconButton color="inherit" edge="start" onClick={handleDrawerToggle} sx={{ mr: 1, display: { sm: 'none' } }}>
             <MenuIcon />
           </IconButton>
-          {isExpanded && (
-            <Tooltip title="Pesquisar (Ctrl+K)">
-              <Box sx={{
-                display: 'flex', alignItems: 'center', bgcolor: colors.grey[50],
-                borderRadius: tokens.borderRadius.md, px: 1.5, py: 0.5, minWidth: 200,
-                maxWidth: 400, flex: 1, border: `1px solid ${colors.grey[200]}`,
-                cursor: 'pointer', transition: 'all 150ms ease',
-                '&:hover': { borderColor: colors.primary.main + '40', bgcolor: colors.background.paper },
-              }}>
-                <SearchIcon sx={{ color: colors.text.muted, mr: 1, fontSize: 20 }} />
-                <InputBase placeholder="Pesquisar..." sx={{ flex: 1, fontSize: '0.875rem', color: colors.text.muted }} disabled />
-                <Chip label="Ctrl+K" size="small" sx={{ height: 20, fontSize: '0.6rem', bgcolor: colors.grey[100], color: colors.text.muted, fontWeight: 600 }} />
-              </Box>
-            </Tooltip>
-          )}
+
+          <Stack direction="row" alignItems="center" spacing={1.5} sx={{ minWidth: 0, flexShrink: 1, overflow: 'hidden' }}>
+            <Typography noWrap sx={{ fontSize: '1.375rem', fontWeight: 800, letterSpacing: '-0.01em', color: '#FFFFFF', lineHeight: 1 }}>
+              Unimed{' '}
+              <Box component="span" sx={{ fontWeight: 400, fontSize: '1.125rem' }}>Tubarão</Box>
+            </Typography>
+            <Box sx={{ width: '1px', height: 24, bgcolor: 'rgba(255,255,255,0.4)', flexShrink: 0, display: { xs: 'none', md: 'block' } }} />
+            <Typography noWrap sx={{ fontSize: '1.0625rem', fontWeight: 700, color: '#FFFFFF', display: { xs: 'none', md: 'block' } }}>
+              Gestão de Plantões Médicos
+            </Typography>
+          </Stack>
+
           <Box sx={{ flexGrow: 1 }} />
-          <Box display="flex" alignItems="center" gap={0.5}>
+
+          {currentCompetency && (
+            <Chip
+              icon={<CalendarMonthIcon sx={{ color: '#fff !important', fontSize: 16 }} />}
+              label={<Box component="span"><Box component="span" sx={{ fontWeight: 700 }}>Competência:</Box> {currentCompetency}</Box>}
+              sx={{
+                bgcolor: 'rgba(255,255,255,0.16)', color: '#fff', fontWeight: 500,
+                border: '1px solid rgba(255,255,255,0.3)', height: 34, px: 0.5,
+                '& .MuiChip-label': { px: 1 },
+              }}
+            />
+          )}
+
+          <Box display="flex" alignItems="center" gap={0.25}>
             <Tooltip title="Notificacoes">
-              <IconButton color="inherit" sx={{ color: colors.text.secondary }}>
+              <IconButton sx={{ color: '#fff' }}>
                 <Badge badgeContent={3} color="error" max={99}><NotificationsIcon fontSize="small" /></Badge>
               </IconButton>
             </Tooltip>
             <Tooltip title="Ajuda">
-              <IconButton color="inherit" sx={{ color: colors.text.secondary }}><HelpIcon fontSize="small" /></IconButton>
+              <IconButton sx={{ color: '#fff' }}><HelpIcon fontSize="small" /></IconButton>
             </Tooltip>
             <Tooltip title={isDarkMode ? 'Ativar tema claro' : 'Ativar tema escuro'}>
-              <IconButton color="inherit" onClick={toggleColorMode} sx={{ color: colors.text.secondary }}>
+              <IconButton onClick={toggleColorMode} sx={{ color: '#fff' }}>
                 {isDarkMode ? <LightModeIcon fontSize="small" /> : <DarkModeIcon fontSize="small" />}
               </IconButton>
             </Tooltip>
             <Tooltip title={`${user?.name || 'Usuario'} (${user?.role || ''}) — Clique para sair`}>
-              <IconButton color="inherit" onClick={logout} sx={{ color: colors.text.secondary }}>
-                <Avatar sx={{ width: 32, height: 32, bgcolor: colors.primary.main, color: '#fff', fontSize: '0.875rem', fontWeight: 600 }}>
+              <IconButton onClick={logout} sx={{ color: '#fff', ml: 0.5 }}>
+                <Avatar sx={{ width: 32, height: 32, bgcolor: 'rgba(255,255,255,0.9)', color: colors.primary.dark, fontSize: '0.875rem', fontWeight: 700 }}>
                   {user?.name?.charAt(0)?.toUpperCase() || 'U'}
                 </Avatar>
               </IconButton>
@@ -500,7 +519,7 @@ function MainLayoutContent() {
         bgcolor: colors.background.default, minHeight: '100vh',
         transition: 'width 200ms ease',
       }}>
-        <Toolbar />
+        <Toolbar sx={{ minHeight: '64px !important' }} />
         {breadcrumbs.length > 1 && (
           <Box sx={{ px: 3, pt: 2, pb: 0 }}>
             <Breadcrumbs separator={<ChevronRightIcon fontSize="small" />} sx={{ fontSize: '0.8rem' }}>

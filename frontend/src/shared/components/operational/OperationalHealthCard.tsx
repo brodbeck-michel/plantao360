@@ -8,9 +8,9 @@
  */
 
 import React from 'react';
-import { Box, Card, CardContent, Typography, Stack, CircularProgress } from '@mui/material';
+import { Box, Card, CardContent, Typography, Stack, CircularProgress, useTheme } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { tokens } from '../../../theme';
+import { tokens, darkTokens } from '../../../theme';
 import { OperationalLevel, getOperationalStatus } from '../../constants/status-colors';
 
 // ============================================================
@@ -43,12 +43,14 @@ export function OperationalHealthCard({
   percentage,
 }: OperationalHealthCardProps) {
   const navigate = useNavigate();
+  const theme = useTheme();
+  const colors = theme.palette.mode === 'dark' ? darkTokens.colors : tokens.colors;
   const status = getOperationalStatus(level);
 
   const trendIcon = trend === 'up' ? '↑' : trend === 'down' ? '↓' : '→';
-  const trendColor = trend === 'up' ? tokens.colors.operational.healthy
-    : trend === 'down' ? tokens.colors.operational.critical
-    : tokens.colors.text.secondary;
+  const trendColor = trend === 'up' ? colors.operational.healthy
+    : trend === 'down' ? colors.operational.critical
+    : colors.text.secondary;
 
   return (
     <Card
@@ -75,7 +77,7 @@ export function OperationalHealthCard({
           transform: 'translateY(0px) scale(0.98)',
         },
         '&:focus-visible': {
-          outline: `2px solid ${tokens.colors.primary.main}`,
+          outline: `2px solid ${colors.primary.main}`,
           outlineOffset: '2px',
         },
       }}
@@ -85,7 +87,7 @@ export function OperationalHealthCard({
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography
               variant="caption"
-              sx={{ color: tokens.colors.text.secondary, textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}
+              sx={{ color: colors.text.secondary, textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}
             >
               {title}
             </Typography>
@@ -94,7 +96,7 @@ export function OperationalHealthCard({
               sx={{
                 fontSize: { xs: '1.75rem', sm: '2.25rem' },
                 fontWeight: 700,
-                color: tokens.colors.text.primary,
+                color: colors.text.primary,
                 mt: 0.5,
                 fontVariantNumeric: 'tabular-nums',
               }}
@@ -110,7 +112,7 @@ export function OperationalHealthCard({
                   {trendIcon} {trendValue}
                 </Typography>
                 {detail && (
-                  <Typography variant="caption" sx={{ color: tokens.colors.text.muted }}>
+                  <Typography variant="caption" sx={{ color: colors.text.muted }}>
                     {detail}
                   </Typography>
                 )}
