@@ -1,9 +1,11 @@
 import React, { useState, useCallback } from 'react';
-import { Box, Typography, useTheme } from '@mui/material';
+import { Box, Typography, IconButton, Tooltip, useTheme } from '@mui/material';
+import { MoreTime as ExtraTimeIcon } from '@mui/icons-material';
 import { AssignmentCell } from './AssignmentCell';
 import { SHIFT_TYPES } from '../../types/operational-types';
 import type { DayData } from '../../types/operational-types';
 import type { CellPosition } from '../../hooks/use-workspace-keyboard';
+import { getFeatureAccentColors } from '../../utils/feature-accent-colors';
 
 interface AssignmentRowProps {
   day: DayData;
@@ -13,11 +15,14 @@ interface AssignmentRowProps {
   onRemove: (assignmentId: number) => void;
   onContextMenu: (e: React.MouseEvent, date: string, shiftType: string, shiftId: number | null) => void;
   onDrop?: (sourceAssignmentId: number, sourceDoctorId: number, targetDate: string, targetShiftType: string, targetShiftId: number | null) => void;
+  onOpenExtras?: (date: string) => void;
+  onSplit?: (date: string, shiftType: string) => void;
   sameDayConflicts: Map<string, boolean>;
 }
 
-export function AssignmentRow({ day, dayIndex, activeCell, onOpenCell, onRemove, onContextMenu, onDrop, sameDayConflicts }: AssignmentRowProps) {
+export function AssignmentRow({ day, dayIndex, activeCell, onOpenCell, onRemove, onContextMenu, onDrop, onOpenExtras, onSplit, sameDayConflicts }: AssignmentRowProps) {
   const theme = useTheme();
+  const accent = getFeatureAccentColors(theme.palette.mode);
   const dayNum = new Date(day.date + 'T12:00:00').getDate();
   const isWeekend = day.day_of_week === 'Sab' || day.day_of_week === 'Dom';
   const [dragOverShift, setDragOverShift] = useState<string | null>(null);
@@ -52,7 +57,8 @@ export function AssignmentRow({ day, dayIndex, activeCell, onOpenCell, onRemove,
         sx={{
           p: 1.5,
           fontWeight: isWeekend ? 700 : 500,
-          fontSize: '0.8125rem',
+          fontSize: '0.9375rem',
+          textAlign: 'center',
           color: isWeekend ? theme.palette.primary.main : theme.palette.text.secondary,
           bgcolor: isWeekend ? weekendBg : weekdayBg,
           borderBottom: `1px solid ${theme.palette.divider}`,
@@ -60,12 +66,12 @@ export function AssignmentRow({ day, dayIndex, activeCell, onOpenCell, onRemove,
           left: 0,
           zIndex: 1,
           whiteSpace: 'nowrap',
-          minWidth: 140,
+          minWidth: 180,
           outline: activeCell?.dayIndex === dayIndex ? `2px solid ${theme.palette.primary.main}` : 'none',
           outlineOffset: -2,
         }}
       >
-        <Typography variant="caption" fontWeight={600} display="block">
+        <Typography variant="body2" fontWeight={600} fontSize="0.9375rem" display="block">
           {day.day_of_week} {dayNum}/{String(day.date.split('-')[1]).padStart(2, '0')}
         </Typography>
       </Box>
@@ -88,10 +94,25 @@ export function AssignmentRow({ day, dayIndex, activeCell, onOpenCell, onRemove,
             onDrop={handleDrop(st, cell.shift_id)}
             onDragOver={() => handleDragOver(st)}
             isDragOver={dragOverShift === st}
+            onSplit={onSplit ? () => onSplit(day.date, st) : undefined}
           />
         );
       })}
-      <Box component="td" sx={{ width: 40, minWidth: 40, borderBottom: `1px solid ${theme.palette.divider}` }} />
+      <Box
+        component="td"
+        sx={{
+          width: 40,
+          minWidth: 40,
+          borderBottom: `1px solid ${theme.palette.divider}`,
+          textAlign: 'center',
+        }}
+      >
+        <Tooltip title="Hora extra">
+          <IconButton size="small" onClick={() => onOpenExtras?.(day.date)} sx={{ color: theme.palette.text.disabled, '&:hover': { color: accent.amber.main, bgcolor: accent.amber.bg } }}>
+            <ExtraTimeIcon sx={{ fontSize: 18 }} />
+          </IconButton>
+        </Tooltip>
+      </Box>
     </Box>
   );
 }

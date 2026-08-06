@@ -1,8 +1,9 @@
 ﻿import React, { useMemo } from 'react';
-import { Box, Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Divider } from '@mui/material';
+import { Box, Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Divider, useTheme } from '@mui/material';
 import { AttachMoney as MoneyIcon } from '@mui/icons-material';
 import { SHIFT_TYPES, SHIFT_TIMES } from '../../types/operational-types';
 import type { DayData, DoctorOption } from '../../types/operational-types';
+import { getFeatureAccentColors } from '../../utils/feature-accent-colors';
 
 interface FinancialTabProps {
   days: DayData[];
@@ -10,10 +11,12 @@ interface FinancialTabProps {
 }
 
 export function FinancialTab({ days, doctors }: FinancialTabProps) {
+  const theme = useTheme();
+  const accent = getFeatureAccentColors(theme.palette.mode);
   const doctorFinancials = useMemo(() => {
-    const map: Record<number, { name: string; crm: string; totalHours: number; totalValue: number; shiftCount: number; hourRate: number }> = {};
+    const map: Record<number, { name: string; crm: string; totalHours: number; extraHours: number; totalValue: number; shiftCount: number; hourRate: number }> = {};
     doctors.forEach((d) => {
-      map[d.id] = { name: d.name, crm: d.crm, totalHours: 0, totalValue: 0, shiftCount: 0, hourRate: d.hour_rate };
+      map[d.id] = { name: d.name, crm: d.crm, totalHours: 0, extraHours: 0, totalValue: 0, shiftCount: 0, hourRate: d.hour_rate };
     });
     days.forEach((day) => {
       SHIFT_TYPES.forEach((st) => {
@@ -31,9 +34,19 @@ export function FinancialTab({ days, doctors }: FinancialTabProps) {
             doc.shiftCount += 1;
           }
         });
+        (day.shifts[st].extras || []).forEach((ex) => {
+          if (ex.status === 'rejected' || ex.status === 'cancelled') return;
+          const doc = map[ex.doctor_id];
+          if (doc) {
+            const hours = ex.duration_minutes / 60;
+            doc.totalHours += hours;
+            doc.extraHours += hours;
+            doc.totalValue += hours * doc.hourRate;
+          }
+        });
       });
     });
-    return Object.values(map).filter((d) => d.shiftCount > 0).sort((a, b) => b.totalValue - a.totalValue);
+    return Object.values(map).filter((d) => d.shiftCount > 0 || d.extraHours > 0).sort((a, b) => b.totalValue - a.totalValue);
   }, [days, doctors]);
 
   const grandTotal = doctorFinancials.reduce((sum, d) => sum + d.totalValue, 0);
@@ -65,6 +78,7 @@ export function FinancialTab({ days, doctors }: FinancialTabProps) {
               <TableCell sx={{ fontWeight: 600, fontSize: '0.75rem' }}>CRM</TableCell>
               <TableCell align="center" sx={{ fontWeight: 600, fontSize: '0.75rem' }}>Plantoes</TableCell>
               <TableCell align="center" sx={{ fontWeight: 600, fontSize: '0.75rem' }}>Horas</TableCell>
+              <TableCell align="center" sx={{ fontWeight: 600, fontSize: '0.75rem' }}>Horas Extras</TableCell>
               <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem' }}>Valor/Hora</TableCell>
               <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem' }}>Total</TableCell>
             </TableRow>
@@ -76,6 +90,9 @@ export function FinancialTab({ days, doctors }: FinancialTabProps) {
                 <TableCell sx={{ fontSize: '0.8125rem', color: 'text.secondary' }}>{d.crm}</TableCell>
                 <TableCell align="center" sx={{ fontSize: '0.8125rem' }}>{d.shiftCount}</TableCell>
                 <TableCell align="center" sx={{ fontSize: '0.8125rem' }}>{d.totalHours.toFixed(1)}h</TableCell>
+                <TableCell align="center" sx={{ fontSize: '0.8125rem', color: d.extraHours > 0 ? accent.amber.main : 'text.secondary' }}>
+                  {d.extraHours > 0 ? `${d.extraHours.toFixed(1)}h` : '—'}
+                </TableCell>
                 <TableCell align="right" sx={{ fontSize: '0.8125rem' }}>R$ {d.hourRate.toFixed(2)}</TableCell>
                 <TableCell align="right" sx={{ fontSize: '0.8125rem', fontWeight: 600, color: '#00995D' }}>
                   R$ {d.totalValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
@@ -84,7 +101,7 @@ export function FinancialTab({ days, doctors }: FinancialTabProps) {
             ))}
             {doctorFinancials.length === 0 && (
               <TableRow>
-                <TableCell colSpan={6} align="center" sx={{ py: 4, color: 'text.secondary' }}>
+                <TableCell colSpan={7} align="center" sx={{ py: 4, color: 'text.secondary' }}>
                   Nenhum dado financeiro disponivel
                 </TableCell>
               </TableRow>

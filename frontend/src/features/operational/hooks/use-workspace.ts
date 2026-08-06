@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '../../../services/query-keys';
-import { fetchWorkspace, createAssignment, updateAssignment, deleteAssignment, moveAssignment, duplicateDay, duplicateWeek } from '../services/operational-api';
+import { fetchWorkspace, createAssignment, updateAssignment, deleteAssignment, moveAssignment, duplicateDay, duplicateWeek, createExtra, deleteExtra } from '../services/operational-api';
 import { SHIFT_TIMES } from '../types/operational-types';
 
 export function useWorkspace(periodId: string | undefined) {
@@ -80,6 +80,61 @@ export function useDuplicateDay(periodId: string | undefined) {
   return useMutation({
     mutationFn: (data: { source_date: string; target_date: string }) =>
       duplicateDay({ source_date: data.source_date, target_date: data.target_date, period_id: parseInt(periodId || '0') }),
+    onSuccess: () => {
+      if (periodId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.periods.detail(periodId) });
+      }
+    },
+  });
+}
+
+export function useUpdateAssignmentTime(periodId: string | undefined) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: { id: number; start_time: string; end_time: string }) =>
+      updateAssignment(data.id, { start_time: data.start_time, end_time: data.end_time }),
+    onSuccess: () => {
+      if (periodId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.periods.detail(periodId) });
+      }
+    },
+  });
+}
+
+export function useCreateSplit(periodId: string | undefined) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: { shift_id: number; doctor_id: number; start_time: string; end_time: string }) =>
+      createAssignment(data),
+    onSuccess: () => {
+      if (periodId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.periods.detail(periodId) });
+      }
+    },
+  });
+}
+
+export function useCreateExtra(periodId: string | undefined) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: { shift_id: number; doctor_id: number; duration_minutes: number; justification: string }) =>
+      createExtra(data),
+    onSuccess: () => {
+      if (periodId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.periods.detail(periodId) });
+      }
+    },
+  });
+}
+
+export function useDeleteExtra(periodId: string | undefined) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (extraId: number) => deleteExtra(extraId),
     onSuccess: () => {
       if (periodId) {
         queryClient.invalidateQueries({ queryKey: queryKeys.periods.detail(periodId) });

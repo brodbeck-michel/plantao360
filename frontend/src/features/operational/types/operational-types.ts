@@ -9,10 +9,22 @@ export interface AssignmentData {
   status: string;
 }
 
+export interface ExtraData {
+  id: number;
+  shift_id: number;
+  shift_type: string;
+  doctor_id: number;
+  doctor_name: string;
+  duration_minutes: number;
+  justification: string;
+  status: string;
+}
+
 export interface ShiftCellData {
   shift_id: number | null;
   shift_type: string;
   assignments: AssignmentData[];
+  extras: ExtraData[];
 }
 
 export interface DayData {
@@ -25,7 +37,10 @@ export interface DoctorOption {
   id: number;
   name: string;
   crm: string;
+  has_rqe: boolean;
+  career_start_date: string | null;
   hour_rate: number;
+  hour_rate_tier: string;
   specialty: string;
   active: boolean;
 }

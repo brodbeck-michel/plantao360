@@ -2,11 +2,13 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { Box, CircularProgress, Typography, Snackbar, Alert, useTheme } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
-import { useWorkspace, useAssignDoctor, useSwapDoctor, useRemoveAssignment, useMoveAssignment, useDuplicateDay, useDuplicateWeek } from '../hooks/use-workspace';
+import { useWorkspace, useAssignDoctor, useSwapDoctor, useRemoveAssignment, useMoveAssignment, useDuplicateDay, useDuplicateWeek, useCreateExtra, useDeleteExtra, useCreateSplit, useUpdateAssignmentTime } from '../hooks/use-workspace';
 import { useWorkspaceKeyboard } from '../hooks/use-workspace-keyboard';
 import { useUndoRedo } from '../hooks/use-undo-redo';
 import { AssignmentGrid } from '../components/grid/AssignmentGrid';
 import { CellContextMenu } from '../components/grid/CellContextMenu';
+import { ExtraHoursDialog } from '../components/grid/ExtraHoursDialog';
+import { SplitShiftDialog } from '../components/grid/SplitShiftDialog';
 import { QuickAssignPopover } from '../components/quick-assign/QuickAssignPopover';
 import { CoverageSidebar } from '../components/sidebar/CoverageSidebar';
 import { WorkspaceHeader } from '../components/workspace/WorkspaceHeader';
@@ -81,10 +83,16 @@ export default function WorkspacePage() {
   const moveAssignment = useMoveAssignment(periodId);
   const duplicateDayMut = useDuplicateDay(periodId);
   const duplicateWeekMut = useDuplicateWeek(periodId);
+  const createExtraMut = useCreateExtra(periodId);
+  const deleteExtraMut = useDeleteExtra(periodId);
+  const createSplitMut = useCreateSplit(periodId);
+  const updateAssignmentTimeMut = useUpdateAssignmentTime(periodId);
 
   const [activeTab, setActiveTab] = useState(0);
   const [activeCell, setActiveCell] = useState<CellPosition | null>(null);
   const [cellContext, setCellContext] = useState<CellContext | null>(null);
+  const [extraDialogDate, setExtraDialogDate] = useState<string | null>(null);
+  const [splitDialog, setSplitDialog] = useState<{ date: string; shiftType: string } | null>(null);
   const [toast, setToast] = useState<ToastState>({ open: false, message: '', severity: 'success' });
   const [confirmDialog, setConfirmDialog] = useState<{ open: boolean; message: string; onConfirm: () => void } | null>(null);
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
@@ -115,6 +123,12 @@ export default function WorkspacePage() {
             let endMin = parseInt(parts_e[0]) * 60 + parseInt(parts_e[1]);
             if (endMin <= startMin) endMin += 24 * 60;
             stats[a.doctor_id].totalHours += (endMin - startMin) / 60;
+          }
+        });
+        (day.shifts[st].extras || []).forEach((ex) => {
+          if (ex.status === 'rejected' || ex.status === 'cancelled') return;
+          if (stats[ex.doctor_id]) {
+            stats[ex.doctor_id].totalHours += ex.duration_minutes / 60;
           }
         });
       });
@@ -480,6 +494,74 @@ export default function WorkspacePage() {
     }
   }, [periodId, refetch, showToast, navigate]);
 
+  const handleOpenExtras = useCallback((date: string) => {
+    setExtraDialogDate(date);
+  }, []);
+
+  const handleCreateExtra = useCallback(async (data: { shift_id: number; doctor_id: number; duration_minutes: number; justification: string }) => {
+    if (!canModify) return;
+    await createExtraMut.mutateAsync(data);
+    showToast('Hora extra registrada');
+    markSaved();
+  }, [canModify, createExtraMut, showToast, markSaved]);
+
+  const handleDeleteExtra = useCallback(async (extraId: number) => {
+    if (!canModify) return;
+    try {
+      await deleteExtraMut.mutateAsync(extraId);
+      showToast('Hora extra removida');
+      markSaved();
+    } catch {
+      showToast('Erro ao remover hora extra', 'error');
+    }
+  }, [deleteExtraMut, showToast, markSaved]);
+
+  const handleOpenSplit = useCallback((date: string, shiftType: string) => {
+    if (!canModify) return;
+    setSplitDialog({ date, shiftType });
+  }, [canModify]);
+
+  const handleCreateSplit = useCallback(async (data: { shift_id: number; doctor_id: number; start_time: string; end_time: string }) => {
+    if (!canModify) return;
+    await createSplitMut.mutateAsync(data);
+    showToast('Medico adicionado ao turno');
+    markSaved();
+  }, [canModify, createSplitMut, showToast, markSaved]);
+
+  const handleRemoveSplitPart = useCallback(async (assignmentId: number) => {
+    if (!canModify) return;
+    try {
+      await removeAssignment.mutateAsync(assignmentId);
+      showToast('Atribuicao removida');
+      markSaved();
+    } catch {
+      showToast('Erro ao remover atribuicao', 'error');
+    }
+  }, [removeAssignment, showToast, markSaved]);
+
+  const handleUpdateSplitPart = useCallback(async (assignmentId: number, data: { start_time: string; end_time: string }) => {
+    if (!canModify) return;
+    try {
+      await updateAssignmentTimeMut.mutateAsync({ id: assignmentId, ...data });
+      showToast('Horario atualizado');
+      markSaved();
+    } catch (err: any) {
+      const msg = err?.response?.data?.error?.message || 'Erro ao atualizar horario';
+      showToast(msg, 'error');
+    }
+  }, [canModify, updateAssignmentTimeMut, showToast, markSaved]);
+
+  const extraDialogDay = useMemo(() => {
+    if (!extraDialogDate || !workspace) return null;
+    return workspace.days.find((d) => d.date === extraDialogDate) || null;
+  }, [extraDialogDate, workspace]);
+
+  const splitDialogCell = useMemo(() => {
+    if (!splitDialog || !workspace) return null;
+    const day = workspace.days.find((d) => d.date === splitDialog.date);
+    return day?.shifts[splitDialog.shiftType] || null;
+  }, [splitDialog, workspace]);
+
   const { gridRef } = useWorkspaceKeyboard({
     days: workspace?.days || [],
     activeCell,
@@ -538,19 +620,42 @@ export default function WorkspacePage() {
       {activeTab === 0 && (
         <Box sx={{ display: 'flex', gap: 2, flex: 1, overflow: 'hidden' }}>
           <Box sx={{ flex: 1, overflow: 'auto' }}>
-            <AssignmentGrid ref={gridRef} days={workspace.days} activeCell={activeCell} onOpenCell={handleOpenCell} onRemove={handleRemove} onContextMenu={handleContextMenu} onDrop={handleDrop} sameDayConflicts={sameDayConflicts} />
+            <AssignmentGrid ref={gridRef} days={workspace.days} activeCell={activeCell} onOpenCell={handleOpenCell} onRemove={handleRemove} onContextMenu={handleContextMenu} onDrop={handleDrop} onOpenExtras={handleOpenExtras} onSplit={canModify ? handleOpenSplit : undefined} sameDayConflicts={sameDayConflicts} />
           </Box>
           <CoverageSidebar summary={workspace.summary} conflicts={conflicts} pastActions={undoRedo.pastActions} futureActions={undoRedo.futureActions} onUndoAction={undoRedo.undo} onRedoAction={undoRedo.redo} saveStatus={saveStatus} lastSaveTime={lastSaveTime} />
         </Box>
       )}
       {activeTab === 1 && <SummaryTab summary={workspace.summary} days={workspace.days} doctors={workspace.doctors} />}
       {activeTab === 2 && <DoctorsTab doctors={workspace.doctors} doctorStats={doctorStats} periodId={periodId} onRefresh={() => refetch()} />}
-      {activeTab === 3 && <ShiftManagementTab period={workspace.period} onShiftCreated={() => refetch()} onShiftUpdated={() => refetch()} onShiftDeleted={() => refetch()} canModify={canModify} />}
+      {activeTab === 3 && <ShiftManagementTab period={workspace.period} />}
       {activeTab === 4 && <FinancialTab days={workspace.days} doctors={workspace.doctors} />}
       {activeTab === 5 && <ReportsTab period={workspace.period} summary={workspace.summary} days={workspace.days} doctors={workspace.doctors} />}
 
       <QuickAssignPopover open={!!cellContext} anchorEl={cellContext?.anchorEl || null} doctors={workspace.doctors} assignedDoctorIds={cellContext?.existingAssignmentIds || []} doctorStats={doctorStats} onSelect={handleAssign} onClear={handleClear} onClose={() => setCellContext(null)} isLoading={isMutating} />
-      <CellContextMenu open={!!contextMenu} anchorEl={contextMenu?.anchorEl || null} onClose={() => setContextMenu(null)} onCopyDoctor={handleCopyDoctor} onPaste={() => handlePaste()} onClearCell={handleClear} onDuplicateDay={handleDuplicateDay} onDuplicateWeek={handleDuplicateWeek} hasClipboardData={!!clipboard} hasAssignments={!!contextMenu && (() => { const day = workspace.days.find((d) => d.date === contextMenu.date); return (day?.shifts[contextMenu.shiftType]?.assignments.length || 0) > 0; })()} canModify={canModify} />
+      <CellContextMenu open={!!contextMenu} anchorEl={contextMenu?.anchorEl || null} onClose={() => setContextMenu(null)} onCopyDoctor={handleCopyDoctor} onPaste={() => handlePaste()} onClearCell={handleClear} onDuplicateDay={handleDuplicateDay} onDuplicateWeek={handleDuplicateWeek} onSplitShift={() => { if (contextMenu) handleOpenSplit(contextMenu.date, contextMenu.shiftType); }} hasClipboardData={!!clipboard} hasAssignments={!!contextMenu && (() => { const day = workspace.days.find((d) => d.date === contextMenu.date); return (day?.shifts[contextMenu.shiftType]?.assignments.length || 0) > 0; })()} hasShift={!!contextMenu?.shiftId} canModify={canModify} />
+
+      <ExtraHoursDialog
+        open={!!extraDialogDate}
+        date={extraDialogDate}
+        day={extraDialogDay}
+        saving={createExtraMut.isPending}
+        onClose={() => setExtraDialogDate(null)}
+        onCreate={handleCreateExtra}
+        onDelete={handleDeleteExtra}
+      />
+
+      <SplitShiftDialog
+        open={!!splitDialog}
+        date={splitDialog?.date || null}
+        shiftType={splitDialog?.shiftType || null}
+        cell={splitDialogCell}
+        doctors={workspace.doctors}
+        saving={createSplitMut.isPending}
+        onClose={() => setSplitDialog(null)}
+        onCreate={handleCreateSplit}
+        onUpdatePart={handleUpdateSplitPart}
+        onRemove={handleRemoveSplitPart}
+      />
 
       <Snackbar open={toast.open} autoHideDuration={3000} onClose={() => setToast((prev) => ({ ...prev, open: false }))} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
         <Alert onClose={() => setToast((prev) => ({ ...prev, open: false }))} severity={toast.severity} variant="filled" sx={{ width: '100%' }}>{toast.message}</Alert>

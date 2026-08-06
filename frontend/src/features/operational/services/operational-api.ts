@@ -61,3 +61,13 @@ export async function duplicateWeek(data: { source_start_date: string; target_st
   const response = await apiClient.post('/assignments/duplicate-week', data);
   return response.data;
 }
+
+export async function createExtra(data: { shift_id: number; doctor_id: number; duration_minutes: number; justification: string }) {
+  const response = await apiClient.post('/extras', data);
+  return response.data;
+}
+
+export async function deleteExtra(id: number) {
+  const response = await apiClient.delete(`/extras/${id}`);
+  return response.data;
+}

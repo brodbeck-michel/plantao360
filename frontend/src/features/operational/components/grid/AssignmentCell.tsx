@@ -1,8 +1,9 @@
 import React, { useCallback } from 'react';
 import { Box, Typography, IconButton, Tooltip, useTheme } from '@mui/material';
-import { Add as AddIcon, Close as CloseIcon, DragIndicator as DragIcon } from '@mui/icons-material';
+import { Add as AddIcon, Close as CloseIcon, DragIndicator as DragIcon, CallSplit as SplitIcon } from '@mui/icons-material';
 import type { ShiftCellData } from '../../types/operational-types';
 import { tokens, darkTokens } from '../../../../theme';
+import { getFeatureAccentColors } from '../../utils/feature-accent-colors';
 
 interface AssignmentCellProps {
   cell: ShiftCellData;
@@ -18,6 +19,7 @@ interface AssignmentCellProps {
   onDragOver?: (e: React.DragEvent) => void;
   onDrop?: (e: React.DragEvent) => void;
   isDragOver?: boolean;
+  onSplit?: () => void;
 }
 
 export function AssignmentCell({
@@ -34,9 +36,11 @@ export function AssignmentCell({
   onDragOver,
   onDrop,
   isDragOver,
+  onSplit,
 }: AssignmentCellProps) {
   const theme = useTheme();
   const colors = theme.palette.mode === 'dark' ? darkTokens.colors : tokens.colors;
+  const accent = getFeatureAccentColors(theme.palette.mode);
   const hasAssignments = cell.assignments.length > 0;
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -68,6 +72,7 @@ export function AssignmentCell({
       sx={{
         p: 0.5,
         minHeight: 44,
+        position: 'relative',
         borderRight: `1px solid ${theme.palette.divider}`,
         bgcolor: isDragOver ? colors.operational.healthyBg : isWeekend ? theme.palette.action.hover : theme.palette.background.paper,
         cursor: 'pointer',
@@ -124,6 +129,22 @@ export function AssignmentCell({
                   {a.doctor_name}
                 </Typography>
               </Tooltip>
+              {cell.shift_id != null && onSplit && (
+                <Tooltip title="Ajuste / divisão de turno">
+                  <IconButton
+                    size="small"
+                    onClick={(e) => { e.stopPropagation(); onSplit(); }}
+                    sx={{
+                      ml: 0.25,
+                      p: 0,
+                      color: theme.palette.text.disabled,
+                      '&:hover': { color: accent.violet.main, bgcolor: accent.violet.bg },
+                    }}
+                  >
+                    <SplitIcon sx={{ fontSize: 13 }} />
+                  </IconButton>
+                </Tooltip>
+              )}
               <IconButton
                 size="small"
                 onClick={(e) => {
@@ -131,7 +152,7 @@ export function AssignmentCell({
                   onRemove(a.id);
                 }}
                 sx={{
-                  ml: 0.5,
+                  ml: 0.25,
                   p: 0,
                   color: theme.palette.text.disabled,
                   '&:hover': { color: colors.operational.critical, bgcolor: colors.operational.criticalBg },

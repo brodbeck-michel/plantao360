@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from app.models.period import Period
 from app.models.shift import Shift
 from app.models.shift_part import ShiftPart
+from app.models.shift_extra import ShiftExtra
 from app.models.doctor import Doctor
 from app.domain.constants.shift_types import ShiftType
 from app.domain.constants.shift_status import ShiftStatus
@@ -71,6 +72,17 @@ class WorkspaceService:
         for a in all_assignments:
             assignments_by_shift.setdefault(a.shift_id, []).append(a)
 
+        all_extras = []
+        if all_shift_ids:
+            all_extras = self.db.query(ShiftExtra).filter(
+                ShiftExtra.shift_id.in_(all_shift_ids),
+                ShiftExtra.status != "cancelled",
+            ).all()
+
+        extras_by_shift: dict[int, list[ShiftExtra]] = {}
+        for e in all_extras:
+            extras_by_shift.setdefault(e.shift_id, []).append(e)
+
         doctors = self.db.query(Doctor).filter(Doctor.active == True).all()
         doctor_map = {d.id: d for d in doctors}
 
@@ -98,11 +110,26 @@ class WorkspaceService:
                             "status": a.status,
                         })
                         total_assignments += 1
+                    extra_list = extras_by_shift.get(shift.id, [])
+                    extras = []
+                    for ex in extra_list:
+                        doc = doctor_map.get(ex.doctor_id)
+                        extras.append({
+                            "id": ex.id,
+                            "shift_id": ex.shift_id,
+                            "shift_type": st,
+                            "doctor_id": ex.doctor_id,
+                            "doctor_name": doc.name if doc else f"Médico #{ex.doctor_id}",
+                            "duration_minutes": ex.duration_minutes,
+                            "justification": ex.justification,
+                            "status": ex.status,
+                        })
                     shifts_data[st] = {
                         "shift_id": shift.id,
                         "shift_type": st,
                         "shift_status": shift.status,
                         "assignments": assignments,
+                        "extras": extras,
                     }
                 else:
                     shifts_data[st] = {
@@ -110,6 +137,7 @@ class WorkspaceService:
                         "shift_type": st,
                         "shift_status": None,
                         "assignments": [],
+                        "extras": [],
                     }
             days.append({
                 "date": current.isoformat(),
@@ -138,7 +166,13 @@ class WorkspaceService:
             },
             "days": days,
             "doctors": [
-                {"id": d.id, "name": d.name, "crm": d.crm, "hour_rate": float(d.hour_rate), "specialty": d.specialty, "active": d.active}
+                {
+                    "id": d.id, "name": d.name, "crm": d.crm,
+                    "has_rqe": d.has_rqe,
+                    "career_start_date": d.career_start_date.isoformat() if d.career_start_date else None,
+                    "hour_rate": float(d.hour_rate), "hour_rate_tier": d.hour_rate_tier,
+                    "specialty": d.specialty, "active": d.active,
+                }
                 for d in doctors
             ],
             "summary": {

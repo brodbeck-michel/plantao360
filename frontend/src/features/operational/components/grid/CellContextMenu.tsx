@@ -1,6 +1,6 @@
 import React from 'react';
 import { Menu, MenuItem, ListItemIcon, ListItemText, Divider, Typography, useTheme } from '@mui/material';
-import { ContentCopy, ContentPaste, Delete, CalendarMonth } from '@mui/icons-material';
+import { ContentCopy, ContentPaste, Delete, CalendarMonth, CallSplit } from '@mui/icons-material';
 
 interface ContextMenuItem {
   label: string;
@@ -19,8 +19,10 @@ interface CellContextMenuProps {
   onClearCell: () => void;
   onDuplicateDay: () => void;
   onDuplicateWeek: () => void;
+  onSplitShift?: () => void;
   hasClipboardData: boolean;
   hasAssignments: boolean;
+  hasShift?: boolean;
   canModify?: boolean;
 }
 
@@ -33,8 +35,10 @@ export function CellContextMenu({
   onClearCell,
   onDuplicateDay,
   onDuplicateWeek,
+  onSplitShift,
   hasClipboardData,
   hasAssignments,
+  hasShift = false,
   canModify = false,
 }: CellContextMenuProps) {
   const theme = useTheme();
@@ -63,6 +67,13 @@ export function CellContextMenu({
       icon: <CalendarMonth sx={{ fontSize: 18 }} />,
       onClick: () => { onDuplicateWeek(); onClose(); },
       disabled: !canModify,
+    },
+    { label: '', icon: null, onClick: () => {}, divider: true },
+    {
+      label: 'Dividir turno / Ajuste',
+      icon: <CallSplit sx={{ fontSize: 18 }} />,
+      onClick: () => { onSplitShift?.(); onClose(); },
+      disabled: !hasShift || !canModify || !onSplitShift,
     },
     { label: '', icon: null, onClick: () => {}, divider: true },
     {

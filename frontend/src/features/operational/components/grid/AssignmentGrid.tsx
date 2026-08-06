@@ -12,11 +12,13 @@ interface AssignmentGridProps {
   onRemove: (assignmentId: number) => void;
   onContextMenu: (e: React.MouseEvent, date: string, shiftType: string, shiftId: number | null) => void;
   onDrop?: (sourceAssignmentId: number, sourceDoctorId: number, targetDate: string, targetShiftType: string, targetShiftId: number | null) => void;
+  onOpenExtras?: (date: string) => void;
+  onSplit?: (date: string, shiftType: string) => void;
   sameDayConflicts: Map<string, boolean>;
 }
 
 export const AssignmentGrid = forwardRef<HTMLDivElement, AssignmentGridProps>(
-  ({ days, activeCell, onOpenCell, onRemove, onContextMenu, onDrop, sameDayConflicts }, ref) => {
+  ({ days, activeCell, onOpenCell, onRemove, onContextMenu, onDrop, onOpenExtras, onSplit, sameDayConflicts }, ref) => {
     return (
       <Paper ref={ref} variant="outlined" sx={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         <TableContainer sx={{ flex: 1, overflow: 'auto' }}>
@@ -40,6 +42,8 @@ export const AssignmentGrid = forwardRef<HTMLDivElement, AssignmentGridProps>(
                   onRemove={onRemove}
                   onContextMenu={onContextMenu}
                   onDrop={onDrop}
+                  onOpenExtras={onOpenExtras}
+                  onSplit={onSplit}
                   sameDayConflicts={sameDayConflicts}
                 />
               ))}

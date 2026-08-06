@@ -12,12 +12,12 @@ export function GridHeader() {
         component="th"
         sx={{
           p: 1.5,
-          textAlign: 'left',
+          textAlign: 'center',
           fontWeight: 600,
-          fontSize: '0.8125rem',
+          fontSize: '0.875rem',
           color: theme.palette.text.secondary,
-          width: 140,
-          minWidth: 140,
+          width: 180,
+          minWidth: 180,
           position: 'sticky',
           left: 0,
           top: 0,
