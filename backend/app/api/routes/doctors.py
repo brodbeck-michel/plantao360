@@ -4,14 +4,29 @@ from sqlalchemy.orm import Session
 from app.database.session import get_db
 from app.database.unit_of_work import UnitOfWork
 from app.services.doctor_service import DoctorService
+from app.services.audit_service import AuditService
 from app.schemas.doctor.doctor_create import DoctorCreateDTO
 from app.schemas.doctor.doctor_update import DoctorUpdateDTO
 from app.schemas.doctor.doctor_filters import DoctorFilterDTO
 from app.common.api_response import ApiResponse
 from app.common.openapi import standard_responses
 from app.core.security.dependencies import get_current_user
+from app.models.doctor import Doctor
 
 router = APIRouter(prefix="/doctors", tags=["Doctors"], dependencies=[Depends(get_current_user)])
+
+
+def _snapshot_doctor(doctor: Doctor) -> dict:
+    """Cria um snapshot do estado do médico para auditoria."""
+    return {
+        "name": doctor.name,
+        "crm": doctor.crm,
+        "specialty": doctor.specialty,
+        "doctor_type": doctor.doctor_type,
+        "has_rqe": doctor.has_rqe,
+        "career_start_date": doctor.career_start_date.isoformat() if doctor.career_start_date else None,
+        "active": doctor.active,
+    }
 
 
 @router.get("", responses=standard_responses)
@@ -69,6 +84,7 @@ def get_doctor(
 def create_doctor(
     dto: DoctorCreateDTO,
     db: Session = Depends(get_db),
+    current_user = Depends(get_current_user),
 ):
     uow = UnitOfWork()
     uow._session = db
@@ -79,6 +95,18 @@ def create_doctor(
             code=result.code,
             message=result.error,
         )
+
+    audit_service = AuditService(db)
+    doctor = db.query(Doctor).filter(Doctor.id == result.data.id).first()
+    if doctor:
+        audit_service.record(
+            action="create",
+            resource="doctor",
+            user=current_user,
+            resource_id=doctor.id,
+            after=_snapshot_doctor(doctor),
+        )
+
     db.commit()
     return ApiResponse.ok(data=result.data.model_dump())
 
@@ -88,7 +116,11 @@ def update_doctor(
     doctor_id: int,
     dto: DoctorUpdateDTO,
     db: Session = Depends(get_db),
+    current_user = Depends(get_current_user),
 ):
+    doctor_before = db.query(Doctor).filter(Doctor.id == doctor_id).first()
+    before_snapshot = _snapshot_doctor(doctor_before) if doctor_before else None
+
     uow = UnitOfWork()
     uow._session = db
     service = DoctorService(uow)
@@ -98,6 +130,25 @@ def update_doctor(
             code=result.code,
             message=result.error,
         )
+
+    audit_service = AuditService(db)
+    doctor = db.query(Doctor).filter(Doctor.id == doctor_id).first()
+    if doctor:
+        after_snapshot = _snapshot_doctor(doctor)
+        changed_fields = {}
+        if before_snapshot:
+            for key in before_snapshot:
+                if before_snapshot.get(key) != after_snapshot.get(key):
+                    changed_fields[key] = after_snapshot[key]
+        audit_service.record(
+            action="update",
+            resource="doctor",
+            user=current_user,
+            resource_id=doctor.id,
+            before=before_snapshot,
+            after=changed_fields if changed_fields else after_snapshot,
+        )
+
     db.commit()
     return ApiResponse.ok(data=result.data.model_dump())
 
@@ -106,7 +157,11 @@ def update_doctor(
 def delete_doctor(
     doctor_id: int,
     db: Session = Depends(get_db),
+    current_user = Depends(get_current_user),
 ):
+    doctor_before = db.query(Doctor).filter(Doctor.id == doctor_id).first()
+    before_snapshot = _snapshot_doctor(doctor_before) if doctor_before else None
+
     uow = UnitOfWork()
     uow._session = db
     service = DoctorService(uow)
@@ -116,5 +171,15 @@ def delete_doctor(
             code=result.code,
             message=result.error,
         )
+
+    audit_service = AuditService(db)
+    audit_service.record(
+        action="delete",
+        resource="doctor",
+        user=current_user,
+        resource_id=doctor_id,
+        before=before_snapshot,
+    )
+
     db.commit()
     return ApiResponse.ok(data={"deleted": True})
