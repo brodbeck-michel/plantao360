@@ -3,7 +3,7 @@
  * Consulta paginada com filtros (usuário, recurso, período, datas).
  */
 
-import { api } from '@/api/client';
+import { apiClient } from '@/api/client';
 
 export interface AuditLog {
   id: number;
@@ -62,7 +62,7 @@ export async function fetchAuditLogs(
   const queryString = params.toString();
   const url = queryString ? `/audit?${queryString}` : '/audit';
 
-  const response = await api.get<AuditLogPage>(url);
+  const response = await apiClient.get<AuditLogPage>(url);
   return response.data;
 }
 
