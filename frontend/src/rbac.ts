@@ -13,7 +13,8 @@ export type ModuleKey =
   | 'medicos'
   | 'financeiro'
   | 'relatorios'
-  | 'usuarios';
+  | 'usuarios'
+  | 'auditoria';
 
 type AccessLevel = 'full' | 'view' | 'none';
 
@@ -27,6 +28,7 @@ const MATRIX: Record<BackendRole, Record<ModuleKey, AccessLevel>> = {
     financeiro: 'full',
     relatorios: 'full',
     usuarios: 'full',
+    auditoria: 'full',
   },
   COORDENADOR: {
     dashboard: 'full',
@@ -37,6 +39,7 @@ const MATRIX: Record<BackendRole, Record<ModuleKey, AccessLevel>> = {
     financeiro: 'view',
     relatorios: 'full',
     usuarios: 'none',
+    auditoria: 'full',
   },
   FINANCEIRO: {
     dashboard: 'full',
@@ -47,6 +50,7 @@ const MATRIX: Record<BackendRole, Record<ModuleKey, AccessLevel>> = {
     financeiro: 'full',
     relatorios: 'full',
     usuarios: 'none',
+    auditoria: 'none',
   },
   MEDICO: {
     dashboard: 'full',
@@ -57,6 +61,7 @@ const MATRIX: Record<BackendRole, Record<ModuleKey, AccessLevel>> = {
     financeiro: 'none',
     relatorios: 'view',
     usuarios: 'none',
+    auditoria: 'none',
   },
   CONSULTA: {
     dashboard: 'full',
@@ -67,6 +72,7 @@ const MATRIX: Record<BackendRole, Record<ModuleKey, AccessLevel>> = {
     financeiro: 'none',
     relatorios: 'view',
     usuarios: 'none',
+    auditoria: 'none',
   },
 };
 

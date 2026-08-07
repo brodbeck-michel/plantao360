@@ -7,6 +7,7 @@ import {
   AccessTime as TurnosIcon,
   AttachMoney as FinanceiroIcon,
   Description as RelatoriosIcon,
+  History as AuditoriaIcon,
 } from '@mui/icons-material';
 
 const TAB_CONFIG = [
@@ -16,6 +17,7 @@ const TAB_CONFIG = [
   { label: 'Turnos', icon: <TurnosIcon sx={{ fontSize: 16 }} /> },
   { label: 'Financeiro', icon: <FinanceiroIcon sx={{ fontSize: 16 }} /> },
   { label: 'Relatórios', icon: <RelatoriosIcon sx={{ fontSize: 16 }} /> },
+  { label: 'Auditoria', icon: <AuditoriaIcon sx={{ fontSize: 16 }} /> },
 ];
 
 interface WorkspaceTabsProps {

@@ -18,9 +18,10 @@ import { DoctorsTab } from '../components/tabs/DoctorsTab';
 import { ShiftManagementTab } from '../components/tabs/ShiftManagementTab';
 import { FinancialTab } from '../components/tabs/FinancialTab';
 import { ReportsTab } from '../components/tabs/ReportsTab';
+import { AuditTab } from '../components/tabs/AuditTab';
 import { SHIFT_TYPES, SHIFT_TIMES, MONTH_NAMES } from '../types/operational-types';
 import { useAuth } from '../../../contexts/AuthContext';
-import { canEdit } from '../../../rbac';
+import { canEdit, canAccess } from '../../../rbac';
 import { useBreadcrumbLabel } from '../../../contexts/BreadcrumbContext';
 import type { CellPosition } from '../hooks/use-workspace-keyboard';
 
@@ -616,6 +617,8 @@ export default function WorkspacePage() {
         canModify={canModify}
       />
       <WorkspaceTabs activeTab={activeTab} onTabChange={setActiveTab} />
+
+      {activeTab === 6 && canAccess(user?.role, 'auditoria') && <AuditTab periodId={Number(periodId)} />}
 
       {activeTab === 0 && (
         <Box sx={{ display: 'flex', gap: 2, flex: 1, overflow: 'hidden' }}>
