@@ -13,7 +13,7 @@ from app.core.security.dependencies import require_role
 router = APIRouter(prefix="/audit", tags=["Audit"], dependencies=[Depends(require_role("ADMIN", "COORDENADOR"))])
 
 
-@router.get("", response_model=ApiResponse, responses=standard_responses)
+@router.get("", responses=standard_responses)
 def query_audit_logs(
     response: Response,
     page: int = Query(1, ge=1),
