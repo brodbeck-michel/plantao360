@@ -79,7 +79,8 @@ incluindo o `before` preservado na remoção (SC-002).
   registro — SC-004)
 - [ ] T011 [US1] Gate + commit: suíte verde; validação manual do quickstart §3.1;
   commit `feat(audit): registra alterações da escala (spec 007, US1)`
-  **Status**: T008-T009 concluído; testes passando (408 passed, 2 failed ambientais)
+  **Status**: T008-T009 ✓ CONCLUÍDO (assignment); T012 ✓ (shift_extra); T015-T017 ✓ (doctors/users/periods)
+Testes: 408 passed, 2 failed (ambientais pré-existentes)
 
 ### Passo 3b — Horas extras (commit 3)
 
