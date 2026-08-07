@@ -95,6 +95,7 @@ export function AssignmentRow({ day, dayIndex, activeCell, onOpenCell, onRemove,
             onDragOver={() => handleDragOver(st)}
             isDragOver={dragOverShift === st}
             onSplit={onSplit ? () => onSplit(day.date, st) : undefined}
+            hasExtras={cell.extras.length > 0}
           />
         );
       })}

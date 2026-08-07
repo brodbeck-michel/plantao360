@@ -20,6 +20,7 @@ interface AssignmentCellProps {
   onDrop?: (e: React.DragEvent) => void;
   isDragOver?: boolean;
   onSplit?: () => void;
+  hasExtras?: boolean;
 }
 
 export function AssignmentCell({
@@ -37,11 +38,13 @@ export function AssignmentCell({
   onDrop,
   isDragOver,
   onSplit,
+  hasExtras,
 }: AssignmentCellProps) {
   const theme = useTheme();
   const colors = theme.palette.mode === 'dark' ? darkTokens.colors : tokens.colors;
   const accent = getFeatureAccentColors(theme.palette.mode);
   const hasAssignments = cell.assignments.length > 0;
+  const isSplitTurno = cell.assignments.length > 1;
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -70,7 +73,7 @@ export function AssignmentCell({
       onDragOver={handleDragOver}
       onDrop={handleDrop}
       sx={{
-        p: 0.5,
+        p: 0,
         minHeight: 44,
         position: 'relative',
         borderRight: `1px solid ${theme.palette.divider}`,
@@ -80,14 +83,18 @@ export function AssignmentCell({
         outline: isActive ? `2px solid ${theme.palette.primary.main}` : 'none',
         outlineOffset: -2,
         boxShadow: isActive ? `0 0 0 1px ${theme.palette.primary.main}4D` : isDragOver ? `0 0 0 2px ${theme.palette.primary.main}` : 'none',
+        borderTop: hasExtras ? `3px solid ${accent.amber.main}` : 'none',
         '&:hover': {
           bgcolor: isActive || isDragOver ? colors.operational.healthyBg : colors.operational.healthyBg,
         },
         verticalAlign: 'middle',
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
-      {hasAssignments ? (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25 }}>
+      <Box sx={{ p: 0.5, flex: 1, display: 'flex', flexDirection: 'column', gap: 0.25, justifyContent: hasAssignments ? 'flex-start' : 'center' }}>
+        {hasAssignments ? (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25 }}>
           {cell.assignments.map((a) => (
             <Box
               key={a.id}
@@ -106,8 +113,8 @@ export function AssignmentCell({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                bgcolor: isSameDayConflict ? colors.operational.attentionBg : colors.operational.healthyBg,
-                border: `1px solid ${isSameDayConflict ? colors.operational.attentionBorder : colors.operational.healthyBorder}`,
+                bgcolor: isSplitTurno ? accent.violet.bg : (isSameDayConflict ? colors.operational.attentionBg : colors.operational.healthyBg),
+                border: `1px solid ${isSplitTurno ? accent.violet.main : (isSameDayConflict ? colors.operational.attentionBorder : colors.operational.healthyBorder)}`,
                 borderRadius: '4px',
                 px: 0.75,
                 py: 0.25,
@@ -122,7 +129,7 @@ export function AssignmentCell({
                   variant="caption"
                   fontWeight={500}
                   fontSize="0.8125rem"
-                  color={isSameDayConflict ? colors.operational.attention : colors.operational.healthy}
+                  color={isSplitTurno ? accent.violet.main : (isSameDayConflict ? colors.operational.attention : colors.operational.healthy)}
                   noWrap
                   sx={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}
                 >
@@ -163,25 +170,26 @@ export function AssignmentCell({
             </Box>
           ))}
         </Box>
-      ) : (
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            height: '100%',
-            minHeight: 36,
-            color: theme.palette.text.disabled,
-            fontSize: '0.8125rem',
-            '&:hover': { color: theme.palette.primary.main },
-          }}
-        >
-          <AddIcon sx={{ fontSize: 16, opacity: 0.5 }} />
-          <Typography variant="caption" ml={0.5} fontSize="0.75rem">
-            vazio
-          </Typography>
-        </Box>
-      )}
+        ) : (
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '100%',
+              minHeight: 36,
+              color: theme.palette.text.disabled,
+              fontSize: '0.8125rem',
+              '&:hover': { color: theme.palette.primary.main },
+            }}
+          >
+            <AddIcon sx={{ fontSize: 16, opacity: 0.5 }} />
+            <Typography variant="caption" ml={0.5} fontSize="0.75rem">
+              vazio
+            </Typography>
+          </Box>
+        )}
+      </Box>
     </Box>
   );
 }
