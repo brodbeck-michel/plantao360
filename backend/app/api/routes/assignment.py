@@ -5,14 +5,35 @@ from sqlalchemy.orm import Session
 from app.database.session import get_db
 from app.database.unit_of_work import UnitOfWork
 from app.services.assignment_service import AssignmentService
+from app.services.audit_service import AuditService
 from app.schemas.assignment.assignment_create import AssignmentCreateDTO
 from app.schemas.assignment.assignment_update import AssignmentUpdateDTO
 from app.schemas.assignment.assignment_filters import AssignmentFilterDTO
 from app.common.api_response import ApiResponse
 from app.common.openapi import standard_responses
 from app.core.security.dependencies import get_current_user
+from app.models.shift_part import ShiftPart
 
 router = APIRouter(prefix="/assignments", tags=["Assignments"], dependencies=[Depends(get_current_user)])
+
+
+def _snapshot_shift_part(shift_part: ShiftPart) -> dict:
+    """Cria um snapshot do estado da atribuição para auditoria."""
+    from app.models.doctor import Doctor
+    from app.models.shift import Shift
+
+    shift = shift_part.shift
+    doctor = shift_part.doctor
+    return {
+        "shift_id": shift_part.shift_id,
+        "shift_date": shift.shift_date.isoformat() if shift.shift_date else None,
+        "shift_type": shift.shift_type,
+        "doctor_id": shift_part.doctor_id,
+        "doctor_name": doctor.name if doctor else None,
+        "start_time": shift_part.start_time.isoformat() if shift_part.start_time else None,
+        "end_time": shift_part.end_time.isoformat() if shift_part.end_time else None,
+        "status": shift_part.status,
+    }
 
 
 def _recalculate_shift_status(db: Session, shift_id: int) -> None:
@@ -85,25 +106,73 @@ def get_assignment(_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("", status_code=201, responses=standard_responses)
-def create_assignment(dto: AssignmentCreateDTO, db: Session = Depends(get_db)):
+def create_assignment(
+    dto: AssignmentCreateDTO,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user),
+):
     uow = UnitOfWork()
     uow._session = db
     service = AssignmentService(uow)
     result = service.create(dto)
     if result.is_failure:
         return ApiResponse.fail_with_code(code=result.code, message=result.error)
+
+    audit_service = AuditService(db)
+    created_assignment = result.data
+    shift_part = db.query(ShiftPart).filter(ShiftPart.id == created_assignment.id).first()
+    if shift_part:
+        after = _snapshot_shift_part(shift_part)
+        audit_service.record(
+            action="create",
+            resource="assignment",
+            user=current_user,
+            resource_id=shift_part.id,
+            after=after,
+            period_id=shift_part.shift.period_id,
+        )
+
     db.commit()
     return ApiResponse.ok(data=result.data.model_dump())
 
 
 @router.put("/{_id}", responses=standard_responses)
-def update_assignment(_id: int, dto: AssignmentUpdateDTO, db: Session = Depends(get_db)):
+def update_assignment(
+    _id: int,
+    dto: AssignmentUpdateDTO,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user),
+):
+    shift_part_before = db.query(ShiftPart).filter(ShiftPart.id == _id).first()
+    before_snapshot = _snapshot_shift_part(shift_part_before) if shift_part_before else None
+
     uow = UnitOfWork()
     uow._session = db
     service = AssignmentService(uow)
     result = service.update(_id, dto)
     if result.is_failure:
         return ApiResponse.fail_with_code(code=result.code, message=result.error)
+
+    audit_service = AuditService(db)
+    updated_assignment = result.data
+    shift_part = db.query(ShiftPart).filter(ShiftPart.id == _id).first()
+    if shift_part:
+        after_snapshot = _snapshot_shift_part(shift_part)
+        changed_fields = {}
+        if before_snapshot:
+            for key in before_snapshot:
+                if before_snapshot.get(key) != after_snapshot.get(key):
+                    changed_fields[key] = after_snapshot[key]
+        audit_service.record(
+            action="update",
+            resource="assignment",
+            user=current_user,
+            resource_id=shift_part.id,
+            before=before_snapshot,
+            after=changed_fields if changed_fields else after_snapshot,
+            period_id=shift_part.shift.period_id,
+        )
+
     db.commit()
     return ApiResponse.ok(data=result.data.model_dump())
 
@@ -157,13 +226,32 @@ def cancel_assignment(_id: int, db: Session = Depends(get_db)):
 
 
 @router.delete("/{_id}", responses=standard_responses)
-def remove_assignment(_id: int, db: Session = Depends(get_db)):
+def remove_assignment(
+    _id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user),
+):
+    shift_part_before = db.query(ShiftPart).filter(ShiftPart.id == _id).first()
+    before_snapshot = _snapshot_shift_part(shift_part_before) if shift_part_before else None
+    period_id = shift_part_before.shift.period_id if shift_part_before else None
+
     uow = UnitOfWork()
     uow._session = db
     service = AssignmentService(uow)
     result = service.remove(_id)
     if result.is_failure:
         return ApiResponse.fail_with_code(code=result.code, message=result.error)
+
+    audit_service = AuditService(db)
+    audit_service.record(
+        action="delete",
+        resource="assignment",
+        user=current_user,
+        resource_id=_id,
+        before=before_snapshot,
+        period_id=period_id,
+    )
+
     db.commit()
     return ApiResponse.ok(data=result.data.model_dump())
 
@@ -187,7 +275,11 @@ class MoveAssignmentRequest(BaseModel):
 
 
 @router.post("/duplicate-day", responses=standard_responses)
-def duplicate_day(dto: DuplicateDayRequest, db: Session = Depends(get_db)):
+def duplicate_day(
+    dto: DuplicateDayRequest,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user),
+):
     from datetime import date as date_type, time as time_type
     from app.models.shift import Shift
     from app.models.shift_part import ShiftPart
@@ -207,6 +299,7 @@ def duplicate_day(dto: DuplicateDayRequest, db: Session = Depends(get_db)):
 
     copied = 0
     target_shift_ids_to_recalculate = set()
+    audit_entries = []
     for src_shift in source_shifts:
         target_shift = target_map.get(src_shift.shift_type)
         if not target_shift:
@@ -233,8 +326,21 @@ def duplicate_day(dto: DuplicateDayRequest, db: Session = Depends(get_db)):
                 duration_minutes=part.duration_minutes,
             )
             db.add(new_part)
+            db.flush()
             copied += 1
             target_shift_ids_to_recalculate.add(target_shift.id)
+            audit_entries.append({
+                "action": "create",
+                "resource": "assignment",
+                "user": current_user,
+                "resource_id": new_part.id,
+                "after": _snapshot_shift_part(new_part),
+                "period_id": dto.period_id,
+            })
+
+    audit_service = AuditService(db)
+    if audit_entries:
+        audit_service.record_many(audit_entries)
 
     db.commit()
     for sid in target_shift_ids_to_recalculate:
@@ -243,7 +349,11 @@ def duplicate_day(dto: DuplicateDayRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/duplicate-week", responses=standard_responses)
-def duplicate_week(dto: DuplicateWeekRequest, db: Session = Depends(get_db)):
+def duplicate_week(
+    dto: DuplicateWeekRequest,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user),
+):
     from datetime import date as date_type, timedelta
     from app.models.shift import Shift
     from app.models.shift_part import ShiftPart
@@ -266,6 +376,7 @@ def duplicate_week(dto: DuplicateWeekRequest, db: Session = Depends(get_db)):
 
     copied = 0
     target_shift_ids_to_recalculate = set()
+    audit_entries = []
     for src_shift in source_shifts:
         delta = src_shift.shift_date - source_start
         target_date = target_start + delta
@@ -294,8 +405,21 @@ def duplicate_week(dto: DuplicateWeekRequest, db: Session = Depends(get_db)):
                 duration_minutes=part.duration_minutes,
             )
             db.add(new_part)
+            db.flush()
             copied += 1
             target_shift_ids_to_recalculate.add(target_shift.id)
+            audit_entries.append({
+                "action": "create",
+                "resource": "assignment",
+                "user": current_user,
+                "resource_id": new_part.id,
+                "after": _snapshot_shift_part(new_part),
+                "period_id": dto.period_id,
+            })
+
+    audit_service = AuditService(db)
+    if audit_entries:
+        audit_service.record_many(audit_entries)
 
     db.commit()
     for sid in target_shift_ids_to_recalculate:
