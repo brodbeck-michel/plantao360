@@ -73,28 +73,25 @@ export function AssignmentCell({
       onDragOver={handleDragOver}
       onDrop={handleDrop}
       sx={{
-        p: 0,
+        p: 0.5,
         minHeight: 44,
         position: 'relative',
         borderRight: `1px solid ${theme.palette.divider}`,
+        borderTop: hasExtras ? `3px solid ${accent.amber.main}` : 'none',
         bgcolor: isDragOver ? colors.operational.healthyBg : isWeekend ? theme.palette.action.hover : theme.palette.background.paper,
         cursor: 'pointer',
         transition: 'background-color 150ms, box-shadow 150ms',
         outline: isActive ? `2px solid ${theme.palette.primary.main}` : 'none',
         outlineOffset: -2,
         boxShadow: isActive ? `0 0 0 1px ${theme.palette.primary.main}4D` : isDragOver ? `0 0 0 2px ${theme.palette.primary.main}` : 'none',
-        borderTop: hasExtras ? `3px solid ${accent.amber.main}` : 'none',
         '&:hover': {
           bgcolor: isActive || isDragOver ? colors.operational.healthyBg : colors.operational.healthyBg,
         },
         verticalAlign: 'middle',
-        display: 'flex',
-        flexDirection: 'column',
       }}
     >
-      <Box sx={{ p: 0.5, flex: 1, display: 'flex', flexDirection: 'column', gap: 0.25, justifyContent: hasAssignments ? 'flex-start' : 'center' }}>
-        {hasAssignments ? (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25 }}>
+      {hasAssignments ? (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25 }}>
           {cell.assignments.map((a) => (
             <Box
               key={a.id}
@@ -170,26 +167,25 @@ export function AssignmentCell({
             </Box>
           ))}
         </Box>
-        ) : (
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              height: '100%',
-              minHeight: 36,
-              color: theme.palette.text.disabled,
-              fontSize: '0.8125rem',
-              '&:hover': { color: theme.palette.primary.main },
-            }}
-          >
-            <AddIcon sx={{ fontSize: 16, opacity: 0.5 }} />
-            <Typography variant="caption" ml={0.5} fontSize="0.75rem">
-              vazio
-            </Typography>
-          </Box>
-        )}
-      </Box>
+      ) : (
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '100%',
+            minHeight: 36,
+            color: theme.palette.text.disabled,
+            fontSize: '0.8125rem',
+            '&:hover': { color: theme.palette.primary.main },
+          }}
+        >
+          <AddIcon sx={{ fontSize: 16, opacity: 0.5 }} />
+          <Typography variant="caption" ml={0.5} fontSize="0.75rem">
+            vazio
+          </Typography>
+        </Box>
+      )}
     </Box>
   );
 }
