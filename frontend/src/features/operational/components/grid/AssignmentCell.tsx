@@ -166,6 +166,39 @@ export function AssignmentCell({
               </IconButton>
             </Box>
           ))}
+          {cell.extras.length > 0 && (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25, mt: 0.5, pt: 0.5, borderTop: `1px solid ${theme.palette.divider}` }}>
+              {cell.extras.map((e) => (
+                <Box
+                  key={e.id}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    bgcolor: accent.amber.bg,
+                    border: `1px solid ${accent.amber.main}`,
+                    borderRadius: '4px',
+                    px: 0.75,
+                    py: 0.25,
+                    fontSize: '0.7rem',
+                  }}
+                >
+                  <Tooltip title={`${e.doctor_name} - ${(e.duration_minutes / 60).toFixed(1)}h`} arrow>
+                    <Typography
+                      variant="caption"
+                      fontWeight={500}
+                      fontSize="0.7rem"
+                      color={accent.amber.main}
+                      noWrap
+                      sx={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}
+                    >
+                      ⏱️ {e.doctor_name}
+                    </Typography>
+                  </Tooltip>
+                </Box>
+              ))}
+            </Box>
+          )}
         </Box>
       ) : (
         <Box
