@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from app.database.session import get_db
 from app.database.unit_of_work import UnitOfWork
 from app.repositories.period_repository import PeriodRepository
+from app.services.audit_service import AuditService
 from app.use_cases.periods import (
     CreatePeriod, UpdatePeriod, ClosePeriod, ReopenPeriod,
     GetPeriod, ListPeriods,
@@ -15,8 +16,18 @@ from app.schemas.period.period_filters import PeriodFilterDTO
 from app.common.api_response import ApiResponse
 from app.common.openapi import standard_responses
 from app.core.security.dependencies import get_current_user
+from app.models.period import Period
 
 router = APIRouter(prefix="/periods", tags=["Periods"], dependencies=[Depends(get_current_user)])
+
+
+def _snapshot_period(period: Period) -> dict:
+    """Cria snapshot da competência para auditoria."""
+    return {
+        "year": period.year,
+        "month": period.month,
+        "status": period.status,
+    }
 
 
 class PeriodErrorResponse(BaseModel):
@@ -105,7 +116,11 @@ def get_period(period_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("", status_code=201, responses=standard_responses)
-def create_period(dto: PeriodCreateDTO, db: Session = Depends(get_db)):
+def create_period(
+    dto: PeriodCreateDTO,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user),
+):
     uow = UnitOfWork()
     uow._session = db
     repo = PeriodRepository(uow.session)
@@ -113,12 +128,32 @@ def create_period(dto: PeriodCreateDTO, db: Session = Depends(get_db)):
     result = use_case(dto=dto)
     if result.is_failure:
         return ApiResponse.fail_with_code(code=result.code, message=result.error)
+
+    audit_service = AuditService(db)
+    period = db.query(Period).filter(Period.id == result.data.id).first()
+    if period:
+        audit_service.record(
+            action="create",
+            resource="period",
+            user=current_user,
+            resource_id=period.id,
+            after=_snapshot_period(period),
+        )
+
     db.commit()
     return ApiResponse.ok(data=result.data.model_dump())
 
 
 @router.patch("/{period_id}", responses=standard_responses)
-def update_period(period_id: int, dto: PeriodUpdateDTO, db: Session = Depends(get_db)):
+def update_period(
+    period_id: int,
+    dto: PeriodUpdateDTO,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user),
+):
+    period_before = db.query(Period).filter(Period.id == period_id).first()
+    before_snapshot = _snapshot_period(period_before) if period_before else None
+
     uow = UnitOfWork()
     uow._session = db
     repo = PeriodRepository(uow.session)
@@ -126,26 +161,62 @@ def update_period(period_id: int, dto: PeriodUpdateDTO, db: Session = Depends(ge
     result = use_case(id=period_id, dto=dto)
     if result.is_failure:
         return ApiResponse.fail_with_code(code=result.code, message=result.error)
+
+    audit_service = AuditService(db)
+    period = db.query(Period).filter(Period.id == period_id).first()
+    if period:
+        after_snapshot = _snapshot_period(period)
+        audit_service.record(
+            action="update",
+            resource="period",
+            user=current_user,
+            resource_id=period.id,
+            before=before_snapshot,
+            after=after_snapshot,
+        )
+
     db.commit()
     return ApiResponse.ok(data=result.data.model_dump())
 
 
 @router.delete("/{period_id}", responses=standard_responses)
-def delete_period(period_id: int, db: Session = Depends(get_db)):
-    from app.models.period import Period
+def delete_period(
+    period_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user),
+):
     from app.domain.constants.period_status import PeriodStatus
     period = db.query(Period).filter(Period.id == period_id).first()
     if not period:
         return ApiResponse.fail_with_code(code="PERIOD_NOT_FOUND", message="Periodo nao encontrado")
     if period.status != PeriodStatus.DRAFT:
         return ApiResponse.fail_with_code(code="PERIOD_IMMUTABLE", message="Apenas periodos em rascunho podem ser excluidos")
+
+    before_snapshot = _snapshot_period(period)
     db.delete(period)
+
+    audit_service = AuditService(db)
+    audit_service.record(
+        action="delete",
+        resource="period",
+        user=current_user,
+        resource_id=period_id,
+        before=before_snapshot,
+    )
+
     db.commit()
     return ApiResponse.ok(data={"deleted": True})
 
 
 @router.post("/{period_id}/close", responses=standard_responses)
-def close_period(period_id: int, db: Session = Depends(get_db)):
+def close_period(
+    period_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user),
+):
+    period_before = db.query(Period).filter(Period.id == period_id).first()
+    before_snapshot = _snapshot_period(period_before) if period_before else None
+
     uow = UnitOfWork()
     uow._session = db
     repo = PeriodRepository(uow.session)
@@ -153,12 +224,32 @@ def close_period(period_id: int, db: Session = Depends(get_db)):
     result = use_case(id=period_id)
     if result.is_failure:
         return ApiResponse.fail_with_code(code=result.code, message=result.error)
+
+    audit_service = AuditService(db)
+    period = db.query(Period).filter(Period.id == period_id).first()
+    if period:
+        audit_service.record(
+            action="update",
+            resource="period",
+            user=current_user,
+            resource_id=period.id,
+            before={"status": before_snapshot.get("status")} if before_snapshot else None,
+            after={"status": period.status},
+        )
+
     db.commit()
     return ApiResponse.ok(data=result.data.model_dump())
 
 
 @router.post("/{period_id}/reopen", responses=standard_responses)
-def reopen_period(period_id: int, db: Session = Depends(get_db)):
+def reopen_period(
+    period_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user),
+):
+    period_before = db.query(Period).filter(Period.id == period_id).first()
+    before_snapshot = _snapshot_period(period_before) if period_before else None
+
     uow = UnitOfWork()
     uow._session = db
     repo = PeriodRepository(uow.session)
@@ -166,6 +257,19 @@ def reopen_period(period_id: int, db: Session = Depends(get_db)):
     result = use_case(id=period_id)
     if result.is_failure:
         return ApiResponse.fail_with_code(code=result.code, message=result.error)
+
+    audit_service = AuditService(db)
+    period = db.query(Period).filter(Period.id == period_id).first()
+    if period:
+        audit_service.record(
+            action="update",
+            resource="period",
+            user=current_user,
+            resource_id=period.id,
+            before={"status": before_snapshot.get("status")} if before_snapshot else None,
+            after={"status": period.status},
+        )
+
     db.commit()
     return ApiResponse.ok(data=result.data.model_dump())
 
