@@ -7,6 +7,7 @@ from app.models.shift import Shift
 from app.models.shift_part import ShiftPart
 from app.models.shift_extra import ShiftExtra
 from app.models.user import User
+from app.models.audit_log import AuditLog
 
 __all__ = [
     "TimestampMixin",
@@ -17,4 +18,5 @@ __all__ = [
     "ShiftPart",
     "ShiftExtra",
     "User",
+    "AuditLog",
 ]

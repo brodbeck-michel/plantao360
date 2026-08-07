@@ -1,10 +1,14 @@
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import String, Boolean, CheckConstraint, Index
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.base import Base
 from app.models.base_mixins import TimestampMixin
+
+if TYPE_CHECKING:
+    from app.models.audit_log import AuditLog
 
 
 class User(Base, TimestampMixin):
@@ -25,6 +29,11 @@ class User(Base, TimestampMixin):
     role: Mapped[str] = mapped_column(String(20), nullable=False, default="CONSULTA")
     active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     last_login: Mapped[datetime | None] = mapped_column(nullable=True)
+
+    audit_logs: Mapped[list["AuditLog"]] = relationship(
+        back_populates="user",
+        lazy="selectin",
+    )
 
     def __repr__(self) -> str:
         return f"<User(id={self.id}, name={self.name}, email={self.email}, role={self.role})>"
