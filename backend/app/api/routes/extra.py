@@ -25,7 +25,7 @@ def _snapshot_shift_extra(shift_extra: ShiftExtra) -> dict:
     doctor = shift_extra.doctor
     return {
         "shift_id": shift_extra.shift_id,
-        "shift_date": shift.shift_date.isoformat() if shift.shift_date else None,
+        "shift_date": shift.shift_date.isoformat() if shift and shift.shift_date else None,
         "doctor_id": shift_extra.doctor_id,
         "doctor_name": doctor.name if doctor else None,
         "duration_minutes": shift_extra.duration_minutes,
@@ -108,7 +108,7 @@ def create_extra(
             user=current_user,
             resource_id=shift_extra.id,
             after=after,
-            period_id=shift_extra.shift.period_id,
+            period_id=shift_extra.shift.period_id if shift_extra.shift else None,
         )
 
     db.commit()
@@ -151,7 +151,7 @@ def update_extra(
             resource_id=shift_extra.id,
             before=before_snapshot,
             after=changed_fields if changed_fields else after_snapshot,
-            period_id=shift_extra.shift.period_id,
+            period_id=shift_extra.shift.period_id if shift_extra.shift else None,
         )
 
     db.commit()
@@ -188,7 +188,7 @@ def approve_extra(
             resource_id=shift_extra.id,
             before={"status": before_snapshot.get("status")} if before_snapshot else None,
             after={"status": after_snapshot.get("status")},
-            period_id=shift_extra.shift.period_id,
+            period_id=shift_extra.shift.period_id if shift_extra.shift else None,
         )
 
     db.commit()
@@ -225,7 +225,7 @@ def reject_extra(
             resource_id=shift_extra.id,
             before={"status": before_snapshot.get("status")} if before_snapshot else None,
             after={"status": after_snapshot.get("status")},
-            period_id=shift_extra.shift.period_id,
+            period_id=shift_extra.shift.period_id if shift_extra.shift else None,
         )
 
     db.commit()
@@ -262,7 +262,7 @@ def cancel_extra(
             resource_id=shift_extra.id,
             before={"status": before_snapshot.get("status")} if before_snapshot else None,
             after={"status": after_snapshot.get("status")},
-            period_id=shift_extra.shift.period_id,
+            period_id=shift_extra.shift.period_id if shift_extra.shift else None,
         )
 
     db.commit()
@@ -277,7 +277,7 @@ def delete_extra(
 ):
     shift_extra_before = db.query(ShiftExtra).filter(ShiftExtra.id == _id).first()
     before_snapshot = _snapshot_shift_extra(shift_extra_before) if shift_extra_before else None
-    period_id = shift_extra_before.shift.period_id if shift_extra_before else None
+    period_id = shift_extra_before.shift.period_id if shift_extra_before and shift_extra_before.shift else None
 
     uow = UnitOfWork()
     uow._session = db
