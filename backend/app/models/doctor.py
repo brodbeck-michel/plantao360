@@ -11,6 +11,7 @@ from app.domain.constants.hour_rate_table import compute_hour_rate
 if TYPE_CHECKING:
     from app.models.shift_part import ShiftPart
     from app.models.shift_extra import ShiftExtra
+    from app.models.user import User
 
 
 class Doctor(Base, TimestampMixin, SoftDeleteMixin):
@@ -44,6 +45,10 @@ class Doctor(Base, TimestampMixin, SoftDeleteMixin):
         lazy="selectin",
     )
     shift_extras: Mapped[list["ShiftExtra"]] = relationship(
+        back_populates="doctor",
+        lazy="selectin",
+    )
+    users: Mapped[list["User"]] = relationship(
         back_populates="doctor",
         lazy="selectin",
     )

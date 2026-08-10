@@ -28,11 +28,12 @@ services:
       - "5173:5173"
     volumes:
       - ./frontend:/app
+      - /app/node_modules
     environment:
       - VITE_API_URL=http://backend:8000
     networks:
       - plantao360_dev
-    command: npm run dev -- --host
+    command: sh -c "npm install && npm run dev -- --host"
     depends_on:
       backend:
         condition: service_healthy

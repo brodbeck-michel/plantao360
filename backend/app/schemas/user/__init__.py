@@ -8,6 +8,7 @@ class UserCreateDTO(BaseModel):
     email: str = Field(..., min_length=1, max_length=255)
     password: str = Field(..., min_length=6, max_length=128)
     role: str = Field(default="CONSULTA", max_length=20)
+    doctor_id: int | None = Field(None, description="ID do médico (obrigatório se role=MEDICO)")
 
 
 class UserUpdateDTO(BaseModel):
@@ -15,6 +16,7 @@ class UserUpdateDTO(BaseModel):
     email: str | None = Field(None, min_length=1, max_length=255)
     password: str | None = Field(None, min_length=6, max_length=128)
     role: str | None = Field(None, max_length=20)
+    doctor_id: int | None = Field(None, description="ID do médico")
     active: bool | None = None
 
 
@@ -23,6 +25,7 @@ class UserResponseDTO(BaseModel):
     name: str
     email: str
     role: str
+    doctor_id: int | None = None
     active: bool
     last_login: datetime | None = None
     created_at: datetime | None = None

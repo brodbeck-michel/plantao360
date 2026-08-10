@@ -83,3 +83,6 @@ backups/*
 backend/test.db
 backend/.test.db
 *.tsbuildinfo
+
+# Dados reais de backup (contem dados pessoais - enviar por canal seguro)
+backend/data/*.json

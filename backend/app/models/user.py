@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import String, Boolean, CheckConstraint, Index
+from sqlalchemy import String, Boolean, CheckConstraint, Index, ForeignKey, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.base import Base
@@ -9,6 +9,7 @@ from app.models.base_mixins import TimestampMixin
 
 if TYPE_CHECKING:
     from app.models.audit_log import AuditLog
+    from app.models.doctor import Doctor
 
 
 class User(Base, TimestampMixin):
@@ -27,11 +28,19 @@ class User(Base, TimestampMixin):
     email: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     role: Mapped[str] = mapped_column(String(20), nullable=False, default="CONSULTA")
+    doctor_id: Mapped[int | None] = mapped_column(
+        ForeignKey("doctors.id", ondelete="SET NULL"),
+        nullable=True,
+    )
     active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     last_login: Mapped[datetime | None] = mapped_column(nullable=True)
 
     audit_logs: Mapped[list["AuditLog"]] = relationship(
         back_populates="user",
+        lazy="selectin",
+    )
+    doctor: Mapped["Doctor | None"] = relationship(
+        back_populates="users",
         lazy="selectin",
     )
 

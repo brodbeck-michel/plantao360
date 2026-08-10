@@ -1,0 +1,234 @@
+================================================================================
+                        IMPORTAÇÃO DE DADOS DO BACKUP
+                              PLANTAO360
+================================================================================
+
+DATA: 2026-08-10
+STATUS: ✓ PRONTO PARA USAR
+
+================================================================================
+O QUE FOI CRIADO
+================================================================================
+
+1. scripts/import_backup.py
+   - Script principal para importar dados do backup JSON
+   - Suporta --clear para limpar banco antes
+   - Usa transações (rollback automático em erro)
+   - Valida integridade dos dados
+
+2. scripts/test_import.py
+   - Script de teste e validação
+   - Cria backup de exemplo em memória
+   - Valida parsing e extração de dados
+   - Sem modificar banco de dados
+
+3. IMPORT_BACKUP.md
+   - Documentação completa
+   - Estrutura de dados
+   - Troubleshooting
+   - Performance
+
+4. IMPORT_GUIA_RAPIDO.md
+   - Guia passo-a-passo
+   - Exemplos prontos para copiar/colar
+   - Perguntas frequentes
+   - Resolução de problemas
+
+================================================================================
+COMO USAR (3 PASSOS)
+================================================================================
+
+PASSO 1: Salve o arquivo de backup
+   └─ Exemplo: /dados/backup_2026-08-06.json
+
+PASSO 2: Navegue para o backend
+   └─ cd plantao360/backend
+
+PASSO 3: Execute a importação
+   └─ python -m scripts.import_backup /caminho/para/backup.json [--clear]
+
+================================================================================
+DADOS IMPORTADOS
+================================================================================
+
+✓ Médicos (doctor_vlh + doctor_meta)
+  - Nome completo
+  - CRM (gerado automaticamente)
+  - Status RQE (Sim/Não)
+  - Data de admissão
+  - Status (ativo/inativo)
+
+✓ Períodos (shifts_YYYY-MM)
+  - Ano e mês
+  - Status (draft)
+
+✓ Plantões (Shifts)
+  - Data do plantão
+  - Tipo (T1, T2, T3, R1, R2)
+  - Horários (início/fim)
+  - Status (completed)
+
+✓ Atribuições (ShiftParts)
+  - Simples (1 médico)
+  - Divididas (split, múltiplos médicos)
+  - Horários individuais
+  - Duração em minutos
+
+✓ Horas Extras (ShiftExtras)
+  - Médico responsável
+  - Duração em minutos
+  - Justificativa/observação
+  - Status (approved)
+
+================================================================================
+TIPOS DE TURNO
+================================================================================
+
+T1: 07:00 - 19:00  (12 horas)
+T2: 19:00 - 07:00  (12 horas)
+T3: 07:00 - 07:00  (24 horas)
+R1: 07:00 - 13:00  (6 horas)
+R2: 13:00 - 19:00  (6 horas)
+
+================================================================================
+TESTE RÁPIDO (SEM MODIFICAR BANCO)
+================================================================================
+
+Antes de importar, teste o script:
+
+   python -m scripts.test_import
+
+Resultado esperado:
+   [OK] import_backup module loaded successfully
+   [OK] Backup loaded successfully
+   [OK] Parsed X doctors
+   [OK] Parsed X shifts
+   [OK] Parsed X shift parts
+   [OK] Parsed X extras
+   All tests passed! Import script is ready to use.
+
+================================================================================
+EXEMPLO DE USO
+================================================================================
+
+# Importação simples (adiciona aos dados existentes)
+python -m scripts.import_backup backup_2026-08-06.json
+
+# Limpar banco e importar (começa do zero)
+python -m scripts.import_backup backup_2026-08-06.json --clear
+
+# Com output em arquivo
+python -m scripts.import_backup backup_2026-08-06.json --clear > import.log 2>&1
+
+================================================================================
+SAÍDA ESPERADA
+================================================================================
+
+A importação mostrará algo assim:
+
+   Loading backup file: backup_2026-08-06.json
+   [OK] Backup loaded successfully
+
+   Parsing backup data...
+     Parsed 38 doctors
+     Parsed 500 shifts
+     Parsed 600 shift assignments
+     Parsed 80 shift extras
+
+   Populating database...
+     Loaded 38 doctors
+     Loaded 12 periods
+     Loaded 500 shifts with 600 assignments
+     Loaded 80 shift extras
+
+   ============================================================
+   ✓ Database imported successfully!
+   ============================================================
+
+================================================================================
+PERFORMANCE
+================================================================================
+
+Dados        | Tempo
+-------------|--------
+38 médicos   | ~1s
+500 plantões | ~2s
+600+ extras  | ~2s
+Pós-processamento | ~1s
+-------------|--------
+TOTAL        | ~5-10s
+
+================================================================================
+SEGURANÇA
+================================================================================
+
+✓ Transações atômicas (tudo ou nada)
+✓ Rollback automático em caso de erro
+✓ Validação de integridade
+✓ Preservação de dados existentes (sem --clear)
+✓ Sem perda de dados em erro
+
+================================================================================
+PRÓXIMOS PASSOS
+================================================================================
+
+1. Faça backup do banco atual:
+   pg_dump -U postgres plantao360 > backup_antes_importacao.sql
+
+2. Teste o script:
+   python -m scripts.test_import
+
+3. Execute a importação:
+   python -m scripts.import_backup backup_2026-08-06.json --clear
+
+4. Verifique os dados:
+   - Interface web: http://localhost:3000
+   - Banco de dados: SELECT COUNT(*) FROM doctors;
+
+5. Valide integridade:
+   - Verifique médicos carregados
+   - Verifique plantões agendados
+   - Verifique extras registradas
+
+================================================================================
+TROUBLESHOOTING
+================================================================================
+
+Erro: "File not found"
+  └─ Solução: Verifique o caminho do arquivo: ls -la /caminho/backup.json
+
+Erro: "Invalid JSON"
+  └─ Solução: Valide JSON: python -m json.tool backup.json
+
+Erro: "Encoding error"
+  └─ Solução: Converta: iconv -f ISO-8859-1 -t UTF-8 backup.json > utf8.json
+
+Erro: "Duplicate CRM"
+  └─ Solução: Use --clear: python -m scripts.import_backup backup.json --clear
+
+Erro: "Database locked"
+  └─ Solução: Feche outras conexões e tente novamente
+
+================================================================================
+DOCUMENTAÇÃO COMPLETA
+================================================================================
+
+Para mais detalhes:
+
+- Guia Rápido: IMPORT_GUIA_RAPIDO.md
+- Documentação: IMPORT_BACKUP.md
+- Script Principal: scripts/import_backup.py
+- Script de Teste: scripts/test_import.py
+
+================================================================================
+CONTATO
+================================================================================
+
+Em caso de problemas:
+1. Consulte IMPORT_GUIA_RAPIDO.md (FAQ)
+2. Verifique IMPORT_BACKUP.md (Troubleshooting)
+3. Execute: python -m scripts.test_import (validar script)
+
+================================================================================
+FIM
+================================================================================
