@@ -32,6 +32,7 @@ import { FEATURE_FLAGS } from '../config';
 import { tokens, darkTokens } from '../theme';
 import { useAuth } from '../contexts/AuthContext';
 import { apiClient } from '../api/client';
+import { healthApi } from '../api/health';
 import { useColorMode } from '../contexts/ColorModeContext';
 import { BreadcrumbProvider, useBreadcrumbLabels } from '../contexts/BreadcrumbContext';
 
@@ -141,6 +142,47 @@ function SidebarOperationalContext({ collapsed }: { collapsed: boolean }) {
           Sync: {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
         </Typography>
       </Stack>
+    </Box>
+  );
+}
+
+function SidebarVersionFooter({ collapsed }: { collapsed: boolean }) {
+  const { mode } = useColorMode();
+  const colors = mode === 'dark' ? darkTokens.colors : tokens.colors;
+  const { data } = useQuery({
+    queryKey: ['health'],
+    queryFn: () => healthApi.check().then((res) => res.data),
+    staleTime: 5 * 60 * 1000,
+    refetchInterval: 5 * 60 * 1000,
+    retry: false,
+  });
+
+  const version = data?.version;
+  const environment = data?.environment;
+  const label = version ? `v${version}` : '';
+  const envLabel = environment && environment !== 'production' ? ` (${environment})` : '';
+
+  if (!version) return null;
+
+  const content = (
+    <Typography
+      variant="caption"
+      sx={{ color: colors.text.muted, fontSize: '0.65rem', whiteSpace: 'nowrap' }}
+    >
+      {label}
+      {envLabel}
+    </Typography>
+  );
+
+  return (
+    <Box sx={{ px: collapsed ? 0 : 2, py: 1, display: 'flex', justifyContent: 'center' }}>
+      {collapsed ? (
+        <Tooltip title={`${label}${envLabel}`} placement="right">
+          <Typography variant="caption" sx={{ color: colors.text.muted, fontSize: '0.6rem' }}>
+            {version.split('.')[0]}
+          </Typography>
+        </Tooltip>
+      ) : content}
     </Box>
   );
 }
@@ -410,6 +452,8 @@ function MainLayoutContent() {
           );
         })}
       </List>
+      <Divider sx={{ borderColor: colors.grey[200] }} />
+      <SidebarVersionFooter collapsed={!isExpanded} />
     </Box>
   );
 

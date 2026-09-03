@@ -3,7 +3,7 @@ from pydantic_settings import BaseSettings
 
 class BaseAppSettings(BaseSettings):
     APP_NAME: str = "Plantao360"
-    APP_VERSION: str = "1.0.0"
+    APP_VERSION: str = "1.5.0"
     ENVIRONMENT: str = "development"
     DATABASE_URL: str = "sqlite:///./plantao360.db"
     SECRET_KEY: str = "change-me-in-production-use-a-real-secret"
