@@ -48,8 +48,10 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ghcr.io/brodbeck-michel/${{ matrix.image }}
+          # A tag git é "vX.Y.Z", mas a imagem é publicada sem o "v" (ex.: "1.5.0")
+          # para bater exatamente com APP_VERSION usado no .env e no docker-compose.prod.yml.
           tags: |
-            type=ref,event=tag
+            type=match,pattern=v(.*),group=1
             type=raw,value=latest
 
       - name: Build and push ${{ matrix.image }}

@@ -8,8 +8,12 @@ Como publicar e operar o Plantão 360 em produção. O princípio é simples:
 Fluxo geral:
 
 ```
-git tag vX.Y.Z  ─►  GitHub Actions builda  ─►  imagens no GHCR  ─►  servidor: deploy.sh (pull + up)
+git tag vX.Y.Z  ─►  GitHub Actions builda  ─►  imagens no GHCR (tag X.Y.Z, sem "v")  ─►
+servidor: define APP_VERSION=X.Y.Z no .env  ─►  docker compose pull && docker compose up -d
 ```
+
+Um único valor, `APP_VERSION`, controla tanto a versão publicada quanto a versão exibida no
+rodapé do menu lateral da aplicação (via `GET /api/v1/health`).
 
 ---
 
@@ -17,17 +21,26 @@ git tag vX.Y.Z  ─►  GitHub Actions builda  ─►  imagens no GHCR  ─►  
 
 - Linux com **Docker** e **Docker Compose v2**.
 - Acesso à internet para baixar imagens do GHCR.
-- Uma cópia do repositório (ou ao menos: `docker-compose.prod.yml`, `scripts/` e o `.env.production`).
+- Uma cópia do repositório (ou ao menos: `docker-compose.prod.yml`, `scripts/`, `.env` e o
+  `.env.production`).
 
 ## 2. Setup inicial (uma vez)
 
-1. **Autenticar no GHCR** (as imagens podem ser privadas):
+1. **Autenticar no GHCR** (só necessário se as imagens forem privadas — hoje são públicas):
    ```bash
    docker login ghcr.io -u <seu-usuario-github>
    # senha = um Personal Access Token com escopo read:packages
    ```
 
-2. **Criar o `.env.production`** a partir do modelo e preencher:
+2. **Criar o `.env` da raiz** (controla qual compose usar e a versão das imagens):
+   ```bash
+   cat > .env <<'EOF'
+   COMPOSE_FILE=docker-compose.prod.yml
+   APP_VERSION=1.5.1
+   EOF
+   ```
+
+3. **Criar o `.env.production`** a partir do modelo e preencher:
    ```bash
    cp .env.production.example .env.production
    ```
@@ -41,7 +54,7 @@ git tag vX.Y.Z  ─►  GitHub Actions builda  ─►  imagens no GHCR  ─►  
      ```
    - `ADMIN_EMAIL`, `ADMIN_PASSWORD` (>= 8 caracteres, não pode ser padrão)
 
-   > O `.env.production` **nunca** vai para o git — ele fica só no servidor.
+   > Nem o `.env.production` nem o `.env` **vão para o git** — ficam só no servidor.
 
 ## 3. Publicar uma nova versão (no GitHub)
 
@@ -52,21 +65,28 @@ git tag v1.2.0
 git push origin v1.2.0
 ```
 
-O workflow **Release Images** constrói e publica no GHCR:
-- `ghcr.io/brodbeck-michel/plantao360-backend:v1.2.0` (e `:latest`)
-- `ghcr.io/brodbeck-michel/plantao360-frontend:v1.2.0` (e `:latest`)
+O workflow **Release Images** constrói e publica no GHCR (a tag da imagem sai sem o `v`, para
+bater com `APP_VERSION`):
+- `ghcr.io/brodbeck-michel/plantao360-backend:1.2.0` (e `:latest`)
+- `ghcr.io/brodbeck-michel/plantao360-frontend:1.2.0` (e `:latest`)
 
 Alternativa manual: aba **Actions → Release Images → Run workflow** (publica `:latest`).
 
-## 4. Deploy no servidor (um comando)
+## 4. Deploy no servidor (dois comandos)
 
 ```bash
 cd /apps/plantao360
-TAG=v1.2.0 ./scripts/deploy.sh
+docker compose pull
+docker compose up -d
 ```
 
-O script baixa as imagens da tag e sobe os serviços na ordem `db → backend → frontend`.
-O backend espera o Postgres ficar saudável, aplica as migrations e só então serve.
+(o `.env` da raiz já aponta para `docker-compose.prod.yml` e para a versão em `APP_VERSION` — não
+precisa `-f` nem passar a versão na linha de comando). Equivalente a `./scripts/deploy.sh`, que
+faz o mesmo com checagens extras.
+
+O comando baixa as imagens da versão definida em `APP_VERSION` e sobe os serviços na ordem
+`db → backend → frontend`. O backend espera o Postgres ficar saudável, aplica as migrations e só
+então serve.
 
 > ⚠️ **Deploy com a migration 008 (spec 006, 2026-07-15)**: rode `./scripts/backup.sh`
 > **antes** — a migration `008_drop_payroll` remove a tabela `payrolls` (e tabelas de
@@ -75,7 +95,9 @@ O backend espera o Postgres ficar saudável, aplica as migrations e só então s
 ## 5. Rollback
 
 ```bash
-TAG=v1.1.0 ./scripts/deploy.sh    # volta para a versão anterior, sem rebuild
+sed -i 's/^APP_VERSION=.*/APP_VERSION=1.1.0/' .env   # volta para a versão anterior
+docker compose pull
+docker compose up -d
 ```
 
 ## 6. Seed de dados (manual — nunca automático em produção)
@@ -110,7 +132,8 @@ Recomendado agendar o backup no cron (ex.: diário às 2h):
 |---|---|---|
 | Backend reinicia dizendo que não conecta ao banco | Postgres ainda subindo ou `DATABASE_URL` errada | O `start.sh` espera o banco; se persistir, confira `DATABASE_URL` e `POSTGRES_*` no `.env.production` |
 | `pull` falha com "unauthorized" | Não autenticado no GHCR ou imagem privada | Refazer `docker login ghcr.io` com token `read:packages` |
-| Deploy sobe versão errada | `TAG` não informado | Rode com `TAG=vX.Y.Z ./scripts/deploy.sh` |
+| Deploy sobe versão errada | `APP_VERSION` desatualizado no `.env` | Edite `APP_VERSION` no `.env` da raiz e rode `docker compose pull && docker compose up -d` |
+| `docker compose` não acha o compose file / sobe serviços de dev | `.env` da raiz sem `COMPOSE_FILE=docker-compose.prod.yml` | Recrie o `.env` conforme a seção 2 |
 | Startup aborta em migração | Migration incompatível com Postgres | Ver seção 9; corrigir a migration e republicar |
 | Erro "database is locked" | Ainda usando SQLite | Confirme que `DATABASE_URL` aponta para `postgresql+psycopg2://...` |
 

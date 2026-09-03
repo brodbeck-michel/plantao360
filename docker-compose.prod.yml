@@ -1,5 +1,6 @@
 # Produção — imagens são construídas no CI (GitHub Actions) e publicadas no GHCR.
-# O servidor apenas baixa e sobe: TAG=vX.Y.Z ./scripts/deploy.sh
+# O servidor apenas baixa e sobe: defina APP_VERSION no .env da raiz e rode
+#   docker compose pull && docker compose up -d
 # NUNCA usar --build aqui.
 services:
   db:
@@ -20,7 +21,7 @@ services:
       start_period: 10s
 
   backend:
-    image: ghcr.io/brodbeck-michel/plantao360-backend:${TAG:-latest}
+    image: ghcr.io/brodbeck-michel/plantao360-backend:${APP_VERSION:-latest}
     container_name: plantao360_backend_prod
     restart: always
     # API NÃO exposta ao host: o frontend (nginx) faz proxy de /api -> backend:8000
@@ -29,6 +30,10 @@ services:
       - "8000"
     env_file:
       - .env.production
+    environment:
+      # Garante que /health (e a versão exibida na tela) reflita exatamente a
+      # tag que foi baixada, mesmo que o .env.production não tenha sido atualizado.
+      APP_VERSION: ${APP_VERSION:-latest}
     networks:
       - plantao360_prod
     depends_on:
@@ -47,7 +52,7 @@ services:
       start_period: 40s
 
   frontend:
-    image: ghcr.io/brodbeck-michel/plantao360-frontend:${TAG:-latest}
+    image: ghcr.io/brodbeck-michel/plantao360-frontend:${APP_VERSION:-latest}
     container_name: plantao360_frontend_prod
     restart: always
     ports:

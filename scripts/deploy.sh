@@ -2,23 +2,25 @@
 # ============================================================================
 # Deploy do Plantão 360 em produção a partir de imagens já publicadas no GHCR.
 #
-#   Uso:       TAG=v1.2.0 ./scripts/deploy.sh
-#   Rollback:  rode de novo com a TAG anterior, ex.:  TAG=v1.1.0 ./scripts/deploy.sh
+#   Uso:       edite APP_VERSION no .env da raiz, depois ./scripts/deploy.sh
+#   Rollback:  troque APP_VERSION para a versão anterior e rode de novo
 #
-# NUNCA compila no servidor — apenas baixa (pull) e sobe (up -d).
-# Pré-requisitos no servidor: docker + docker compose, `docker login ghcr.io`,
-# e um arquivo .env.production preenchido (a partir de .env.production.example).
+# NUNCA compila no servidor — apenas baixa (pull) e sobe (up -d). Equivalente a:
+#   docker compose pull && docker compose up -d
+#
+# Pré-requisitos no servidor: docker + docker compose, um arquivo .env na raiz
+# com COMPOSE_FILE=docker-compose.prod.yml e APP_VERSION=X.Y.Z, e um
+# .env.production preenchido (a partir de .env.production.example).
 # ============================================================================
 set -euo pipefail
 
-# Vai para a raiz do projeto (um nível acima de scripts/)
 cd "$(dirname "$0")/.."
 
-COMPOSE_FILE="docker-compose.prod.yml"
-TAG="${TAG:-latest}"
-export TAG
-
-echo "==> Deploy Plantão 360 | TAG=${TAG}"
+if [ ! -f .env ]; then
+  echo "ERRO: .env não encontrado na raiz do projeto." >&2
+  echo "      Crie com: COMPOSE_FILE=docker-compose.prod.yml e APP_VERSION=X.Y.Z" >&2
+  exit 1
+fi
 
 if [ ! -f .env.production ]; then
   echo "ERRO: .env.production não encontrado na raiz do projeto." >&2
@@ -26,19 +28,22 @@ if [ ! -f .env.production ]; then
   exit 1
 fi
 
-echo "==> Baixando imagens da tag '${TAG}' no GHCR..."
-if ! docker compose -f "$COMPOSE_FILE" pull; then
-  echo "ERRO: falha ao baixar as imagens da tag '${TAG}'." >&2
-  echo "      Verifique: (1) a tag existe no GHCR; (2) 'docker login ghcr.io' foi feito" >&2
-  echo "      com um token de escopo read:packages." >&2
+APP_VERSION="$(grep -E '^APP_VERSION=' .env | cut -d= -f2-)"
+echo "==> Deploy Plantão 360 | APP_VERSION=${APP_VERSION:-<não definido em .env>}"
+
+echo "==> Baixando imagens..."
+if ! docker compose pull; then
+  echo "ERRO: falha ao baixar as imagens da versão '${APP_VERSION}'." >&2
+  echo "      Verifique: (1) a versão existe no GHCR; (2) se as imagens forem" >&2
+  echo "      privadas, rode 'docker login ghcr.io' com um token read:packages." >&2
   exit 1
 fi
 
 echo "==> Subindo serviços (db -> backend -> frontend)..."
-docker compose -f "$COMPOSE_FILE" up -d
+docker compose up -d
 
 echo "==> Estado dos serviços:"
-docker compose -f "$COMPOSE_FILE" ps
+docker compose ps
 
-echo "==> Deploy concluído (TAG=${TAG})."
-echo "    Logs do backend:  docker compose -f ${COMPOSE_FILE} logs -f backend"
+echo "==> Deploy concluído (APP_VERSION=${APP_VERSION})."
+echo "    Logs do backend:  docker compose logs -f backend"
