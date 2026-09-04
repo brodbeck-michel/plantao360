@@ -8,7 +8,6 @@ class TestSettings(BaseAppSettings):
     SECRET_KEY: str = "test-secret-key-not-for-production"
 
     model_config = {
-        "env_file": ".env.test",
         "env_file_encoding": "utf-8",
         "extra": "ignore",
     }

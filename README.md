@@ -2,39 +2,34 @@
 
 Sistema de gestão de plantões médicos para intranet da Unimed.
 
-> **Deploy em produção:** as instruções abaixo (`docker compose up -d`) são para
-> **desenvolvimento** (SQLite). Em produção o banco é **PostgreSQL** e as imagens são
-> construídas no GitHub Actions e publicadas no GHCR — o servidor apenas baixa e sobe.
-> Veja o guia completo em **[docs/deploy.md](docs/deploy.md)**.
+> **Deploy:** o servidor nunca compila. Toda atualização vem dentro da imagem —
+> basta trocar `APP_VERSION` no `.env` e rodar `down; pull; up -d`.
+> Guia completo em **[docs/runbook-deploy.md](docs/runbook-deploy.md)**.
 
 ## Pré-requisitos
 
 - Docker e Docker Compose
-- Python 3.12+ (desenvolvimento local)
-- Node.js 20+ (desenvolvimento local)
+- Python 3.12+ e Node.js 20+ (desenvolvimento local)
 
 ## Como Subir
 
 ```bash
-# Copiar variáveis de ambiente
-cp .env.example .env
-
-# Subir com Docker
+cp .env.example .env     # preencha POSTGRES_PASSWORD, SECRET_KEY, ADMIN_PASSWORD
+docker compose pull
 docker compose up -d
-
-# Ou usar Make
-make setup
 ```
+
+O `docker-compose.yml` é o **único** arquivo de stack e sempre usa as imagens
+publicadas no GHCR (`APP_VERSION` do `.env`). Para desenvolver com hot reload,
+rode backend e frontend nativamente (ver "Desenvolvimento Local" abaixo).
 
 ## URLs de Acesso
 
 | Serviço | URL |
 |---------|-----|
-| Frontend | http://localhost:3000 |
-| API | http://localhost:8000 |
-| Swagger | http://localhost:8000/api/v1/docs |
-| ReDoc | http://localhost:8000/api/v1/redoc |
-| Health Check | http://localhost:8000/api/v1/health |
+| Aplicação (frontend + proxy /api) | http://localhost:3001 |
+| Health Check | http://localhost:3001/api/v1/health |
+| Swagger (dev local) | http://localhost:8000/api/v1/docs |
 
 ## Comandos Úteis
 
@@ -118,12 +113,10 @@ plantao360/
 │   └── package.json
 ├── docker/
 │   └── nginx/            # Configuração Nginx
-├── scripts/              # Scripts auxiliares
+├── scripts/              # lint / test / format (uso local)
 ├── docs/                 # Documentação
 ├── backups/              # Backups
-├── docker-compose.yml
-├── docker-compose.dev.yml
-├── docker-compose.prod.yml
+├── docker-compose.yml    # única stack (imagens do GHCR)
 ├── Makefile
 ├── .env.example
 └── README.md

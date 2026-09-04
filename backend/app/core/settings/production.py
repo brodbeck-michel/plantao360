@@ -24,7 +24,7 @@ class ProductionSettings(BaseAppSettings):
     DATABASE_URL: str = "postgresql+psycopg2://user:pass@localhost:5432/plantao360"
 
     model_config = {
-        "env_file": ".env.production",
+        "env_file": ".env",
         "env_file_encoding": "utf-8",
         "extra": "ignore",
     }
@@ -41,14 +41,14 @@ class ProductionSettings(BaseAppSettings):
         if self.SECRET_KEY in INSECURE_SECRET_KEYS or len(self.SECRET_KEY) < 32:
             errors.append(
                 "SECRET_KEY inseguro ou ausente. Defina um valor aleatório com "
-                ">= 32 caracteres no .env.production. Gere um com: "
+                ">= 32 caracteres no .env. Gere um com: "
                 'python -c "import secrets; print(secrets.token_urlsafe(48))"'
             )
 
         if self.ADMIN_PASSWORD in INSECURE_ADMIN_PASSWORDS or len(self.ADMIN_PASSWORD) < 8:
             errors.append(
                 "ADMIN_PASSWORD inseguro ou ausente. Defina ADMIN_PASSWORD no "
-                ".env.production com >= 8 caracteres e diferente dos valores padrão."
+                ".env com >= 8 caracteres e diferente dos valores padrão."
             )
 
         if errors:

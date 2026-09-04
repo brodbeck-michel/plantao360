@@ -7,7 +7,7 @@ class DevelopmentSettings(BaseAppSettings):
     DATABASE_URL: str = "sqlite:///./plantao360.db"
 
     model_config = {
-        "env_file": ".env.development",
+        "env_file": ".env",
         "env_file_encoding": "utf-8",
         "extra": "ignore",
     }

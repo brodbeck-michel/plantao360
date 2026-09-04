@@ -1,14 +1,25 @@
-.git
-.github
-.pytest_cache
-.ruff_cache
-__pycache__
-*.pyc
-# Segredos e artefatos locais — nunca dentro da imagem
+# Nada de documentação, relatórios, scaffolding ou dados locais dentro da imagem.
+# (app/tests fica: o CI roda pytest dentro desta mesma imagem.)
+*.md
+*.txt
+!requirements.txt
+architecture/
+architecture_rules/
+templates/
+reports/
+htmlcov/
+data/
+*.db
 .env
 .env.*
-*.db
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage*
+.ruff_cache/
 *.sqlite3
-htmlcov/
-.coverage
-.coverage.*
+.git
+
+# Scripts de manutenção: só o import de backup é rodado manualmente no container.
+scripts/*
+!scripts/import_backup.py

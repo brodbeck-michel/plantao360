@@ -1,10 +1,7 @@
-.PHONY: setup up down lint test format migrate revision downgrade shell logs clean seed help
+.PHONY: up down lint test format migrate revision downgrade shell logs clean seed help
 
 help: ## Mostra esta ajuda
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
-
-setup: ## Configura o projeto (copia .env, instala dependências)
-	bash scripts/setup.sh
 
 up: ## Sobe os containers
 	docker compose up -d

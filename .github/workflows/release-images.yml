@@ -49,7 +49,7 @@ jobs:
         with:
           images: ghcr.io/brodbeck-michel/${{ matrix.image }}
           # A tag git é "vX.Y.Z", mas a imagem é publicada sem o "v" (ex.: "1.5.0")
-          # para bater exatamente com APP_VERSION usado no .env e no docker-compose.prod.yml.
+          # para bater exatamente com o APP_VERSION usado no .env do servidor.
           tags: |
             type=match,pattern=v(.*),group=1
             type=raw,value=latest
