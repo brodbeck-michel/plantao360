@@ -69,7 +69,7 @@ export interface WorkspaceData {
   summary: WorkspaceSummary;
 }
 
-export const SHIFT_TYPES = ['T1', 'T2', 'T3', 'R1', 'R2'] as const;
+export const SHIFT_TYPES = ['T1', 'T2', 'T3', 'R1', 'R2', 'R3'] as const;
 
 export const SHIFT_LABELS: Record<string, string> = {
   T1: 'T1 TITULAR MANHÃ',
@@ -77,14 +77,16 @@ export const SHIFT_LABELS: Record<string, string> = {
   T3: 'T3 TITULAR NOITE',
   R1: 'R1 REFORÇO MANHÃ',
   R2: 'R2 REFORÇO TARDE',
+  R3: 'R3 REFORÇO NOITE',
 };
 
 export const SHIFT_TIMES: Record<string, { start: string; end: string; hours: number }> = {
   T1: { start: '07:00', end: '12:59', hours: 6 },
   T2: { start: '13:00', end: '18:59', hours: 6 },
   T3: { start: '19:00', end: '06:59', hours: 12 },
-  R1: { start: '09:00', end: '14:59', hours: 6 },
-  R2: { start: '15:00', end: '21:00', hours: 6 },
+  R1: { start: '08:00', end: '13:59', hours: 6 },
+  R2: { start: '14:00', end: '19:59', hours: 6 },
+  R3: { start: '20:00', end: '23:00', hours: 3 },
 };
 
 export const MONTH_NAMES = [

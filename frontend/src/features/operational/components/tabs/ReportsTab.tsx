@@ -135,7 +135,7 @@ export function ReportsTab({ period, summary, days, doctors }: ReportsTabProps) 
   };
 
   const generateCoverageReport = () => {
-    let csv = 'Data,Dia,T1,T2,T3,R1,R2,Total Preenchidos,Total Vagas,Cobertura %\n';
+    let csv = `Data,Dia,${SHIFT_TYPES.join(',')},Total Preenchidos,Total Vagas,Cobertura %\n`;
     days.forEach((day) => {
       const row: Record<string, string | number> = { date: day.date, dow: day.day_of_week };
       let filled = 0;
@@ -147,7 +147,8 @@ export function ReportsTab({ period, summary, days, doctors }: ReportsTabProps) 
       row.total_filled = filled;
       row.total_slots = SHIFT_TYPES.length;
       row.coverage = ((filled / SHIFT_TYPES.length) * 100).toFixed(1);
-      csv += `${row.date},${row.dow},${row.T1},${row.T2},${row.T3},${row.R1},${row.R2},${row.total_filled},${row.total_slots},${row.coverage}%\n`;
+      const shiftCounts = SHIFT_TYPES.map((st) => row[st]).join(',');
+      csv += `${row.date},${row.dow},${shiftCounts},${row.total_filled},${row.total_slots},${row.coverage}%\n`;
     });
     downloadFile(csv, `cobertura_${period.year}_${String(period.month).padStart(2, '0')}.csv`, 'text/csv;charset=utf-8');
   };

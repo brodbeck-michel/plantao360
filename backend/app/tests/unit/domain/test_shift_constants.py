@@ -17,3 +17,4 @@ def test_shift_type_values():
     assert ShiftType.T3 == "T3"
     assert ShiftType.R1 == "R1"
     assert ShiftType.R2 == "R2"
+    assert ShiftType.R3 == "R3"

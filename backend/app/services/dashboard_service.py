@@ -274,7 +274,7 @@ class FinancialTrendPoint:
 
 @dataclass(frozen=True)
 class ShiftTypeBreakdownEntry:
-    """Immutable billing breakdown for one shift type (T1/T2/T3/R1/R2) in the current period."""
+    """Immutable billing breakdown for one shift type (T1/T2/T3/R1/R2/R3) in the current period."""
     shift_type: str
     total_hours: float
     total_value: float

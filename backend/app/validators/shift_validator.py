@@ -16,7 +16,7 @@ class ShiftValidator(BaseValidator):
             result.add_error("shift_date is required")
         if not data.shift_type:
             result.add_error("shift_type is required")
-        if data.shift_type and data.shift_type not in ("T1", "T2", "T3", "R1", "R2"):
+        if data.shift_type and data.shift_type not in ("T1", "T2", "T3", "R1", "R2", "R3"):
             result.add_error(f"Invalid shift_type: {data.shift_type}")
         if data.scheduled_start and data.scheduled_end:
             if data.scheduled_end <= data.scheduled_start:
@@ -24,7 +24,7 @@ class ShiftValidator(BaseValidator):
 
     def _validate_update(self, data: ShiftUpdateDTO, result: ValidationResult) -> None:
         if data.shift_type is not None:
-            if data.shift_type not in ("T1", "T2", "T3", "R1", "R2"):
+            if data.shift_type not in ("T1", "T2", "T3", "R1", "R2", "R3"):
                 result.add_error(f"Invalid shift_type: {data.shift_type}")
         if data.scheduled_start is not None and data.scheduled_end is not None:
             if data.scheduled_end <= data.scheduled_start:
