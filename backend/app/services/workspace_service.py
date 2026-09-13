@@ -19,9 +19,10 @@ SHIFT_TYPE_LABELS = {
     "T3": "T3 TITULAR NOITE",
     "R1": "R1 REFORÇO MANHÃ",
     "R2": "R2 REFORÇO TARDE",
+    "R3": "R3 REFORÇO NOITE",
 }
 
-SHIFT_TYPE_ORDER = ["T1", "T2", "T3", "R1", "R2"]
+SHIFT_TYPE_ORDER = ["T1", "T2", "T3", "R1", "R2", "R3"]
 
 DAY_NAMES = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"]
 
@@ -29,8 +30,9 @@ SHIFT_TIMES = {
     "T1": (time_type(7, 0), time_type(12, 59)),
     "T2": (time_type(13, 0), time_type(18, 59)),
     "T3": (time_type(19, 0), time_type(6, 59)),
-    "R1": (time_type(9, 0), time_type(14, 59)),
-    "R2": (time_type(15, 0), time_type(21, 0)),
+    "R1": (time_type(8, 0), time_type(13, 59)),
+    "R2": (time_type(14, 0), time_type(19, 59)),
+    "R3": (time_type(20, 0), time_type(23, 0)),
 }
 
 

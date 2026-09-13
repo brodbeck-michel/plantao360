@@ -7,6 +7,7 @@ class ShiftType(StrEnum):
     T3 = "T3"
     R1 = "R1"
     R2 = "R2"
+    R3 = "R3"
 
     @classmethod
     def values(cls) -> list[str]:

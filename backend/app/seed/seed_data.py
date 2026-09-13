@@ -44,8 +44,9 @@ SHIFT_TYPE_MAP = {
     "T1": {"start": time(7, 0), "end": time(19, 0), "hours": 720},
     "T2": {"start": time(19, 0), "end": time(7, 0), "hours": 720},
     "T3": {"start": time(7, 0), "end": time(7, 0), "hours": 1440},
-    "R1": {"start": time(7, 0), "end": time(13, 0), "hours": 360},
-    "R2": {"start": time(13, 0), "end": time(19, 0), "hours": 360},
+    "R1": {"start": time(8, 0), "end": time(13, 59), "hours": 359},
+    "R2": {"start": time(14, 0), "end": time(19, 59), "hours": 359},
+    "R3": {"start": time(20, 0), "end": time(23, 0), "hours": 180},
 }
 
 NAMES_FIRST = [
