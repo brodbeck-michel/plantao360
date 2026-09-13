@@ -1,0 +1,8 @@
+# Normaliza fim de linha para LF no repositório, independente do SO/editor
+# que gravou o arquivo em disco. Evita diffs inteiros de CRLF↔LF (ver
+# docs/HANDOFF.md — "armadilhas conhecidas").
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.ico binary

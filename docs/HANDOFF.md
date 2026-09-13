@@ -119,7 +119,7 @@ entre passos. Verificação de paridade tripla: suíte 0 falhas + grep sem impor
 - Drive de rede (`\\sfs01\...`) é lento para I/O em massa: em scripts, ler cada arquivo **uma
   vez** (não N×). Git avisa CRLF/LF — inofensivo.
 - Dentro do container o path é `app/...` (workdir `/app`), não `backend/app/...`.
-- `git commit` já usa `Co-Authored-By: Claude Opus 4.8`. Estamos na branch `master`.
+- `git commit` já usa `Co-Authored-By: Claude Opus 4.8`. Estamos na branch `main`.
 - Spec Kit: sem hooks (`.specify/extensions.yml` não existe). `.specify/feature.json` aponta para
   a feature ativa (hoje `specs/006-remocao-payroll`).
 

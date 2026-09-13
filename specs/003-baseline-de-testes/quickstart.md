@@ -34,7 +34,7 @@ docker run --rm -e ENVIRONMENT=test plantao360-backend-test python -m pytest -p 
 ## Confirmar que nada de produto mudou
 
 ```bash
-git diff --name-only origin/master..HEAD -- backend/app | grep -v '/tests/' || echo "OK: nenhum arquivo de app fora de tests"
+git diff --name-only origin/main..HEAD -- backend/app | grep -v '/tests/' || echo "OK: nenhum arquivo de app fora de tests"
 ```
 
 Espera-se que apenas `backend/app/tests/**` (e `backend/pyproject.toml`) apareçam — nenhum
