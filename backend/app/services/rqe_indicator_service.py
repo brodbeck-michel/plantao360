@@ -97,6 +97,11 @@ class RqeHoursIndicator:
     month: int = 0
     period_name: str = ""
     period_status: str = ""
+    # Intervalo real coberto pelos plantões da competência. O modelo Period
+    # guarda só ano/mês, mas os plantões podem atravessar o mês (a virada do
+    # dia 26 do fechamento, por exemplo) — então o recorte vem dos dados.
+    start_date: str = ""
+    end_date: str = ""
 
     total_hours: float = 0.0
     hours_with_rqe: float = 0.0
@@ -117,6 +122,8 @@ class RqeHoursIndicator:
             "month": self.month,
             "period_name": self.period_name,
             "period_status": self.period_status,
+            "start_date": self.start_date,
+            "end_date": self.end_date,
             "total_hours": self.total_hours,
             "hours_with_rqe": self.hours_with_rqe,
             "hours_without_rqe": self.hours_without_rqe,
@@ -149,6 +156,7 @@ class RqeIndicatorService:
             return RqeHoursIndicator(period_name="Nenhuma competência encontrada")
 
         doctors = self._build_doctor_hours(period.id)
+        start_date, end_date = self._period_date_range(period.id)
 
         hours_with_rqe = sum(d.total_hours for d in doctors if d.has_rqe)
         hours_without_rqe = sum(d.total_hours for d in doctors if not d.has_rqe)
@@ -165,6 +173,8 @@ class RqeIndicatorService:
             month=period.month,
             period_name=f"{MONTH_NAMES.get(period.month, '')}/{period.year}",
             period_status=period.status,
+            start_date=start_date,
+            end_date=end_date,
             total_hours=round(total_hours, 2),
             hours_with_rqe=round(hours_with_rqe, 2),
             hours_without_rqe=round(hours_without_rqe, 2),
@@ -198,6 +208,24 @@ class RqeIndicatorService:
             .order_by(Period.year.desc(), Period.month.desc())
             .first()
         )
+
+    def _period_date_range(self, period_id: int) -> tuple[str, str]:
+        """Primeiro e último dia com plantão na competência, em ISO.
+
+        Sai dos próprios plantões porque `Period` só tem ano/mês: uma
+        competência pode atravessar o mês (26/08 a 25/09, por exemplo).
+        """
+        row = (
+            self._session.query(
+                func.min(Shift.shift_date),
+                func.max(Shift.shift_date),
+            )
+            .filter(Shift.period_id == period_id)
+            .first()
+        )
+        if not row or row[0] is None:
+            return "", ""
+        return str(row[0]), str(row[1])
 
     def _build_doctor_hours(self, period_id: int) -> list[RqeDoctorHours]:
         """Horas por médico na competência — base completa, sem limite.

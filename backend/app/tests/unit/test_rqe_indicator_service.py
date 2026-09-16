@@ -284,3 +284,28 @@ def test_duracao_derivada_e_persistida_convivem(db_session, period, shift):
 
     assert result.total_hours == 24.0
     assert result.pct_with_rqe == 50.0
+
+
+def test_intervalo_da_competencia_sai_dos_plantoes(db_session, period, shift):
+    """Period só tem ano/mês; o recorte real vem das datas dos plantões,
+    que podem atravessar o mês (virada do dia 26)."""
+    outro = Shift(
+        period_id=period.id,
+        shift_date=date(2026, 10, 5),
+        shift_type="N",
+        status="scheduled",
+    )
+    db_session.add(outro)
+    db_session.commit()
+
+    result = RqeIndicatorService(db_session).execute(period_id=period.id)
+
+    assert result.start_date == "2026-09-10"
+    assert result.end_date == "2026-10-05"
+
+
+def test_competencia_sem_plantao_tem_intervalo_vazio(db_session, period):
+    result = RqeIndicatorService(db_session).execute(period_id=period.id)
+
+    assert result.start_date == ""
+    assert result.end_date == ""

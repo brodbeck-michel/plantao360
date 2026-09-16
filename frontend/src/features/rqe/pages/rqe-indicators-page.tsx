@@ -43,6 +43,8 @@ interface RqeHoursIndicator {
   month: number;
   period_name: string;
   period_status: string;
+  start_date: string;
+  end_date: string;
   total_hours: number;
   hours_with_rqe: number;
   hours_without_rqe: number;
@@ -76,6 +78,19 @@ async function fetchPeriods(): Promise<PeriodOption[]> {
 function periodLabel(p: PeriodOption): string {
   const label = new Date(p.year, p.month - 1, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
   return label.charAt(0).toUpperCase() + label.slice(1);
+}
+
+function formatShortDate(iso: string): string {
+  const [y, m, d] = iso.split('-').map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString('pt-BR', {
+    day: '2-digit', month: 'short', year: 'numeric',
+  }).replace('.', '');
+}
+
+/** Intervalo real dos plantões — a competência pode atravessar o mês. */
+function periodRange(data?: RqeHoursIndicator): string {
+  if (!data?.start_date || !data?.end_date) return data?.period_name ?? '';
+  return `${formatShortDate(data.start_date)} – ${formatShortDate(data.end_date)}`;
 }
 
 function formatHours(hours: number): string {
@@ -204,7 +219,7 @@ function DistributionBlock({ data, loading }: { data?: RqeHoursIndicator; loadin
             Distribuição dos plantões por RQE
           </Typography>
           <Typography variant="caption" sx={{ color: colors.text.secondary }}>
-            {formatHours(total)} · {data?.period_name}
+            {formatHours(total)} · {periodRange(data)}
           </Typography>
         </Stack>
 
@@ -422,6 +437,7 @@ function RqeIndicatorsPageContent() {
           </Typography>
           <Typography variant="caption" sx={{ color: colors.text.secondary }}>
             Percentual de horas de plantão cobertas por médicos com RQE
+            {data?.start_date && ` · ${data.period_name}: ${periodRange(data)}`}
           </Typography>
         </Stack>
         <TextField
