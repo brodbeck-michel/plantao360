@@ -240,6 +240,13 @@ function MainLayoutContent() {
               c.path === ROUTES.WORKSPACE || c.path === ROUTES.PERIODS
             ),
           });
+        } else if (item.label === 'Analytics' && item.children) {
+          // No MVP o grupo Analytics entra só com os Indicadores RQE — as demais
+          // telas do grupo ainda apontam para a dashboard (placeholders).
+          acc.push({
+            ...item,
+            children: item.children.filter((c) => c.path === ROUTES.RQE_INDICATORS),
+          });
         } else if (item.label === 'Sistema') {
           acc.push(item);
         }
