@@ -9,8 +9,12 @@ from app.models.shift_extra import ShiftExtra
 from app.models.doctor import Doctor
 from app.domain.constants.shift_types import ShiftType
 from app.domain.constants.shift_status import ShiftStatus
+from app.domain.constants.period_status import PeriodStatus
 from app.domain.constants.competency_dates import get_competency_dates
 from app.services.shift_lifecycle_service import ShiftLifecycleService
+from app.core.logging import get_logger
+
+logger = get_logger("service.workspace")
 
 
 SHIFT_TYPE_LABELS = {
@@ -47,6 +51,8 @@ class WorkspaceService:
 
         start_date, end_date = self._get_period_dates(period)
         shift_types = [s.value for s in ShiftType]
+
+        self._ensure_base_shifts(period, start_date, end_date)
 
         existing_shifts = self.db.query(Shift).filter(
             Shift.period_id == period_id,
@@ -185,6 +191,52 @@ class WorkspaceService:
                 "total_hours": round(total_hours, 1),
             },
         }
+
+    def _ensure_base_shifts(self, period: Period, start_date: date, end_date: date) -> int:
+        """Cria as linhas de turno que faltam na competencia e devolve quantas criou.
+
+        A geracao base so roda uma vez, na criacao do periodo, com os tipos de
+        turno que existiam naquele momento. Um tipo novo (ex: R3) aparece na
+        grade — que le o enum ShiftType — mas sem linha no banco a celula volta
+        com shift_id nulo e a tela recusa a gravacao. Fechar o buraco aqui, ao
+        abrir a escala, evita ter que rodar backfill manual a cada tipo novo.
+
+        Periodo fechado ou pago nao e tocado: o fechamento congela a competencia.
+        """
+        if period.status != PeriodStatus.DRAFT:
+            return 0
+
+        # Inclui turnos cancelados de proposito — a linha existe e a unique
+        # (period_id, shift_date, shift_type) recusaria a duplicata.
+        known = set(
+            self.db.query(Shift.shift_date, Shift.shift_type).filter(
+                Shift.period_id == period.id,
+                Shift.shift_date >= start_date,
+                Shift.shift_date <= end_date,
+            ).all()
+        )
+
+        created = 0
+        current = start_date
+        while current <= end_date:
+            for st in ShiftType.values():
+                if (current, st) not in known:
+                    self.db.add(Shift(
+                        period_id=period.id,
+                        shift_date=current,
+                        shift_type=st,
+                        status=ShiftStatus.DRAFT,
+                    ))
+                    created += 1
+            current += timedelta(days=1)
+
+        if created:
+            self.db.flush()
+            logger.info(
+                "workspace.base_shifts.backfilled",
+                extra={"period_id": period.id, "created_count": created},
+            )
+        return created
 
     def _get_period_dates(self, period: Period) -> tuple[date, date]:
         return get_competency_dates(period.year, period.month)
