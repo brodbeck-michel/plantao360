@@ -6,7 +6,7 @@ from app.core.logging import setup_logging
 from app.core.lifespan import create_lifespan
 from app.api.middlewares.correlation import CorrelationIDMiddleware
 from app.api.middlewares.access_log import AccessLogMiddleware
-from app.api.routes import health, readiness, doctors, period, shift, assignment, extra, dashboard, auth, users, audit
+from app.api.routes import health, readiness, doctors, period, shift, assignment, extra, dashboard, auth, users, audit, rqe_indicator
 from app.api.exception_handlers import register_exception_handlers
 
 
@@ -47,5 +47,6 @@ def create_app() -> FastAPI:
     application.include_router(extra.router, prefix="/api/v1")
     application.include_router(audit.router, prefix="/api/v1")
     application.include_router(dashboard.router, prefix="/api/v1/query")
+    application.include_router(rqe_indicator.router, prefix="/api/v1/query")
 
     return application

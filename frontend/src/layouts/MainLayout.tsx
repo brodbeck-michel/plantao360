@@ -18,7 +18,7 @@ import {
   PersonAdd as PersonAddIcon, HealthAndSafety as HealthAndSafetyIcon,
   AddCircle as AddCircleIcon, People as PeopleIcon,
   LocalHospital as LocalHospitalIcon, Receipt as ReceiptIcon,
-  Insights as InsightsIcon, Timeline as TimelineIcon,
+  Insights as InsightsIcon, Timeline as TimelineIcon, VerifiedUser as VerifiedUserIcon,
   Description as DescriptionIcon, AttachMoney as AttachMoneyIcon,
   ChevronRight as ChevronRightIcon, ExpandMore as ExpandMoreIcon,
   ExpandLess as ExpandLessIcon, Sync as SyncIcon, Circle as CircleIcon,
@@ -45,7 +45,7 @@ const iconMap: Record<string, React.ReactNode> = {
   PersonAdd: <PersonAddIcon />, HealthAndSafety: <HealthAndSafetyIcon />,
   AddCircle: <AddCircleIcon />, People: <PeopleIcon />,
   LocalHospital: <LocalHospitalIcon />, Receipt: <ReceiptIcon />,
-  Insights: <InsightsIcon />, Timeline: <TimelineIcon />,
+  Insights: <InsightsIcon />, Timeline: <TimelineIcon />, VerifiedUser: <VerifiedUserIcon />,
   Description: <DescriptionIcon />, AttachMoney: <AttachMoneyIcon />,
   Settings: <SettingsIcon />,
 };

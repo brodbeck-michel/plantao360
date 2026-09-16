@@ -15,6 +15,7 @@ const WorkspacePage = React.lazy(() => import('./features/operational/pages/work
 const WorkspaceRedirect = React.lazy(() => import('./features/operational/pages/workspace-redirect').then((m) => ({ default: m.WorkspaceRedirect })));
 const PeriodListPage = React.lazy(() => import('./features/period/pages/period-list-page').then((m) => ({ default: m.PeriodListPage })));
 const ShiftListPage = React.lazy(() => import('./features/shift/pages/shift-list-page').then((m) => ({ default: m.ShiftListPage })));
+const RqeIndicatorsPage = React.lazy(() => import('./features/rqe/pages/rqe-indicators-page'));
 const UserListPage = React.lazy(() => import('./pages/UserListPage'));
 const AccessDeniedPage = React.lazy(() => import('./pages/AccessDeniedPage'));
 
@@ -103,6 +104,7 @@ function App() {
         <Route path={ROUTES.ANALYTICS} element={<LazyPage><DashboardPage /></LazyPage>} />
         <Route path={ROUTES.TIMELINE} element={<LazyPage><DashboardPage /></LazyPage>} />
         <Route path={ROUTES.REPORTS} element={<LazyPage><DashboardPage /></LazyPage>} />
+        <Route path={ROUTES.RQE_INDICATORS} element={<LazyPage><RqeIndicatorsPage /></LazyPage>} />
 
         <Route path={ROUTES.USERS} element={<AdminRoute><LazyPage><UserListPage /></LazyPage></AdminRoute>} />
 
