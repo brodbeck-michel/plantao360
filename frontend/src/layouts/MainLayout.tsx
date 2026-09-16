@@ -18,7 +18,7 @@ import {
   PersonAdd as PersonAddIcon, HealthAndSafety as HealthAndSafetyIcon,
   AddCircle as AddCircleIcon, People as PeopleIcon,
   LocalHospital as LocalHospitalIcon, Receipt as ReceiptIcon,
-  Insights as InsightsIcon, Timeline as TimelineIcon,
+  Insights as InsightsIcon, Timeline as TimelineIcon, VerifiedUser as VerifiedUserIcon,
   Description as DescriptionIcon, AttachMoney as AttachMoneyIcon,
   ChevronRight as ChevronRightIcon, ExpandMore as ExpandMoreIcon,
   ExpandLess as ExpandLessIcon, Sync as SyncIcon, Circle as CircleIcon,
@@ -45,7 +45,7 @@ const iconMap: Record<string, React.ReactNode> = {
   PersonAdd: <PersonAddIcon />, HealthAndSafety: <HealthAndSafetyIcon />,
   AddCircle: <AddCircleIcon />, People: <PeopleIcon />,
   LocalHospital: <LocalHospitalIcon />, Receipt: <ReceiptIcon />,
-  Insights: <InsightsIcon />, Timeline: <TimelineIcon />,
+  Insights: <InsightsIcon />, Timeline: <TimelineIcon />, VerifiedUser: <VerifiedUserIcon />,
   Description: <DescriptionIcon />, AttachMoney: <AttachMoneyIcon />,
   Settings: <SettingsIcon />,
 };
@@ -239,6 +239,13 @@ function MainLayoutContent() {
             children: item.children.filter((c) =>
               c.path === ROUTES.WORKSPACE || c.path === ROUTES.PERIODS
             ),
+          });
+        } else if (item.label === 'Analytics' && item.children) {
+          // No MVP o grupo Analytics entra só com os Indicadores RQE — as demais
+          // telas do grupo ainda apontam para a dashboard (placeholders).
+          acc.push({
+            ...item,
+            children: item.children.filter((c) => c.path === ROUTES.RQE_INDICATORS),
           });
         } else if (item.label === 'Sistema') {
           acc.push(item);

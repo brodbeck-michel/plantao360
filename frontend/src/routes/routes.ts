@@ -61,6 +61,7 @@ export const ROUTES = {
   // Analytics
   ANALYTICS: '/app/analytics',
   TIMELINE: '/app/analytics/timeline',
+  RQE_INDICATORS: '/app/analytics/rqe',
   REPORTS: '/app/analytics/reports',
 
   // Users (Admin only)
@@ -117,6 +118,7 @@ export const NAV_ITEMS: NavItem[] = [
     children: [
       { label: 'Dashboard', path: ROUTES.ANALYTICS, icon: 'Insights' },
       { label: 'Timeline', path: ROUTES.TIMELINE, icon: 'Timeline' },
+      { label: 'Indicadores RQE', path: ROUTES.RQE_INDICATORS, icon: 'VerifiedUser' },
       { label: 'Relatorios', path: ROUTES.REPORTS, icon: 'Description' },
     ],
   },
