@@ -19,7 +19,7 @@ import { ShiftManagementTab } from '../components/tabs/ShiftManagementTab';
 import { FinancialTab } from '../components/tabs/FinancialTab';
 import { ReportsTab } from '../components/tabs/ReportsTab';
 import { AuditTab } from '../components/tabs/AuditTab';
-import { SHIFT_TYPES, SHIFT_TIMES, MONTH_NAMES } from '../types/operational-types';
+import { SHIFT_TYPES, SHIFT_TIMES, getCompetencyName } from '../types/operational-types';
 import { useAuth } from '../../../contexts/AuthContext';
 import { canEdit, canAccess } from '../../../rbac';
 import { useBreadcrumbLabel } from '../../../contexts/BreadcrumbContext';
@@ -57,7 +57,7 @@ export default function WorkspacePage() {
   const { data: workspace, isLoading, refetch } = useWorkspace(periodId);
 
   useBreadcrumbLabel(
-    workspace?.period ? `${MONTH_NAMES[workspace.period.month - 1]} ${workspace.period.year}` : undefined
+    workspace?.period ? getCompetencyName(workspace.period.month) : undefined
   );
 
   const { data: periodsData } = useQuery({

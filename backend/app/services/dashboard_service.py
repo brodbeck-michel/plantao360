@@ -15,14 +15,9 @@ from app.domain.constants.period_status import PeriodStatus
 from app.domain.constants.shift_status import ShiftStatus
 from app.domain.constants.extra_status import ExtraStatus
 from app.core.logging import get_logger
+from app.services.competency_label import competency_name
 
 logger = get_logger("service.dashboard")
-
-MONTH_NAMES = {
-    1: "Janeiro", 2: "Fevereiro", 3: "Março", 4: "Abril",
-    5: "Maio", 6: "Junho", 7: "Julho", 8: "Agosto",
-    9: "Setembro", 10: "Outubro", 11: "Novembro", 12: "Dezembro",
-}
 
 
 # Dashboard read models (summaries) — antes em domain/read_models/dashboard_summary (consumidor
@@ -689,8 +684,7 @@ class DashboardService:
         """Get formatted period name."""
         if not period:
             return "Nenhuma competência ativa"
-        month_name = MONTH_NAMES.get(period.month, "")
-        return f"{month_name}/{period.year}"
+        return competency_name(period.month)
 
     def _build_current_period(self, projection: DashboardProjection) -> CurrentPeriodSummary | None:
         """Build the current period summary."""
@@ -810,7 +804,6 @@ class DashboardService:
         )
 
         for shift in recent_shifts:
-            month_name = MONTH_NAMES.get(shift.shift_date.month if hasattr(shift.shift_date, 'month') else 0, "")
             activities.append(ActivitySummary(
                 activity_id=f"shift-{shift.id}",
                 entity_type="shift",

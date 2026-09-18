@@ -6,7 +6,7 @@ import {
   Code as CsvIcon,
   Assessment as ReportIcon,
 } from '@mui/icons-material';
-import { SHIFT_TYPES, SHIFT_LABELS, SHIFT_TIMES, MONTH_NAMES } from '../../types/operational-types';
+import { SHIFT_TYPES, SHIFT_LABELS, SHIFT_TIMES, getCompetencyName, getCompetencySlug } from '../../types/operational-types';
 import type { WorkspaceSummary, DayData, DoctorOption, PeriodInfo } from '../../types/operational-types';
 
 interface ReportsTabProps {
@@ -29,7 +29,8 @@ function downloadFile(content: string, filename: string, mimeType: string) {
 }
 
 export function ReportsTab({ period, summary, days, doctors }: ReportsTabProps) {
-  const monthName = MONTH_NAMES[period.month - 1];
+  const competencyName = getCompetencyName(period.month);
+  const competencySlug = getCompetencySlug(period.year, period.month);
 
   const generateCSV = () => {
     let csv = 'Data,Dia,Tipo Turno,Horario,Medico,CRM,Especialidade,Status\n';
@@ -42,12 +43,12 @@ export function ReportsTab({ period, summary, days, doctors }: ReportsTabProps) 
         });
       });
     });
-    downloadFile(csv, `escala_${period.year}_${String(period.month).padStart(2, '0')}.csv`, 'text/csv;charset=utf-8');
+    downloadFile(csv, `escala_${competencySlug}.csv`, 'text/csv;charset=utf-8');
   };
 
   const generateExcel = () => {
     let xml = '<?xml version="1.0"?>\n<?mso-application progid="Excel.Sheet"?>\n<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet">\n<Worksheet ss:Name="Escala">\n<Table>\n';
-    xml += `<Row><Cell><Data ss:Type="String">Escala ${monthName} ${period.year}</Data></Cell></Row>\n`;
+    xml += `<Row><Cell><Data ss:Type="String">Escala ${competencyName}</Data></Cell></Row>\n`;
     xml += `<Row><Cell><Data ss:Type="String">Cobertura: ${summary.coverage_rate}%</Data></Cell><Cell><Data ss:Type="String">Turnos: ${summary.filled_shifts}/${summary.total_shifts}</Data></Cell><Cell><Data ss:Type="String">Horas: ${summary.total_hours}h</Data></Cell></Row>\n`;
     xml += '<Row></Row>\n';
     xml += '<Row>';
@@ -68,13 +69,13 @@ export function ReportsTab({ period, summary, days, doctors }: ReportsTabProps) 
       });
     });
     xml += '</Table>\n</Worksheet>\n</Workbook>';
-    downloadFile(xml, `escala_${period.year}_${String(period.month).padStart(2, '0')}.xls`, 'application/vnd.ms-excel');
+    downloadFile(xml, `escala_${competencySlug}.xls`, 'application/vnd.ms-excel');
   };
 
   const generatePDF = () => {
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
-    let html = `<!DOCTYPE html><html><head><title>Escala ${monthName} ${period.year}</title>
+    let html = `<!DOCTYPE html><html><head><title>Escala ${competencyName}</title>
     <style>
       body { font-family: Arial, sans-serif; padding: 20px; }
       h1 { color: #00995D; font-size: 20px; }
@@ -86,7 +87,7 @@ export function ReportsTab({ period, summary, days, doctors }: ReportsTabProps) 
       .summary span { font-size: 12px; }
       @media print { body { padding: 10px; } }
     </style></head><body>
-    <h1>Escala ${monthName} ${period.year}</h1>
+    <h1>Escala ${competencyName}</h1>
     <p style="color:#6B7280;font-size:12px">PS Unimed Tubarao - Periodo: 26/${String(period.month).padStart(2, '0')}/${period.year} a 25/${String(period.month === 12 ? 1 : period.month + 1).padStart(2, '0')}/${period.month === 12 ? period.year + 1 : period.year}</p>
     <div class="summary">
       <span><strong>Cobertura:</strong> ${summary.coverage_rate}%</span>
@@ -150,7 +151,7 @@ export function ReportsTab({ period, summary, days, doctors }: ReportsTabProps) 
       const shiftCounts = SHIFT_TYPES.map((st) => row[st]).join(',');
       csv += `${row.date},${row.dow},${shiftCounts},${row.total_filled},${row.total_slots},${row.coverage}%\n`;
     });
-    downloadFile(csv, `cobertura_${period.year}_${String(period.month).padStart(2, '0')}.csv`, 'text/csv;charset=utf-8');
+    downloadFile(csv, `cobertura_${competencySlug}.csv`, 'text/csv;charset=utf-8');
   };
 
   const reports = [

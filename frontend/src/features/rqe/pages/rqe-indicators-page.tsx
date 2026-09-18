@@ -21,6 +21,7 @@ import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '../../../api/client';
 import { tokens, darkTokens } from '../../../theme';
 import { ErrorBoundary } from '../../../shared/components/error-boundary';
+import { getCompetencyName } from '../../operational/types/operational-types';
 
 // ============================================================
 // API
@@ -76,8 +77,7 @@ async function fetchPeriods(): Promise<PeriodOption[]> {
 }
 
 function periodLabel(p: PeriodOption): string {
-  const label = new Date(p.year, p.month - 1, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
-  return label.charAt(0).toUpperCase() + label.slice(1);
+  return getCompetencyName(p.month);
 }
 
 function formatShortDate(iso: string): string {

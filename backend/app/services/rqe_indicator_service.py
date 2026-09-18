@@ -28,14 +28,9 @@ from app.models.period import Period
 from app.models.shift import Shift
 from app.models.shift_extra import ShiftExtra
 from app.models.shift_part import ShiftPart
+from app.services.competency_label import competency_name
 
 logger = get_logger("service.rqe_indicator")
-
-MONTH_NAMES = {
-    1: "Janeiro", 2: "Fevereiro", 3: "Março", 4: "Abril",
-    5: "Maio", 6: "Junho", 7: "Julho", 8: "Agosto",
-    9: "Setembro", 10: "Outubro", 11: "Novembro", 12: "Dezembro",
-}
 
 
 def part_duration_minutes(
@@ -171,7 +166,7 @@ class RqeIndicatorService:
             period_id=period.id,
             year=period.year,
             month=period.month,
-            period_name=f"{MONTH_NAMES.get(period.month, '')}/{period.year}",
+            period_name=competency_name(period.month),
             period_status=period.status,
             start_date=start_date,
             end_date=end_date,

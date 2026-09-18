@@ -3,6 +3,7 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, M
 import { useCreatePeriod, useUpdatePeriod } from '../hooks/use-periods';
 import { useErrorExperience } from '../../../shared/hooks/use-error-experience';
 import { MONTH_NAMES } from '../types/period-types';
+import { getCompetencyName } from '../../operational/types/operational-types';
 
 interface PeriodDialogProps {
   open: boolean;
@@ -54,14 +55,14 @@ export function PeriodDialog({ open, onClose, mode, initialData }: PeriodDialogP
             inputProps={{ min: 2000, max: 2100 }}
           />
           <TextField
-            label="Mes"
+            label="Competencia"
             select
             value={month}
             onChange={(e) => setMonth(parseInt(e.target.value))}
             fullWidth
           >
-            {MONTH_NAMES.map((name, idx) => (
-              <MenuItem key={idx + 1} value={idx + 1}>{name}</MenuItem>
+            {MONTH_NAMES.map((_, idx) => (
+              <MenuItem key={idx + 1} value={idx + 1}>{getCompetencyName(idx + 1)}</MenuItem>
             ))}
           </TextField>
         </Box>
