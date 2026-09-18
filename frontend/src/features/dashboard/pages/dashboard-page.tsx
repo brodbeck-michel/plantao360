@@ -27,6 +27,7 @@ import { useFeatureFlagService } from '../../../config/feature-flag-service';
 import { ErrorBoundary } from '../../../shared/components/error-boundary';
 import { tokens, darkTokens } from '../../../theme';
 import { getOperationalLevel } from '../../../shared/constants/status-colors';
+import { getCompetencyName } from '../../operational/types/operational-types';
 import {
   OperationalHealthCard, CriticalAlertCard, UpcomingActionCard, OperationalEmptyState,
 } from '../../../shared/components/operational';
@@ -58,8 +59,7 @@ async function fetchPeriods(): Promise<PeriodOption[]> {
 }
 
 function periodLabel(p: PeriodOption): string {
-  const label = new Date(p.year, p.month - 1, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
-  return label.charAt(0).toUpperCase() + label.slice(1);
+  return getCompetencyName(p.month);
 }
 
 // ============================================================
@@ -473,7 +473,7 @@ function FinancialTrendCard({ trend, loading }: { trend: FinancialTrendPoint[] |
                       }}
                     />
                     <Typography variant="caption" sx={{ color: colors.text.secondary, mt: 0.75, fontSize: '0.6875rem', textAlign: 'center', whiteSpace: 'nowrap' }}>
-                      {p.period_name.slice(0, 3)}/{String(p.year).slice(2)}
+                      {p.period_name.split('/').map((m) => m.slice(0, 3)).join('/')}
                     </Typography>
                   </Box>
                 </Tooltip>

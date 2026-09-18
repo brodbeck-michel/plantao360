@@ -17,7 +17,8 @@ import {
   usePeriodList, useDeletePeriod, useClosePeriod,
   useReopenPeriod, useDuplicatePeriod,
 } from '../hooks/use-periods';
-import { MONTH_NAMES, STATUS_LABELS } from '../types/period-types';
+import { STATUS_LABELS } from '../types/period-types';
+import { getCompetencyName } from '../../operational/types/operational-types';
 import type { PeriodData } from '../types/period-types';
 import { useAuth } from '../../../contexts/AuthContext';
 import { canEdit } from '../../../rbac';
@@ -95,7 +96,7 @@ export function PeriodListPage() {
       id: 'month',
       label: 'Mes',
       sortable: true,
-      render: (row) => MONTH_NAMES[row.month - 1] || row.month,
+      render: (row) => getCompetencyName(row.month) || row.month,
     },
     {
       id: 'status',
@@ -196,7 +197,7 @@ export function PeriodListPage() {
       <Dialog open={!!deleteConfirm} onClose={() => setDeleteConfirm(null)}>
         <DialogTitle>Excluir Competencia?</DialogTitle>
         <DialogContent>
-          <Typography>Tem certeza que deseja excluir a competencia {deleteConfirm && MONTH_NAMES[deleteConfirm.month - 1]} {deleteConfirm?.year}?</Typography>
+          <Typography>Tem certeza que deseja excluir a competencia {deleteConfirm && getCompetencyName(deleteConfirm.month)} {deleteConfirm?.year}?</Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDeleteConfirm(null)}>Cancelar</Button>
@@ -207,7 +208,7 @@ export function PeriodListPage() {
       <Dialog open={!!closeConfirm} onClose={() => setCloseConfirm(null)}>
         <DialogTitle>Fechar Competencia?</DialogTitle>
         <DialogContent>
-          <Typography>Fechar a competencia {closeConfirm && MONTH_NAMES[closeConfirm.month - 1]} {closeConfirm?.year}? Esta acao bloqueara edicoes.</Typography>
+          <Typography>Fechar a competencia {closeConfirm && getCompetencyName(closeConfirm.month)} {closeConfirm?.year}? Esta acao bloqueara edicoes.</Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setCloseConfirm(null)}>Cancelar</Button>
@@ -218,7 +219,7 @@ export function PeriodListPage() {
       <Dialog open={!!reopenConfirm} onClose={() => setReopenConfirm(null)}>
         <DialogTitle>Reabrir Competencia?</DialogTitle>
         <DialogContent>
-          <Typography>Reabrir a competencia {reopenConfirm && MONTH_NAMES[reopenConfirm.month - 1]} {reopenConfirm?.year}? Permitira edicoes novamente.</Typography>
+          <Typography>Reabrir a competencia {reopenConfirm && getCompetencyName(reopenConfirm.month)} {reopenConfirm?.year}? Permitira edicoes novamente.</Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setReopenConfirm(null)}>Cancelar</Button>

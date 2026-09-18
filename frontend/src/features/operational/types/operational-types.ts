@@ -94,6 +94,20 @@ export const MONTH_NAMES = [
   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro',
 ];
 
+// A competência vai do dia 26 do mês inicial ao dia 25 do seguinte, então o nome
+// traz os dois meses: (2026, 8) -> "Agosto/Setembro"; (2026, 12) -> "Dezembro/Janeiro".
+export function getCompetencyName(month: number): string {
+  return `${MONTH_NAMES[month - 1]}/${MONTH_NAMES[month % 12]}`;
+}
+
+// Sufixo para nomes de arquivo exportado: (2026, 8) -> "2026-08_2026-09".
+export function getCompetencySlug(year: number, month: number): string {
+  const nextMonth = month === 12 ? 1 : month + 1;
+  const nextYear = month === 12 ? year + 1 : year;
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${year}-${pad(month)}_${nextYear}-${pad(nextMonth)}`;
+}
+
 export function getCompetencyLabel(year: number, month: number): string {
   const nextMonth = month === 12 ? 1 : month + 1;
   const nextYear = month === 12 ? year + 1 : year;

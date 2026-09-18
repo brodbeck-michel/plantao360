@@ -191,7 +191,7 @@ def test_resolve_competencia_por_year_month(db_session, period, shift):
     result = RqeIndicatorService(db_session).execute(year_month="2026-09")
 
     assert result.period_id == period.id
-    assert result.period_name == "Setembro/2026"
+    assert result.period_name == "Setembro/Outubro"
     assert result.total_hours == 10.0
 
 

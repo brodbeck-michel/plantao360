@@ -3,7 +3,7 @@ import { Box, Typography, Chip } from '@mui/material';
 import { NavigateBefore as PrevIcon, NavigateNext as NextIcon } from '@mui/icons-material';
 import { IconButton } from '@mui/material';
 import type { PeriodInfo } from '../../types/operational-types';
-import { MONTH_NAMES, getCompetencyLabel } from '../../types/operational-types';
+import { getCompetencyName, getCompetencyLabel } from '../../types/operational-types';
 
 interface TemporalNavProps {
   period: PeriodInfo;
@@ -11,7 +11,7 @@ interface TemporalNavProps {
 }
 
 export function TemporalNav({ period, onNavigate }: TemporalNavProps) {
-  const label = `${MONTH_NAMES[period.month - 1]} ${period.year}`;
+  const label = getCompetencyName(period.month);
 
   return (
     <Box display="flex" alignItems="center" gap={1}>
