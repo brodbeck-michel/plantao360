@@ -8,6 +8,7 @@ import {
 } from '@mui/icons-material';
 import { SHIFT_TYPES, SHIFT_LABELS, SHIFT_TIMES, getCompetencyName, getCompetencySlug } from '../../types/operational-types';
 import type { WorkspaceSummary, DayData, DoctorOption, PeriodInfo } from '../../types/operational-types';
+import { shiftHours, compareDoctorName } from '../../utils/shift-hours';
 
 interface ReportsTabProps {
   period: PeriodInfo;
@@ -114,20 +115,15 @@ export function ReportsTab({ period, summary, days, doctors }: ReportsTabProps) 
           day.shifts[st].assignments.forEach((a) => {
             if (a.doctor_id === d.id) {
               shiftCount++;
-              const parts_s = a.start_time.split(':');
-              const parts_e = a.end_time.split(':');
-              let startMin = parseInt(parts_s[0]) * 60 + parseInt(parts_s[1]);
-              let endMin = parseInt(parts_e[0]) * 60 + parseInt(parts_e[1]);
-              if (endMin <= startMin) endMin += 24 * 60;
-              totalHours += (endMin - startMin) / 60;
+              totalHours += shiftHours(a.start_time, a.end_time);
             }
           });
         });
       });
       return { ...d, totalHours, shiftCount, totalValue: totalHours * d.hour_rate };
-    }).filter((d) => d.shiftCount > 0).sort((a, b) => b.totalValue - a.totalValue);
+    }).filter((d) => d.shiftCount > 0).sort(compareDoctorName);
     financials.forEach((d) => {
-      html += `<tr><td>${d.name}</td><td>${d.crm}</td><td>${d.shiftCount}</td><td>${d.totalHours.toFixed(1)}h</td><td>R$ ${d.hour_rate.toFixed(2)}</td><td>R$ ${d.totalValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td></tr>`;
+      html += `<tr><td>${d.name}</td><td>${d.crm}</td><td>${d.shiftCount}</td><td>${d.totalHours.toFixed(1)}h</td><td>R$ ${d.hour_rate.toFixed(2)}</td><td>R$ ${d.totalValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td></tr>`;
     });
     html += '</tbody></table>';
     html += '<script>window.onload=function(){window.print();}</script></body></html>';

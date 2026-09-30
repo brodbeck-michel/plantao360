@@ -1,3 +1,4 @@
+import math
 from datetime import date, time as time_type, timedelta
 
 from sqlalchemy.orm import Session
@@ -242,6 +243,7 @@ class WorkspaceService:
         return get_competency_dates(period.year, period.month)
 
     def _calc_hours(self, start_str: str, end_str: str) -> float:
+        """Horas do turno pela hora cheia (PLANTAOPA-5): 13:00-18:59 conta 6h."""
         try:
             parts_s = start_str.split(":")
             parts_e = end_str.split(":")
@@ -249,6 +251,6 @@ class WorkspaceService:
             end_minutes = int(parts_e[0]) * 60 + int(parts_e[1])
             if end_minutes <= start_minutes:
                 end_minutes += 24 * 60
-            return (end_minutes - start_minutes) / 60.0
+            return float(math.floor((end_minutes - start_minutes) / 60 + 0.5))
         except Exception:
             return 0.0

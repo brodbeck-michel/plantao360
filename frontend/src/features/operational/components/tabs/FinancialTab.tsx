@@ -4,6 +4,7 @@ import { AttachMoney as MoneyIcon } from '@mui/icons-material';
 import { SHIFT_TYPES, SHIFT_TIMES } from '../../types/operational-types';
 import type { DayData, DoctorOption } from '../../types/operational-types';
 import { getFeatureAccentColors } from '../../utils/feature-accent-colors';
+import { shiftHours, compareDoctorName } from '../../utils/shift-hours';
 
 interface FinancialTabProps {
   days: DayData[];
@@ -23,12 +24,7 @@ export function FinancialTab({ days, doctors }: FinancialTabProps) {
         day.shifts[st].assignments.forEach((a) => {
           const doc = map[a.doctor_id];
           if (doc) {
-            const parts_s = a.start_time.split(':');
-            const parts_e = a.end_time.split(':');
-            let startMin = parseInt(parts_s[0]) * 60 + parseInt(parts_s[1]);
-            let endMin = parseInt(parts_e[0]) * 60 + parseInt(parts_e[1]);
-            if (endMin <= startMin) endMin += 24 * 60;
-            const hours = (endMin - startMin) / 60;
+            const hours = shiftHours(a.start_time, a.end_time);
             doc.totalHours += hours;
             doc.totalValue += hours * doc.hourRate;
             doc.shiftCount += 1;
@@ -46,7 +42,7 @@ export function FinancialTab({ days, doctors }: FinancialTabProps) {
         });
       });
     });
-    return Object.values(map).filter((d) => d.shiftCount > 0 || d.extraHours > 0).sort((a, b) => b.totalValue - a.totalValue);
+    return Object.values(map).filter((d) => d.shiftCount > 0 || d.extraHours > 0).sort(compareDoctorName);
   }, [days, doctors]);
 
   const grandTotal = doctorFinancials.reduce((sum, d) => sum + d.totalValue, 0);
@@ -66,7 +62,7 @@ export function FinancialTab({ days, doctors }: FinancialTabProps) {
         </Paper>
         <Paper variant="outlined" sx={{ p: 2, flex: 1 }}>
           <Typography variant="caption" color="text.secondary">Total Geral</Typography>
-          <Typography variant="h5" fontWeight={700} color="#00995D">R$ {grandTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</Typography>
+          <Typography variant="h5" fontWeight={700} color="#00995D">R$ {grandTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Typography>
         </Paper>
       </Box>
 
@@ -95,7 +91,7 @@ export function FinancialTab({ days, doctors }: FinancialTabProps) {
                 </TableCell>
                 <TableCell align="right" sx={{ fontSize: '0.8125rem' }}>R$ {d.hourRate.toFixed(2)}</TableCell>
                 <TableCell align="right" sx={{ fontSize: '0.8125rem', fontWeight: 600, color: '#00995D' }}>
-                  R$ {d.totalValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  R$ {d.totalValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </TableCell>
               </TableRow>
             ))}
