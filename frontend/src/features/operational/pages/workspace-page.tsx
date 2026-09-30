@@ -23,6 +23,7 @@ import { SHIFT_TYPES, SHIFT_TIMES, getCompetencyName } from '../types/operationa
 import { useAuth } from '../../../contexts/AuthContext';
 import { canEdit, canAccess } from '../../../rbac';
 import { useBreadcrumbLabel } from '../../../contexts/BreadcrumbContext';
+import { shiftHours } from '../utils/shift-hours';
 import type { CellPosition } from '../hooks/use-workspace-keyboard';
 
 interface CellContext {
@@ -118,12 +119,7 @@ export default function WorkspacePage() {
         day.shifts[st].assignments.forEach((a) => {
           if (stats[a.doctor_id]) {
             stats[a.doctor_id].totalShifts += 1;
-            const parts_s = a.start_time.split(':');
-            const parts_e = a.end_time.split(':');
-            let startMin = parseInt(parts_s[0]) * 60 + parseInt(parts_s[1]);
-            let endMin = parseInt(parts_e[0]) * 60 + parseInt(parts_e[1]);
-            if (endMin <= startMin) endMin += 24 * 60;
-            stats[a.doctor_id].totalHours += (endMin - startMin) / 60;
+            stats[a.doctor_id].totalHours += shiftHours(a.start_time, a.end_time);
           }
         });
         (day.shifts[st].extras || []).forEach((ex) => {
