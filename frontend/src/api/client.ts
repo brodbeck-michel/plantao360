@@ -108,6 +108,17 @@ export interface AppError {
   requestId?: string;
 }
 
+export function extractDetailMessage(detail: unknown): string | null {
+  if (typeof detail === 'string' && detail.trim()) return detail;
+  if (Array.isArray(detail)) {
+    const messages = detail
+      .map((item) => (typeof item?.msg === 'string' ? item.msg.replace(/^Value error, /, '') : null))
+      .filter((msg): msg is string => !!msg);
+    if (messages.length) return messages.join(' ');
+  }
+  return null;
+}
+
 export function mapError(error: AxiosError): AppError {
   const status = error.response?.status;
   const data = error.response?.data as any;
@@ -129,6 +140,19 @@ export function mapError(error: AxiosError): AppError {
       message: data.message,
       status,
       details: data.details,
+      requestId: error.config?.headers?.['X-Request-ID'] as string,
+    };
+  }
+
+  // FastAPI devolve o motivo em `detail`: texto (regra de negócio) ou lista
+  // (validação do Pydantic, 422). Sem isso a tela mostrava só a frase genérica.
+  const detailMessage = extractDetailMessage(data?.detail);
+  if (detailMessage) {
+    return {
+      code: 'VALIDATION_ERROR',
+      message: detailMessage,
+      status,
+      details: data,
       requestId: error.config?.headers?.['X-Request-ID'] as string,
     };
   }

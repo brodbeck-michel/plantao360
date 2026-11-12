@@ -20,5 +20,5 @@ class DoctorUpdateDTO(BaseUpdateDTO):
     @classmethod
     def _validate_career_start_date(cls, value: date | None) -> date | None:
         if value is not None and value > date.today():
-            raise ValueError("career_start_date nao pode ser no futuro")
+            raise ValueError("Data de início de carreira não pode ser no futuro")
         return value
