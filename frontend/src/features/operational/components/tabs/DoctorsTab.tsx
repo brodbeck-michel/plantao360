@@ -32,6 +32,12 @@ const EMPTY_FORM = {
   doctor_type: 'plantonista', has_rqe: false, career_start_date: '', active: true,
 };
 
+// Data de hoje no fuso local (AAAA-MM-DD), mesmo formato do campo type="date".
+function todayIso(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 function getStatusColor(stats?: DoctorStats): 'success' | 'warning' | 'error' | 'default' {
   if (!stats) return 'default';
   if (stats.totalHours >= 240) return 'error';
@@ -103,11 +109,12 @@ export function DoctorsTab({ doctors, doctorStats, periodId, onRefresh }: Doctor
     if (!form.name.trim()) { setError('Nome e obrigatorio'); return; }
     if (!form.crm.trim()) { setError('CRM e obrigatorio'); return; }
     if (!form.career_start_date) { setError('Data de inicio de carreira e obrigatoria'); return; }
+    if (form.career_start_date > todayIso()) { setError('Data de início de carreira não pode ser no futuro'); return; }
     setSaving(true);
     setError('');
     try {
       if (editingDoctor) {
-        await apiClient.put(`/doctors/${editingDoctor.id}`, {
+        const res = await apiClient.put(`/doctors/${editingDoctor.id}`, {
           name: form.name,
           crm: form.crm,
           specialty: form.specialty,
@@ -117,9 +124,10 @@ export function DoctorsTab({ doctors, doctorStats, periodId, onRefresh }: Doctor
           has_rqe: form.has_rqe,
           career_start_date: form.career_start_date || null,
         });
+        if (res.data?.success === false) throw new Error(res.data?.error?.message || 'Erro ao salvar medico');
         setToast({ open: true, message: 'Medico atualizado com sucesso', severity: 'success' });
       } else {
-        await apiClient.post('/doctors', {
+        const res = await apiClient.post('/doctors', {
           name: form.name,
           crm: form.crm,
           specialty: form.specialty,
@@ -129,6 +137,7 @@ export function DoctorsTab({ doctors, doctorStats, periodId, onRefresh }: Doctor
           has_rqe: form.has_rqe,
           career_start_date: form.career_start_date,
         });
+        if (res.data?.success === false) throw new Error(res.data?.error?.message || 'Erro ao salvar medico');
         setToast({ open: true, message: 'Medico criado com sucesso', severity: 'success' });
       }
       setDialogOpen(false);
@@ -294,6 +303,9 @@ export function DoctorsTab({ doctors, doctorStats, periodId, onRefresh }: Doctor
           <TextField fullWidth label="Email" value={form.email} onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))} sx={{ mb: 2 }} />
           <TextField
             fullWidth type="date" label="Início de carreira" value={form.career_start_date}
+            inputProps={{ max: todayIso() }}
+            error={form.career_start_date > todayIso()}
+            helperText={form.career_start_date > todayIso() ? 'Data no futuro — confira o ano' : undefined}
             onChange={(e) => setForm((p) => ({ ...p, career_start_date: e.target.value }))}
             InputLabelProps={{ shrink: true }} sx={{ mb: 2 }}
           />

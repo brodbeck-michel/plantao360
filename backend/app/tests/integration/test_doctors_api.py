@@ -1,3 +1,4 @@
+from datetime import date, timedelta
 import os
 
 import pytest
@@ -168,3 +169,16 @@ def test_list_doctors_with_filters(client):
     assert response.status_code == 200
     data = response.json()
     assert len(data["data"]["items"]) == 1
+
+
+def test_create_doctor_future_career_start_returns_readable_message(client):
+    # Caso real (PLANTAOPA-6): ano digitado errado deixava a data no futuro e a
+    # tela só mostrava "Dados não processados"; o motivo precisa vir no detail.
+    future = (date.today() + timedelta(days=10)).isoformat()
+    response = client.post(
+        "/api/v1/doctors/",
+        json={"name": "Dra. Futuro", "crm": "36722/SC", "has_rqe": False, "career_start_date": future},
+    )
+    assert response.status_code == 422
+    messages = [item["msg"] for item in response.json()["detail"]]
+    assert any("Data de início de carreira não pode ser no futuro" in m for m in messages)
